@@ -1,0 +1,112 @@
+'use client';
+
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Shield, LogOut, Settings, MessageSquare, User, Hash } from 'lucide-react';
+
+export interface ChatRoom {
+  id: string;
+  name: string;
+  isEncrypted: boolean;
+  lastMessage?: string;
+  unread?: number;
+}
+
+interface SidebarProps {
+  rooms: ChatRoom[];
+  activeRoomId: string | null;
+  onSelectRoom: (id: string) => void;
+  onCreateRoom: () => void;
+}
+
+export function Sidebar({ rooms, activeRoomId, onSelectRoom, onCreateRoom }: SidebarProps) {
+  return (
+    <div className="flex flex-col h-full bg-surface-darker/90 backdrop-blur border-r border-neon-green/10">
+      {/* Logo + Header */}
+      <div className="p-4 border-b border-neon-green/10">
+        <div className="flex items-center gap-2">
+          <Shield className="w-5 h-5 text-neon-green" />
+          <span className="font-bold text-white text-lg">Cipher Talk</span>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">Зашифрованный чат</p>
+      </div>
+
+      {/* Create Room Button */}
+      <div className="p-3">
+        <button
+          onClick={onCreateRoom}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neon-green/10 border border-neon-green/30 text-neon-green hover:bg-neon-green/20 hover:border-neon-green/50 transition-all text-sm font-medium"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Создать чат-комнату</span>
+        </button>
+      </div>
+
+      {/* Room List */}
+      <div className="flex-1 overflow-y-auto px-3 space-y-1">
+        <AnimatePresence>
+          {rooms.length === 0 ? (
+            <div className="text-center py-8">
+              <MessageSquare className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+              <p className="text-gray-500 text-sm">Нет активных комнат</p>
+              <p className="text-gray-600 text-xs mt-1">Создайте первую</p>
+            </div>
+          ) : (
+            rooms.map((room) => (
+              <motion.button
+                key={room.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                onClick={() => onSelectRoom(room.id)}
+                className={`w-full text-left px-3 py-3 rounded-xl transition-all ${
+                  activeRoomId === room.id
+                    ? 'bg-neon-green/10 border border-neon-green/30'
+                    : 'hover:bg-white/5 border border-transparent'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Hash className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                    <span className="text-sm font-medium text-white truncate">
+                      {room.name}
+                    </span>
+                  </div>
+                  {room.isEncrypted && (
+                    <Shield className="w-3.5 h-3.5 text-neon-green flex-shrink-0 ml-2" />
+                  )}
+                </div>
+                {room.lastMessage && (
+                  <p className="text-xs text-gray-500 mt-1 truncate pl-6">
+                    {room.lastMessage}
+                  </p>
+                )}
+                {room.unread && room.unread > 0 ? (
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-neon-green text-black text-xs font-bold mt-1 ml-6">
+                    {room.unread}
+                  </span>
+                ) : null}
+              </motion.button>
+            ))
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Bottom: Profile / Settings */}
+      <div className="p-3 border-t border-neon-green/10">
+        <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5 transition cursor-pointer">
+          <div className="w-8 h-8 rounded-full bg-neon-green/20 flex items-center justify-center">
+            <User className="w-4 h-4 text-neon-green" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-white truncate">Пользователь</p>
+            <p className="text-xs text-gray-500">Ключ E2EE активен</p>
+          </div>
+          <button className="text-gray-500 hover:text-neon-green transition">
+            <Settings className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

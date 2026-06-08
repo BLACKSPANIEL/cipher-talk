@@ -1,18 +1,17 @@
 :root {
   color-scheme: dark;
   font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background-color: #05070d;
-  color: #e6edf9;
-  --bg: #05070d;
-  --surface: rgba(17, 22, 39, 0.92);
-  --surface-strong: rgba(8, 14, 27, 0.98);
-  --border: rgba(255, 255, 255, 0.08);
-  --text: #e6edf9;
-  --muted: #8aa0b4;
-  --primary: #64ffda;
-  --accent: #8a7dff;
-  --accent-2: #3dd7ff;
-  --shadow: 0 24px 90px rgba(0, 0, 0, 0.22);
+  background-color: #000000;
+  color: #ffffff;
+  --bg: #000000;
+  --surface: rgba(30, 40, 50, 0.8);
+  --surface-dark: rgba(10, 10, 15, 0.95);
+  --border: rgba(0, 255, 0, 0.2);
+  --text: #ffffff;
+  --muted: #888888;
+  --neon: #00ff00;
+  --neon-dark: #00cc00;
+  --shadow: 0 24px 90px rgba(0, 0, 0, 0.5);
 }
 
 @tailwind base {
@@ -31,9 +30,9 @@ html {
 
 body {
   min-height: 100vh;
-  background: radial-gradient(circle at top left, rgba(56, 248, 205, 0.12), transparent 26%),
-    radial-gradient(circle at 90% 10%, rgba(138, 125, 255, 0.14), transparent 25%),
-    rgb(5, 7, 13);
+  background: radial-gradient(circle at 100% 0%, rgba(0, 255, 0, 0.15), transparent 30%),
+    radial-gradient(circle at 0% 100%, rgba(0, 200, 0, 0.1), transparent 40%),
+    linear-gradient(180deg, #000000, #0a0a0a);
   color: var(--text);
 }
 

@@ -8,21 +8,30 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: '#05070d',
-        surface: '#111827',
-        surface2: '#0d1221',
-        border: 'rgba(255,255,255,0.08)',
-        muted: '#8aa0b4',
-        primary: '#64ffda',
-        cyan: '#3dd7ff',
-        violet: '#8a7dff'
+        'neon-green': '#00ff00',
+        'neon-dark-green': '#00cc00',
+        'bg-black': '#000000',
+        'bg-dark': '#0a0a0a',
+        'surface-dark': 'rgba(30, 40, 50, 0.8)',
+        'surface-darker': 'rgba(10, 10, 15, 0.95)',
+        'text-muted': '#888888'
       },
       boxShadow: {
-        glow: '0 0 45px rgba(100,255,218,0.12), 0 0 24px rgba(61,215,255,0.08)',
-        glass: '0 24px 80px rgba(0,0,0,0.25)'
+        'neon-glow': '0 0 30px rgba(0, 255, 0, 0.4), 0 0 60px rgba(0, 255, 0, 0.2)',
+        'neon-glow-lg': '0 0 50px rgba(0, 255, 0, 0.6), 0 0 100px rgba(0, 255, 0, 0.3)',
+        glass: '0 24px 80px rgba(0, 0, 0, 0.5)'
       },
       backgroundImage: {
-        'hero-radial': 'radial-gradient(circle at top, rgba(56,248,205,0.14), transparent 32%), radial-gradient(circle at 20% 20%, rgba(133,110,255,0.18), transparent 25%)'
+        'hero-gradient': 'radial-gradient(circle at 100% 0%, rgba(0, 255, 0, 0.15), transparent 30%), radial-gradient(circle at 0% 100%, rgba(0, 200, 0, 0.1), transparent 40%), linear-gradient(180deg, #000000, #0a0a0a)'
+      },
+      animation: {
+        'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+      },
+      keyframes: {
+        'pulse-glow': {
+          '0%, 100%': { opacity: '1', boxShadow: '0 0 30px rgba(0, 255, 0, 0.4)' },
+          '50%': { opacity: '.8', boxShadow: '0 0 50px rgba(0, 255, 0, 0.6)' }
+        }
       }
     }
   },
