@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar, type ChatRoom } from '@/components/chat/Sidebar';
 import { ChatWindow } from '@/components/chat/ChatWindow';
 import { SearchUserModal } from '@/components/chat/SearchUserModal';
@@ -284,15 +285,9 @@ export default function ChatPage() {
           newMessage.status = 'delivered';
 
           setMessages((prev) => {
-            // Skip if we already have this id (echoed by our optimistic insert)
             if (prev.some((m) => m.id === newMessage.id)) return prev;
-            // If the server message has the same content + sender as a recent optimistic, replace it
             const optimisticIdx = prev.findIndex(
-              (m) =>
-                m.sender === 'me' &&
-                m.status === 'sending' &&
-                m.text === newMessage.text &&
-                m.roomId === newMessage.roomId
+              (m) => m.sender === 'me' && m.status === 'sending' && m.text === newMessage.text && m.roomId === newMessage.roomId
             );
             if (optimisticIdx !== -1) {
               const next = [...prev];
@@ -302,9 +297,7 @@ export default function ChatPage() {
             return [...prev, newMessage];
           });
 
-          setRooms((prev) =>
-            prev.map((r) => r.id === activeRoomId ? { ...r, lastMessage: payload.new.text } : r)
-          );
+          setRooms((prev) => prev.map((r) => r.id === activeRoomId ? { ...r, lastMessage: payload.new.text } : r));
         }
       )
       .subscribe();
@@ -321,14 +314,10 @@ export default function ChatPage() {
   // Presence (online tracking)
   useEffect(() => {
     if (!currentUserId) return;
-    const channel = supabase.channel('online-users', {
-      config: { presence: { key: currentUserId } },
-    });
+    const channel = supabase.channel('online-users', { config: { presence: { key: currentUserId } } });
     channel.subscribe();
     presenceRef.current = channel;
-    return () => {
-      if (presenceRef.current) supabase.removeChannel(presenceRef.current);
-    };
+    return () => { if (presenceRef.current) supabase.removeChannel(presenceRef.current); };
   }, [currentUserId]);
 
   const handleStartChat = useCallback(
@@ -343,75 +332,35 @@ export default function ChatPage() {
     [currentUserId]
   );
 
-  /**
-   * Optimistic send: instantly add the message with status='sending' and a temp UUID,
-   * clear the input, then fire-and-forget the Supabase request. On success we mark 'sent'
-   * with the server id; on error we mark 'error'. The realtime subscription will replace
-   * the optimistic record with the real one when it echoes back.
-   */
   const handleSendMessage = useCallback(
     async (text: string, cipher: CipherType) => {
       if (!activeRoomId || !currentUserId) return;
-
       const visibleCipherText = cipher !== 'none' ? encryptText(text, cipher) : text;
       const e2eeCipherText = encryptMessage(visibleCipherText);
-
       const tempId = (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function')
         ? globalThis.crypto.randomUUID()
         : `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
       const optimisticMessage: Message = {
-        id: tempId,
-        text: visibleCipherText,
-        senderId: currentUserId,
-        senderName: currentProfile?.username || 'Я',
-        sender: 'me',
-        senderAvatar: (currentProfile as any)?.avatar_url || null,
-        timestamp: new Date(),
-        roomId: activeRoomId,
-        cipher: cipher !== 'none' ? cipher : undefined,
-        isEncrypted: cipher !== 'none',
-        originalText: visibleCipherText,
-        isE2ee: true,
-        status: 'sending',
+        id: tempId, text: visibleCipherText, senderId: currentUserId, senderName: currentProfile?.username || 'Я',
+        sender: 'me', senderAvatar: (currentProfile as any)?.avatar_url || null, timestamp: new Date(),
+        roomId: activeRoomId, cipher: cipher !== 'none' ? cipher : undefined, isEncrypted: cipher !== 'none',
+        originalText: visibleCipherText, isE2ee: true, status: 'sending',
       };
 
       setMessages((prev) => [...prev, optimisticMessage]);
-      setRooms((prev) =>
-        prev.map((r) => r.id === activeRoomId ? { ...r, lastMessage: visibleCipherText } : r)
-      );
-
-      const newDbMessage: Omit<DbMessage, 'id' | 'created_at'> = {
-        room_id: activeRoomId,
-        sender_id: currentUserId,
-        text: e2eeCipherText,
-        cipher_type: cipher,
-      };
+      setRooms((prev) => prev.map((r) => r.id === activeRoomId ? { ...r, lastMessage: visibleCipherText } : r));
 
       const { data, error } = await supabase
         .from('messages')
-        .insert(newDbMessage)
-        .select('id')
-        .single();
+        .insert({ room_id: activeRoomId, sender_id: currentUserId, text: e2eeCipherText, cipher_type: cipher })
+        .select('id').single();
 
       if (error) {
-        console.error('Ошибка отправки:', error);
-        setMessages((prev) =>
-          prev.map((m) => (m.id === tempId ? { ...m, status: 'error' } : m))
-        );
+        setMessages((prev) => prev.map((m) => m.id === tempId ? { ...m, status: 'error' } : m));
         return;
       }
-
-      // Replace temp id with server id; mark as 'sent'. Realtime may also echo, but we dedupe.
-      if (data?.id) {
-        setMessages((prev) =>
-          prev.map((m) => (m.id === tempId ? { ...m, id: data.id, status: 'sent' } : m))
-        );
-      } else {
-        setMessages((prev) =>
-          prev.map((m) => (m.id === tempId ? { ...m, status: 'sent' } : m))
-        );
-      }
+      setMessages((prev) => prev.map((m) => m.id === tempId ? { ...m, id: data!.id, status: 'sent' } : m));
     },
     [activeRoomId, currentUserId, currentProfile]
   );
@@ -419,31 +368,31 @@ export default function ChatPage() {
   const handleDecryptMessage = useCallback((messageId: string) => {
     setDecryptingMessageId(messageId);
     setTimeout(() => {
-      setMessages((prev) =>
-        prev.map((msg) => {
-          if (msg.id === messageId && msg.isEncrypted && msg.originalText && msg.cipher) {
-            return { ...msg, text: decryptVisibleLayer(msg.originalText, msg.cipher), isEncrypted: false, originalText: undefined };
-          }
-          return msg;
-        })
-      );
+      setMessages((prev) => prev.map((msg) => {
+        if (msg.id === messageId && msg.isEncrypted && msg.originalText && msg.cipher) {
+          return { ...msg, text: decryptVisibleLayer(msg.originalText, msg.cipher), isEncrypted: false, originalText: undefined };
+        }
+        return msg;
+      }));
       setDecryptingMessageId(null);
     }, 800);
   }, []);
 
   const handleProfileUpdated = useCallback((updated: Profile) => {
     setCurrentProfile(updated);
-    if (updated.id) {
-      profilesCache.set(updated.id, updated.username);
-      avatarsCache.set(updated.id, (updated as any).avatar_url || null);
-    }
+    if (updated.id) { profilesCache.set(updated.id, updated.username); avatarsCache.set(updated.id, (updated as any).avatar_url || null); }
   }, []);
 
   return (
     <div className="h-screen flex flex-col bg-[#0B0F12] text-white relative overflow-hidden">
+      {/* Premium gradient background overlay */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 -left-32 w-[420px] h-[420px] rounded-full bg-neon-green/[0.06] blur-3xl" />
         <div className="absolute -bottom-40 -right-40 w-[520px] h-[520px] rounded-full bg-emerald-500/[0.05] blur-3xl" />
+        {/* Subtle grid texture across the whole app */}
+        <div className="absolute inset-0 opacity-[0.015] md:opacity-[0.02]"
+          style={{ backgroundImage: 'linear-gradient(rgba(0,255,102,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,102,0.3) 1px, transparent 1px)', backgroundSize: '60px 60px' }}
+        />
       </div>
 
       <div className="relative z-10 flex flex-1 overflow-hidden p-0 md:p-5 gap-0 md:gap-6">
@@ -451,10 +400,7 @@ export default function ChatPage() {
           className={`w-full md:w-64 flex-shrink-0 md:rounded-2xl overflow-hidden border-0 md:border border-zinc-800/80 backdrop-blur-xl ${
             mobileShowChat ? 'hidden md:block' : 'block'
           }`}
-          style={{
-            background: 'rgba(9, 9, 11, 0.5)',
-            boxShadow: 'none',
-          }}
+          style={{ background: 'rgba(9, 9, 11, 0.5)', boxShadow: 'none' }}
         >
           <Sidebar
             rooms={rooms}
@@ -467,42 +413,54 @@ export default function ChatPage() {
           />
         </aside>
 
-        <main
-          className={`flex-1 min-w-0 md:rounded-2xl overflow-hidden border-0 md:border border-zinc-800/80 backdrop-blur-xl flex flex-col ${
-            mobileShowChat ? 'block' : 'hidden md:flex'
-          }`}
-          style={{
-            background: 'rgba(9, 9, 11, 0.4)',
-            boxShadow: 'none',
-          }}
-        >
-          <ChatWindow
-            room={activeRoom}
-            messages={messages}
-            currentUserId={currentUserId}
-            onSendMessage={handleSendMessage}
-            onDecryptMessage={handleDecryptMessage}
-            decryptingMessageId={decryptingMessageId}
-            onBack={handleBackToList}
-          />
-        </main>
+        {/* Chat window with slide-in animation on mobile */}
+        <AnimatePresence mode="wait">
+          {mobileShowChat ? (
+            <motion.main
+              key="chat"
+              initial={{ x: '100%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '100%', opacity: 0 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300, mass: 0.8 }}
+              className="flex-1 min-w-0 md:rounded-2xl overflow-hidden border-0 md:border border-zinc-800/80 backdrop-blur-xl flex flex-col absolute md:relative inset-0 z-30 md:z-auto"
+              style={{ background: 'rgba(9, 9, 11, 0.4)', boxShadow: 'none' }}
+            >
+              <ChatWindow
+                room={activeRoom}
+                messages={messages}
+                currentUserId={currentUserId}
+                onSendMessage={handleSendMessage}
+                onDecryptMessage={handleDecryptMessage}
+                decryptingMessageId={decryptingMessageId}
+                onBack={handleBackToList}
+              />
+            </motion.main>
+          ) : (
+            <motion.main
+              key="empty"
+              initial={{ x: '-20%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              className="flex-1 min-w-0 md:rounded-2xl overflow-hidden border-0 md:border border-zinc-800/80 backdrop-blur-xl flex-col hidden md:flex"
+              style={{ background: 'rgba(9, 9, 11, 0.4)', boxShadow: 'none' }}
+            >
+              <ChatWindow
+                room={activeRoom}
+                messages={messages}
+                currentUserId={currentUserId}
+                onSendMessage={handleSendMessage}
+                onDecryptMessage={handleDecryptMessage}
+                decryptingMessageId={decryptingMessageId}
+                onBack={handleBackToList}
+              />
+            </motion.main>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Search User Modal */}
-      <SearchUserModal
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-        currentUserId={currentUserId}
-        onStartChat={handleStartChat}
-      />
-
-      {/* Settings Modal */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        profile={currentProfile}
-        onProfileUpdated={handleProfileUpdated}
-      />
+      {/* Modals */}
+      <SearchUserModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} currentUserId={currentUserId} onStartChat={handleStartChat} />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} profile={currentProfile} onProfileUpdated={handleProfileUpdated} />
     </div>
   );
 }
