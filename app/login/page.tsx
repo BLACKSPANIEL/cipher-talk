@@ -42,8 +42,9 @@ export default function LoginPage() {
       return;
     }
 
-    // Успешный вход — редирект на чат
+    // Успешный вход — редирект на чат + refresh для синхронизации с middleware
     router.push('/chat');
+    router.refresh();
   };
 
   return (
