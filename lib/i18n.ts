@@ -108,6 +108,15 @@ const dictionaries = {
     'legal.agree_prefix': 'Регистрируясь, вы соглашаетесь с',
     'legal.terms': 'Правилами использования',
     'legal.privacy': 'Политикой конфиденциальности',
+
+    // Settings — new keys (sessions)
+    'settings.nickname_empty': 'Nickname не может быть пустым',
+    'settings.active_sessions': 'Активные сессии',
+    'settings.sessions_desc': 'Управление устройствами, на которых вы вошли в аккаунт',
+    'settings.session_current': 'Текущая',
+    'settings.sign_out_others': 'Завершить другие сессии',
+    'settings.signing_out_others': 'Завершение…',
+    'settings.others_signed_out': 'Другие сессии завершены!',
   },
   en: {
     'app.name': 'Cipher Talk',
@@ -197,6 +206,15 @@ const dictionaries = {
     'legal.agree_prefix': 'By signing up, you agree to the',
     'legal.terms': 'Terms of Service',
     'legal.privacy': 'Privacy Policy',
+
+    // Settings — new keys (sessions)
+    'settings.nickname_empty': 'Nickname cannot be empty',
+    'settings.active_sessions': 'Active Sessions',
+    'settings.sessions_desc': 'Manage devices where you are signed in',
+    'settings.session_current': 'Current',
+    'settings.sign_out_others': 'Sign out all other sessions',
+    'settings.signing_out_others': 'Signing out…',
+    'settings.others_signed_out': 'Other sessions signed out!',
   },
 } as const;
 

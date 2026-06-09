@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User as UserIcon, LogOut, Camera, Loader2, Check, Shield, Globe, Lock, Sparkles, Crown } from 'lucide-react';
+import { X, User as UserIcon, LogOut, Camera, Loader2, Check, Shield, Globe, Lock, Monitor, Smartphone, Trash2 } from 'lucide-react';
 import { supabase, type Profile } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import { TierBadge } from './TierBadge';
@@ -22,7 +22,7 @@ const PRESET_AVATARS = [
 
 type Tab = 'profile' | 'security' | 'language';
 
-const tabsList: { value: Tab; key: 'settings.tab.profile' | 'settings.tab.security' | 'settings.tab.language'; icon: React.ReactNode }[] = [
+const tabsList: { value: Tab; key: string; icon: React.ReactNode }[] = [
   { value: 'profile', key: 'settings.tab.profile', icon: <UserIcon className="w-4 h-4" /> },
   { value: 'security', key: 'settings.tab.security', icon: <Shield className="w-4 h-4" /> },
   { value: 'language', key: 'settings.tab.language', icon: <Globe className="w-4 h-4" /> },
@@ -41,6 +41,10 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Active sessions mock (would normally come from Supabase sessions API)
+  const [isSigningOutOthers, setIsSigningOutOthers] = useState(false);
+  const [signedOutOthers, setSignedOutOthers] = useState(false);
+
   useEffect(() => {
     if (isOpen && profile) {
       setNickname(profile.username);
@@ -48,6 +52,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
       setSaved(false);
       setError(null);
       setActiveTab('profile');
+      setSignedOutOthers(false);
     }
   }, [isOpen, profile]);
 
@@ -64,7 +69,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
     if (!profile) return;
     const trimmed = nickname.trim();
     if (!trimmed) {
-      setError('Nickname не может быть пустым');
+      setError(t('settings.nickname_empty') as string || 'Nickname не может быть пустым');
       return;
     }
     setIsSaving(true);
@@ -109,9 +114,20 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
     router.push('/login');
   };
 
-  const handleSelectLocale = (l: Locale) => {
-    setLocale(l);
+  const handleSignOutOthers = async () => {
+    setIsSigningOutOthers(true);
+    try {
+      await supabase.auth.signOut({ scope: 'others' });
+      setSignedOutOthers(true);
+    } catch {
+      // ignore
+    }
+    setTimeout(() => setIsSigningOutOthers(false), 1000);
   };
+
+  // Detect current device from user-agent
+  const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+  const isMobile = /Mobi|Android|iPhone/i.test(userAgent);
 
   return (
     <AnimatePresence>
@@ -130,210 +146,285 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-2xl rounded-2xl border border-zinc-800 bg-zinc-900/95 backdrop-blur-md shadow-glass-lg overflow-hidden max-h-[90vh] flex flex-col"
+            className="relative w-full max-w-4xl h-[80vh] rounded-2xl border border-zinc-800 bg-zinc-900/95 backdrop-blur-md shadow-glass-lg overflow-hidden flex"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800/80 flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                  <UserIcon className="w-4 h-4 text-emerald-400" />
+            {/* ── Left: Vertical Tab Sidebar ── */}
+            <div className="w-56 flex-shrink-0 border-r border-zinc-800/80 bg-zinc-900/50 flex flex-col">
+              {/* Header */}
+              <div className="px-4 pt-5 pb-4 border-b border-zinc-800/60">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                    <UserIcon className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <h3 className="font-semibold text-white text-sm tracking-wide">{t('settings.title')}</h3>
                 </div>
-                <h3 className="font-semibold text-white text-base tracking-wide">{t('settings.title')}</h3>
-              </div>
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition"
-                title="Закрыть"
-                aria-label="Закрыть"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex items-center gap-1 px-5 pt-4 border-b border-zinc-800/60 flex-shrink-0">
-              {tabsList.map((tab) => {
-                const isActive = activeTab === tab.value;
-                return (
-                  <button
-                    key={tab.value}
-                    onClick={() => setActiveTab(tab.value)}
-                    className={`flex items-center gap-2 px-3 py-2.5 text-sm rounded-t-xl border-b-2 transition ${
-                      isActive
-                        ? 'text-emerald-300 border-emerald-400 bg-zinc-800/30'
-                        : 'text-zinc-400 border-transparent hover:text-zinc-200 hover:bg-zinc-800/30'
-                    }`}
-                  >
-                    {tab.icon}
-                    <span>{t(tab.key)}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Content */}
-            <div className="p-5 space-y-5 overflow-y-auto flex-1 min-h-0">
-              {activeTab === 'profile' && (
-                <>
-                  {/* Avatar */}
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider text-zinc-500 mb-2">{t('settings.avatar')}</label>
-                    <div className="flex items-center gap-4">
-                      <div className="relative w-20 h-20 rounded-2xl bg-zinc-800/60 border border-zinc-700/50 flex items-center justify-center overflow-hidden flex-shrink-0">
-                        {avatar ? (
-                          avatar.startsWith('data:') || avatar.startsWith('http') ? (
-                            <img src={avatar} alt="avatar" className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-4xl">{avatar}</span>
-                          )
+                {/* Avatar preview in sidebar */}
+                {profile && (
+                  <div className="flex items-center gap-3 mt-2">
+                    <div className="w-10 h-10 rounded-xl bg-zinc-800/60 border border-zinc-700/50 flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {avatar ? (
+                        avatar.startsWith('data:') || avatar.startsWith('http') ? (
+                          <img src={avatar} alt="avatar" className="w-full h-full object-cover" />
                         ) : (
-                          <UserIcon className="w-8 h-8 text-zinc-600" />
-                        )}
-                      </div>
-                      <div className="flex-1 space-y-2">
-                        <button
-                          onClick={() => fileInputRef.current?.click()}
-                          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-zinc-700/50 bg-zinc-800/40 text-zinc-200 hover:bg-zinc-800/70 hover:border-zinc-600 transition text-sm"
-                        >
-                          <Camera className="w-4 h-4" />
-                          {t('settings.upload_photo')}
-                        </button>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleFileUpload}
-                        />
-                        {avatar && (
-                          <button
-                            onClick={() => setAvatar('')}
-                            className="w-full px-3 py-1.5 rounded-lg text-xs text-zinc-500 hover:text-zinc-300 transition"
-                          >
-                            {t('settings.remove_avatar')}
-                          </button>
-                        )}
-                      </div>
+                          <span className="text-xl">{avatar}</span>
+                        )
+                      ) : (
+                        <UserIcon className="w-5 h-5 text-zinc-600" />
+                      )}
                     </div>
-
-                    <div className="mt-3">
-                      <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-2">{t('settings.avatar_presets')}</p>
-                      <div className="grid grid-cols-8 gap-1.5 p-2 rounded-xl bg-zinc-800/30 border border-zinc-800/50 max-h-32 overflow-y-auto">
-                        {PRESET_AVATARS.map((emoji) => (
-                          <button
-                            key={emoji}
-                            onClick={() => setAvatar(emoji)}
-                            className={`text-xl w-8 h-8 rounded-lg flex items-center justify-center transition ${
-                              avatar === emoji
-                                ? 'bg-neon-green/20 ring-1 ring-neon-green/50'
-                                : 'hover:bg-zinc-700/50'
-                            }`}
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-white truncate">{profile.username}</p>
+                      <TierBadge tier={profile.tier ?? 'free'} size="sm" />
                     </div>
                   </div>
+                )}
+              </div>
 
-                  {/* Nickname */}
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider text-zinc-500 mb-2">{t('settings.nickname')}</label>
-                    <input
-                      type="text"
-                      value={nickname}
-                      onChange={(e) => setNickname(e.target.value)}
-                      placeholder={t('settings.nickname_placeholder')}
-                      className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-3 py-2.5 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-emerald-500/50 focus:bg-zinc-800/80 transition"
-                    />
-                  </div>
+              {/* Tab list */}
+              <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
+                {tabsList.map((tab) => {
+                  const isActive = activeTab === tab.value;
+                  return (
+                    <button
+                      key={tab.value}
+                      onClick={() => setActiveTab(tab.value)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all ${
+                        isActive
+                          ? 'text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 shadow-[0_0_12px_rgba(16,185,129,0.10)]'
+                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 border border-transparent'
+                      }`}
+                    >
+                      {tab.icon}
+                      <span>{t(tab.key as any)}</span>
+                    </button>
+                  );
+                })}
+              </nav>
 
-                  {/* Tier — read-only display */}
-                  {profile && (
+              {/* Logout at bottom of sidebar */}
+              <div className="p-3 border-t border-zinc-800/60">
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-red-500/30 text-red-400 bg-red-500/5 hover:bg-red-500/10 hover:border-red-500/50 transition text-xs font-medium disabled:opacity-50"
+                >
+                  {isLoggingOut ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <LogOut className="w-3.5 h-3.5" />
+                  )}
+                  {isLoggingOut ? t('common.logging_out') : t('common.logout')}
+                </button>
+              </div>
+            </div>
+
+            {/* ── Right: Content Area ── */}
+            <div className="flex-1 flex flex-col min-w-0">
+              {/* Top bar with close */}
+              <div className="flex items-center justify-between px-6 py-3 border-b border-zinc-800/60 flex-shrink-0 bg-zinc-900/30">
+                <h4 className="text-sm font-semibold text-white">
+                  {t(`settings.tab.${activeTab}` as any)}
+                </h4>
+                <button
+                  onClick={onClose}
+                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition"
+                  title="Закрыть"
+                  aria-label="Закрыть"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Tab Content */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                {activeTab === 'profile' && (
+                  <>
+                    {/* Avatar */}
                     <div>
-                      <label className="block text-xs uppercase tracking-wider text-zinc-500 mb-2">{t('settings.tier')}</label>
-                      <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-zinc-800/40 border border-zinc-800/60">
-                        <TierBadge tier={profile.tier ?? 'free'} size="md" />
-                        <span className="text-xs text-zinc-500">{t('settings.tier_desc')}</span>
+                      <label className="block text-xs uppercase tracking-wider text-zinc-500 mb-3">{t('settings.avatar')}</label>
+                      <div className="flex items-start gap-5">
+                        <div className="relative w-24 h-24 rounded-2xl bg-zinc-800/60 border border-zinc-700/50 flex items-center justify-center overflow-hidden flex-shrink-0">
+                          {avatar ? (
+                            avatar.startsWith('data:') || avatar.startsWith('http') ? (
+                              <img src={avatar} alt="avatar" className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-5xl">{avatar}</span>
+                            )
+                          ) : (
+                            <UserIcon className="w-10 h-10 text-zinc-600" />
+                          )}
+                        </div>
+                        <div className="flex-1 space-y-3">
+                          <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-700/50 bg-zinc-800/40 text-zinc-200 hover:bg-zinc-800/70 hover:border-zinc-600 transition text-sm"
+                          >
+                            <Camera className="w-4 h-4" />
+                            {t('settings.upload_photo')}
+                          </button>
+                          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+                          {avatar && (
+                            <button onClick={() => setAvatar('')} className="w-full px-3 py-1.5 rounded-lg text-xs text-zinc-500 hover:text-zinc-300 transition">
+                              {t('settings.remove_avatar')}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-2">{t('settings.avatar_presets')}</p>
+                        <div className="grid grid-cols-8 sm:grid-cols-10 gap-1.5 p-2.5 rounded-xl bg-zinc-800/30 border border-zinc-800/50 max-h-36 overflow-y-auto">
+                          {PRESET_AVATARS.map((emoji) => (
+                            <button
+                              key={emoji}
+                              onClick={() => setAvatar(emoji)}
+                              className={`text-xl w-8 h-8 rounded-lg flex items-center justify-center transition ${
+                                avatar === emoji ? 'bg-neon-green/20 ring-1 ring-neon-green/50' : 'hover:bg-zinc-700/50'
+                              }`}
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  )}
 
-                  {/* Error */}
-                  {error && (
-                    <div className="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs">
-                      {error}
+                    {/* Nickname */}
+                    <div>
+                      <label className="block text-xs uppercase tracking-wider text-zinc-500 mb-2">{t('settings.nickname')}</label>
+                      <input
+                        type="text"
+                        value={nickname}
+                        onChange={(e) => setNickname(e.target.value)}
+                        placeholder={t('settings.nickname_placeholder')}
+                        className="w-full max-w-md bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-3 py-2.5 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-emerald-500/50 focus:bg-zinc-800/80 transition"
+                      />
                     </div>
-                  )}
 
-                  {/* Save */}
-                  <button
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/25 hover:border-emerald-500/60 transition-all text-sm font-medium disabled:opacity-50"
-                  >
-                    {isSaving ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : saved ? (
-                      <Check className="w-4 h-4" />
-                    ) : null}
-                    {isSaving ? t('common.saving') : saved ? t('common.saved') : t('common.save_changes')}
-                  </button>
-                </>
-              )}
-
-              {activeTab === 'security' && (
-                <div className="space-y-4">
-                  <div className="px-4 py-5 rounded-2xl bg-zinc-800/40 border border-zinc-800/60">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Lock className="w-4 h-4 text-emerald-400" />
-                      <h4 className="text-sm font-semibold text-white">E2EE</h4>
-                    </div>
-                    <p className="text-xs text-zinc-400 leading-relaxed">{t('settings.security_desc')}</p>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    disabled={isLoggingOut}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/30 text-red-400 bg-red-500/5 hover:bg-red-500/10 hover:border-red-500/50 transition text-sm font-medium disabled:opacity-50"
-                  >
-                    {isLoggingOut ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <LogOut className="w-4 h-4" />
+                    {/* Tier — read-only */}
+                    {profile && (
+                      <div>
+                        <label className="block text-xs uppercase tracking-wider text-zinc-500 mb-2">{t('settings.tier')}</label>
+                        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-800/40 border border-zinc-800/60 max-w-md">
+                          <TierBadge tier={profile.tier ?? 'free'} size="md" />
+                          <span className="text-xs text-zinc-500">{t('settings.tier_desc')}</span>
+                        </div>
+                      </div>
                     )}
-                    {isLoggingOut ? t('common.logging_out') : t('common.logout')}
-                  </button>
-                </div>
-              )}
 
-              {activeTab === 'language' && (
-                <div className="space-y-4">
-                  <p className="text-xs text-zinc-400 leading-relaxed">{t('settings.language_desc')}</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {LOCALES.map((loc) => {
-                      const isActive = locale === loc.value;
-                      return (
+                    {/* Error */}
+                    {error && (
+                      <div className="px-4 py-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs max-w-md">
+                        {error}
+                      </div>
+                    )}
+
+                    {/* Save */}
+                    <button
+                      onClick={handleSave}
+                      disabled={isSaving}
+                      className="max-w-md w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/25 hover:border-emerald-500/60 transition-all text-sm font-medium disabled:opacity-50"
+                    >
+                      {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : null}
+                      {isSaving ? t('common.saving') : saved ? t('common.saved') : t('common.save_changes')}
+                    </button>
+                  </>
+                )}
+
+                {activeTab === 'security' && (
+                  <div className="space-y-6 max-w-2xl">
+                    {/* E2EE */}
+                    <div className="px-5 py-5 rounded-2xl bg-zinc-800/40 border border-zinc-800/60">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Lock className="w-4 h-4 text-emerald-400" />
+                        <h4 className="text-sm font-semibold text-white">E2EE End-to-End Encryption</h4>
+                      </div>
+                      <p className="text-xs text-zinc-400 leading-relaxed">{t('settings.security_desc')}</p>
+                    </div>
+
+                    {/* Active Sessions */}
+                    <div className="rounded-2xl bg-zinc-800/40 border border-zinc-800/60 overflow-hidden">
+                      <div className="px-5 py-4 border-b border-zinc-800/60">
+                        <div className="flex items-center gap-2">
+                          <Monitor className="w-4 h-4 text-neon-green" />
+                          <h4 className="text-sm font-semibold text-white">{t('settings.active_sessions') || 'Активные сессии'}</h4>
+                        </div>
+                        <p className="text-[10px] text-zinc-500 mt-1">{t('settings.sessions_desc') || 'Управление устройствами, на которых вы вошли в аккаунт'}</p>
+                      </div>
+                      <div className="p-5 space-y-3">
+                        {/* Current session */}
+                        <div className="flex items-center gap-4 p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                            {isMobile ? <Smartphone className="w-5 h-5 text-emerald-400" /> : <Monitor className="w-5 h-5 text-emerald-400" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm text-white font-medium">{isMobile ? 'Mobile Device' : 'Desktop Browser'}</p>
+                              <span className="text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
+                                {t('settings.session_current') || 'Текущая'}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-zinc-500 mt-0.5 font-mono">{userAgent.slice(0, 80)}…</p>
+                          </div>
+                        </div>
+
+                        {/* Sign out others button */}
                         <button
-                          key={loc.value}
-                          onClick={() => handleSelectLocale(loc.value)}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-2xl border transition text-left ${
-                            isActive
-                              ? 'border-emerald-500/50 bg-emerald-500/10 shadow-[0_0_18px_rgba(16,185,129,0.20)]'
-                              : 'border-zinc-800 bg-zinc-800/40 hover:border-zinc-700 hover:bg-zinc-800/60'
+                          onClick={handleSignOutOthers}
+                          disabled={isSigningOutOthers || signedOutOthers}
+                          className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all disabled:opacity-50 ${
+                            signedOutOthers
+                              ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/5'
+                              : 'border-red-500/30 text-red-400 bg-red-500/5 hover:bg-red-500/10 hover:border-red-500/50'
                           }`}
                         >
-                          <span className="text-2xl">{loc.flag}</span>
-                          <div className="flex-1">
-                            <p className={`text-sm font-medium ${isActive ? 'text-emerald-300' : 'text-white'}`}>{loc.label}</p>
-                            <p className="text-[10px] text-zinc-500 uppercase tracking-wider">{loc.value}</p>
-                          </div>
-                          {isActive && <Check className="w-4 h-4 text-emerald-400" />}
+                          {isSigningOutOthers ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : signedOutOthers ? (
+                            <Check className="w-4 h-4" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                          {isSigningOutOthers
+                            ? (t('settings.signing_out_others') || 'Завершение…')
+                            : signedOutOthers
+                            ? (t('settings.others_signed_out') || 'Другие сессии завершены!')
+                            : (t('settings.sign_out_others') || 'Завершить другие сессии')}
                         </button>
-                      );
-                    })}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+
+                {activeTab === 'language' && (
+                  <div className="space-y-5 max-w-2xl">
+                    <p className="text-xs text-zinc-400 leading-relaxed">{t('settings.language_desc')}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {LOCALES.map((loc) => {
+                        const isActive = locale === loc.value;
+                        return (
+                          <button
+                            key={loc.value}
+                            onClick={() => setLocale(loc.value)}
+                            className={`flex items-center gap-4 px-5 py-4 rounded-2xl border transition-all text-left ${
+                              isActive
+                                ? 'border-emerald-500/50 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.20)]'
+                                : 'border-zinc-800 bg-zinc-800/40 hover:border-zinc-700 hover:bg-zinc-800/60'
+                            }`}
+                          >
+                            <span className="text-3xl">{loc.flag}</span>
+                            <div className="flex-1">
+                              <p className={`text-sm font-medium ${isActive ? 'text-emerald-300' : 'text-white'}`}>{loc.label}</p>
+                              <p className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">{loc.value}</p>
+                            </div>
+                            {isActive && <Check className="w-5 h-5 text-emerald-400" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
         </motion.div>
