@@ -60,76 +60,97 @@ export function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
             </div>
 
             {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto px-6 py-5 text-zinc-300 text-sm leading-relaxed space-y-4 scrollbar-thin">
-              <h2 className="text-xl font-bold text-white tracking-tight">
+            <div className="flex-1 overflow-y-auto px-6 py-5 text-zinc-300 text-sm leading-relaxed scrollbar-thin">
+              <h2 className="text-xl font-bold text-white tracking-tight mb-3">
                 Политика конфиденциальности (Privacy Policy)
               </h2>
-              <p>
-                <strong className="text-emerald-400">Дата вступления в силу: 9 июня 2026 года</strong>
+              <p className="text-emerald-400 text-sm font-semibold mb-4">
+                Дата вступления в силу: 9 июня 2026 года | Статус: Положение об обработке данных
               </p>
-              <p>
-                Защита ваших данных — наш главный приоритет. Мы спроектировали архитектуру
-                CipherTalk так, чтобы минимизировать сбор личных данных.
+              <p className="mb-4 text-zinc-300">
+                Защита вашей частной жизни и конфиденциальных данных является фундаментальным
+                приоритетом платформы CipherTalk. Настоящая Политика определяет порядок сбора,
+                обработки, хранения и защиты информации Пользователей.
               </p>
 
-              <h3 className="text-base font-semibold text-white pt-2">
-                1. Категории обрабатываемых данных
+              <h3 className="text-emerald-400 font-medium mt-4 mb-2">
+                1. Категории обрабатываемых данных и цели сбора
               </h3>
-              <ul className="list-disc pl-5 space-y-2 marker:text-emerald-500">
+              <p className="mb-2 text-zinc-300">
+                Мы собираем исключительно те данные, без которых технически невозможна
+                авторизация и доставка сообщений:
+              </p>
+              <ul className="list-disc pl-5 mb-4 text-zinc-300 space-y-2 marker:text-emerald-500">
                 <li>
-                  <strong className="text-white">Регистрационные данные:</strong> Email и Username
-                  хранятся в таблице <code className="text-emerald-300 font-mono text-xs">profiles</code>{' '}
-                  для авторизации и поиска контактов через{' '}
-                  <code className="text-emerald-300 font-mono text-xs">SearchUserModal</code> по
-                  маске <code className="text-emerald-300 font-mono text-xs">ilike</code>.
+                  <strong className="text-white">Регистрационные данные (Supabase Auth):</strong>{' '}
+                  Адрес электронной почты и имя пользователя (Username / Nickname) записываются
+                  в системную таблицу{' '}
+                  <code className="text-emerald-400 text-xs font-mono">profiles</code>.
+                  Используются для входа, генерации токенов сессии и поиска контактов через
+                  форму SearchUserModal по маске ilike.
                 </li>
                 <li>
                   <strong className="text-white">Контент сообщений:</strong> Все сообщения
-                  передаются в зашифрованном виде. Доступ к ним имеют только верифицированные
-                  участники комнат из таблицы{' '}
-                  <code className="text-emerald-300 font-mono text-xs">room_members</code>.
+                  передаются по защищенным протоколам и хранятся в зашифрованном виде. Доступ к
+                  ним имеют только верифицированные участники конкретной комнаты из таблицы{' '}
+                  <code className="text-emerald-400 text-xs font-mono">room_members</code>.
+                  Администрация не читает и не анализирует вашу переписку.
                 </li>
                 <li>
-                  <strong className="text-white">Медиафайлы:</strong> Загружаемые аватары и
-                  вложения (до 5 МБ) сохраняются в изолированном публичном бакете{' '}
-                  <code className="text-emerald-300 font-mono text-xs">chat-attachments</code> в
-                  Supabase Storage и отображаются через{' '}
-                  <code className="text-emerald-300 font-mono text-xs">MessageBubble.tsx</code>{' '}
-                  по прямым хэшированным ссылкам.
+                  <strong className="text-white">Маркеры статусов (Message States):</strong>{' '}
+                  Сообщения содержать флаги состояния: sent (записано в БД), delivered
+                  (доставлено на устройство) и read (чат открыт получателем). Это необходимо для
+                  работы UI-логики отображения галочек.
+                </li>
+                <li>
+                  <strong className="text-white">Медиафайлы и вложения:</strong> Загружаемые
+                  аватары профиля (до 2 МБ) или файлы, отправленные через инпут чата,
+                  сохраняются в изолированном публичном бакете{' '}
+                  <code className="text-emerald-400 text-xs font-mono">chat-attachments</code> в
+                  Supabase Storage и отображаются в MessageBubble.tsx по прямым хэшированным
+                  ссылкам.
                 </li>
               </ul>
 
-              <h3 className="text-base font-semibold text-white pt-2">
-                2. Технологии реального времени
+              <h3 className="text-emerald-400 font-medium mt-4 mb-2">
+                2. Технологии реального времени и эфемерные данные
               </h3>
-              <p>
-                Индикатор набора текста (Typing Indicator) работает через Broadcast-каналы по
-                маске{' '}
-                <code className="px-1.5 py-0.5 rounded bg-zinc-800/80 text-emerald-300 text-xs font-mono">
-                  typing-$&#123;roomId&#125;
-                </code>{' '}
-                в оперативной памяти. События активности не логируются в базу данных и
-                полностью уничтожаются по 3-секундному таймауту.
+              <p className="mb-2 text-zinc-300">
+                Для создания интерактивного интерфейса CipherTalk использует технологии
+                WebSockets и Broadcast-каналы, работающие исключительно в оперативной памяти:
               </p>
-              <p>
-                Статусы сообщений (одна галочка — <em>sent</em>, две серые —{' '}
-                <em>delivered</em>, две изумрудные — <em>read</em>) обрабатываются
-                исключительно для работы UI-логики.
+              <p className="mb-4 text-zinc-300">
+                <strong className="text-white">Индикатор набора текста (Typing Indicator):</strong>{' '}
+                При вводе символов клиент отправляет кратковременное событие в Broadcast-канал
+                по маске{' '}
+                <code className="text-emerald-400 text-xs font-mono">typing-{"{roomId}"}</code>.
+                Это событие содержит только ваш userId, транслируется напрямую собеседнику, не
+                логируется в базу данных и полностью уничтожается по жесткому 3-секундному
+                автотаймауту.
               </p>
 
-              <h3 className="text-base font-semibold text-white pt-2">
-                3. Безопасность и передача третьим лицам
+              <h3 className="text-emerald-400 font-medium mt-4 mb-2">
+                3. Механизмы защиты и передача третьим лицам
               </h3>
-              <p>
-                Сессии защищены на уровне Next.js SSR Middleware через защищенные куки
-                (HttpOnly, Secure). Права доступа к комнатам изолированы через{' '}
+              <p className="mb-2 text-zinc-300">
+                3.1. Для предотвращения перехвата сессий (атак Session Hijacking) токены сессий
+                упаковываются в защищенные куки (HttpOnly, Secure, SameSite), проверяемые на
+                уровне Next.js SSR Middleware при каждом переходе.
+              </p>
+              <p className="mb-2 text-zinc-300">
+                3.2. Права доступа к сообщениям жестко разграничены на уровне базы данных через
+                политики{' '}
                 <strong className="text-emerald-400">Row Level Security (RLS)</strong> в
-                Supabase. Мы{' '}
-                <strong className="text-white">никогда не передаем и не продаем</strong> ваши
-                данные третьим лицам и рекламным трекерам.
+                Supabase.
+              </p>
+              <p className="mb-4 text-zinc-300">
+                3.3. CipherTalk строго придерживается политики абсолютной конфиденциальности. Мы{' '}
+                <strong className="text-white">никогда не продаем, не арендуем и не передаем</strong>{' '}
+                данные пользователей коммерческим организациям, третьим лицам или рекламным
+                трекерам.
               </p>
 
-              <div className="pt-3 mt-2 border-t border-zinc-800/60 flex items-center gap-2 text-[11px] text-zinc-500">
+              <div className="pt-3 mt-4 border-t border-zinc-800/60 flex items-center gap-2 text-[11px] text-zinc-500">
                 <ShieldCheck className="w-3 h-3 text-emerald-500" />
                 <span>CipherTalk © 2026 — zero-logs policy</span>
               </div>
