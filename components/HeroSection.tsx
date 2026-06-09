@@ -1,6 +1,5 @@
-'use client';
-
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { Shield, ArrowRight, Sparkles } from 'lucide-react';
 
 const fadeInUp = {
@@ -17,11 +16,10 @@ const staggerContainer = {
 };
 
 interface HeroSectionProps {
-  onOpenMessenger: () => void;
   onScrollToHowItWorks: () => void;
 }
 
-export function HeroSection({ onOpenMessenger, onScrollToHowItWorks }: HeroSectionProps) {
+export function HeroSection({ onScrollToHowItWorks }: HeroSectionProps) {
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20">
       {/* Background decorations */}
@@ -76,13 +74,13 @@ export function HeroSection({ onOpenMessenger, onScrollToHowItWorks }: HeroSecti
 
           {/* Buttons */}
           <motion.div variants={fadeInUp} className="flex flex-wrap justify-center gap-4 pt-4">
-            <button
-              onClick={onOpenMessenger}
+            <Link
+              href="/chat"
               className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-neon-green text-black font-semibold text-lg hover:bg-neon-dark-green transition-all shadow-neon-glow-lg hover:shadow-neon-glow"
             >
               <span>Открыть мессенджер</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
+            </Link>
             <button
               onClick={onScrollToHowItWorks}
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl border border-neon-green/40 text-neon-green font-semibold text-lg hover:border-neon-green hover:bg-neon-green/5 transition-all"

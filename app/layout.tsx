@@ -3,7 +3,6 @@ import { Space_Grotesk } from 'next/font/google';
 import './globals.css';
 
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
-import { Navbar } from '@/components/Navbar';
 
 export const metadata: Metadata = {
   title: 'Cipher Talk — приватный мессенджер с E2EE',
@@ -35,7 +34,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru" suppressHydrationWarning>
       <body className={`${spaceGrotesk.variable} font-sans bg-bg-black text-white`}>
-        <Navbar />
         {children}
       </body>
     </html>

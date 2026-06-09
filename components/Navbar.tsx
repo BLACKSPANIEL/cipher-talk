@@ -47,6 +47,11 @@ export function Navbar() {
 
         {/* Desktop Buttons */}
         <div className="hidden md:flex items-center gap-4">
+          <Link href="/login">
+            <Button variant="secondary" className="text-xs">
+              Войти
+            </Button>
+          </Link>
           <Link href="/chat">
             <Button variant="secondary" className="text-xs">
               Веб-версия

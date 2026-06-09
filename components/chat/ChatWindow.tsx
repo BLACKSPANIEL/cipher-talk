@@ -1,8 +1,6 @@
-'use client';
-
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Shield, Lock, ChevronDown, MessageSquare } from 'lucide-react';
+import { Send, Shield, Lock, ChevronDown, MessageSquare, Loader2 } from 'lucide-react';
 import { MessageBubble, type Message } from './MessageBubble';
 import { type ChatRoom } from './Sidebar';
 import { CIPHER_OPTIONS, type CipherType } from '@/lib/ciphers';
@@ -11,12 +9,15 @@ interface ChatWindowProps {
   room: ChatRoom | null;
   messages: Message[];
   onSendMessage: (text: string, cipher: CipherType) => void;
+  onDecryptMessage?: (messageId: string) => void;
+  decryptingMessageId?: string | null;
 }
 
-export function ChatWindow({ room, messages, onSendMessage }: ChatWindowProps) {
+export function ChatWindow({ room, messages, onSendMessage, onDecryptMessage, decryptingMessageId }: ChatWindowProps) {
   const [inputText, setInputText] = useState('');
   const [cipher, setCipher] = useState<CipherType>('none');
   const [showCipherMenu, setShowCipherMenu] = useState(false);
+  const [showEncryptingIndicator, setShowEncryptingIndicator] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -30,7 +31,18 @@ export function ChatWindow({ room, messages, onSendMessage }: ChatWindowProps) {
   const handleSend = () => {
     const text = inputText.trim();
     if (!text) return;
-    onSendMessage(text, cipher);
+
+    // Показываем индикатор "Шифрование..." на секунду
+    if (cipher !== 'none') {
+      setShowEncryptingIndicator(true);
+      setTimeout(() => {
+        setShowEncryptingIndicator(false);
+        onSendMessage(text, cipher);
+      }, 1000);
+    } else {
+      onSendMessage(text, cipher);
+    }
+
     setInputText('');
   };
 
@@ -42,6 +54,8 @@ export function ChatWindow({ room, messages, onSendMessage }: ChatWindowProps) {
   };
 
   const activeCipherLabel = CIPHER_OPTIONS.find((o) => o.value === cipher)?.label ?? 'Обычный текст';
+
+  const roomMessages = messages.filter((m) => m.roomId === room?.id);
 
   if (!room) {
     return (
@@ -62,10 +76,14 @@ export function ChatWindow({ room, messages, onSendMessage }: ChatWindowProps) {
       {/* Chat Header */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-neon-green/10 bg-surface-darker/50">
         <div className="flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-neon-green animate-pulse-glow" />
+          <div className="w-8 h-8 rounded-full bg-neon-green/20 flex items-center justify-center text-xs font-bold text-neon-green">
+            {room.name.charAt(0).toUpperCase()}
+          </div>
           <div>
             <h3 className="font-semibold text-white text-sm">{room.name}</h3>
-            <p className="text-xs text-gray-500">2 участника</p>
+            <p className="text-xs text-gray-500">
+              {roomMessages.length} сообщ.
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-neon-green/20 bg-neon-green/5">
@@ -76,7 +94,24 @@ export function ChatWindow({ room, messages, onSendMessage }: ChatWindowProps) {
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-1">
-        {messages.filter((m) => m.roomId === room.id).length === 0 ? (
+        {/* Encrypting indicator */}
+        {showEncryptingIndicator && (
+          <motion.div
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="flex justify-start mb-3"
+          >
+            <div className="bg-gray-800/40 rounded-2xl rounded-bl-md border border-gray-700/20 px-4 py-2.5">
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-neon-green" />
+                <span className="text-sm text-gray-400 italic">Шифрование...</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {roomMessages.length === 0 && !showEncryptingIndicator ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center space-y-2">
               <Shield className="w-10 h-10 text-gray-600 mx-auto" />
@@ -85,9 +120,14 @@ export function ChatWindow({ room, messages, onSendMessage }: ChatWindowProps) {
             </div>
           </div>
         ) : (
-          messages
-            .filter((m) => m.roomId === room.id)
-            .map((msg) => <MessageBubble key={msg.id} message={msg} />)
+          roomMessages.map((msg) => (
+            <MessageBubble
+              key={msg.id}
+              message={msg}
+              onDecrypt={onDecryptMessage}
+              isDecrypting={decryptingMessageId === msg.id}
+            />
+          ))
         )}
         <div ref={messagesEndRef} />
       </div>

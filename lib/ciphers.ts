@@ -1,3 +1,7 @@
+export function caesarDecrypt(text: string, shift: number): string {
+  return caesarEncrypt(text, 32 - (shift % 32));
+}
+
 export function caesarEncrypt(text: string, shift: number): string {
   return text
     .split('')
