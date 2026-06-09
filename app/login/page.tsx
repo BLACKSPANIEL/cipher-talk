@@ -4,6 +4,8 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { Shield, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
+import { TermsModal } from '@/components/ui/TermsModal';
+import { PrivacyModal } from '@/components/ui/PrivacyModal';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,6 +15,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -182,10 +186,35 @@ export default function LoginPage() {
                   Зарегистрироваться
                 </button>
               </p>
+
+              {/* Legal notice */}
+              <p className="text-xs text-zinc-500 mt-4 text-center leading-relaxed">
+                Регистрируясь, вы соглашаетесь с{' '}
+                <button
+                  type="button"
+                  onClick={() => setIsTermsOpen(true)}
+                  className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300 transition-colors font-medium"
+                >
+                  Правилами использования
+                </button>{' '}
+                и{' '}
+                <button
+                  type="button"
+                  onClick={() => setIsPrivacyOpen(true)}
+                  className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300 transition-colors font-medium"
+                >
+                  Политикой конфиденциальности
+                </button>
+                .
+              </p>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Legal modals */}
+      <TermsModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />
+      <PrivacyModal isOpen={isPrivacyOpen} onClose={() => setIsPrivacyOpen(false)} />
     </div>
   );
 }
