@@ -16,6 +16,31 @@ export interface DbMessage {
   cipher_type: string;
 }
 
+/** Role-Based Access Control roles */
+export type UserRole = 'owner' | 'admin' | 'moderator' | 'user';
+
+/** Role hierarchy weight (higher = more powerful) */
+export const ROLE_WEIGHT: Record<UserRole, number> = {
+  owner: 4,
+  admin: 3,
+  moderator: 2,
+  user: 1,
+};
+
+/** Can `actor` perform action on `target`? */
+export function canAct(actorRole: UserRole, targetRole: UserRole, action: 'change_role' | 'change_tier' | 'view_logs'): boolean {
+  const aw = ROLE_WEIGHT[actorRole];
+  const tw = ROLE_WEIGHT[targetRole];
+  if (action === 'view_logs') return aw >= ROLE_WEIGHT.moderator;
+  if (action === 'change_tier') return aw > tw;
+  if (action === 'change_role') {
+    if (actorRole === 'owner') return true;
+    if (actorRole === 'admin') return targetRole === 'moderator' || targetRole === 'user';
+    return false;
+  }
+  return false;
+}
+
 // Тип профиля — соответствует таблице profiles
 export interface Profile {
   id: string;
@@ -25,6 +50,8 @@ export interface Profile {
   avatar_url?: string | null;
   /** Tier подписки: free / pro / elite. Только для чтения для самого пользователя. */
   tier?: 'free' | 'pro' | 'elite';
-  /** Флаг администратора. Назначается другим админом через /admin. */
+  /** Role-Based Access Control: owner | admin | moderator | user */
+  role?: UserRole;
+  /** Legacy flag —PRECATED, use role instead. Kept for backward compat. */
   is_admin?: boolean;
 }

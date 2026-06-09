@@ -40,6 +40,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
+  // Admin route requires moderator+ role (checked on client via role field)
+  // Middleware only verifies auth; role check happens in app/admin/page.tsx
+
   return res;
 }
 

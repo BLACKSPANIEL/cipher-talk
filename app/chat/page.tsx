@@ -200,11 +200,23 @@ export default function ChatPage() {
   const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  /** Mobile: when a room is selected, hide sidebar and show only chat */
+  const [mobileShowChat, setMobileShowChat] = useState(false);
 
   const subscriptionRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const presenceRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const activeRoom = rooms.find((r) => r.id === activeRoomId) ?? null;
+
+  // Auto-switch to chat on mobile when room is selected
+  const handleSelectRoom = useCallback((id: string) => {
+    setActiveRoomId(id);
+    setMobileShowChat(true);
+  }, []);
+
+  const handleBackToList = useCallback(() => {
+    setMobileShowChat(false);
+  }, []);
 
   // Auth guard + load profile + rooms
   useEffect(() => {
@@ -436,7 +448,9 @@ export default function ChatPage() {
 
       <div className="relative z-10 flex flex-1 overflow-hidden p-3 md:p-5 gap-4 md:gap-6">
         <aside
-          className="w-64 flex-shrink-0 hidden md:block rounded-2xl overflow-hidden border border-zinc-800/80 backdrop-blur-xl"
+          className={`w-64 flex-shrink-0 rounded-2xl overflow-hidden border border-zinc-800/80 backdrop-blur-xl ${
+            mobileShowChat ? 'hidden md:block' : 'block'
+          }`}
           style={{
             background: 'rgba(9, 9, 11, 0.4)',
             boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
@@ -445,7 +459,7 @@ export default function ChatPage() {
           <Sidebar
             rooms={rooms}
             activeRoomId={activeRoomId}
-            onSelectRoom={setActiveRoomId}
+            onSelectRoom={handleSelectRoom}
             onOpenSearch={() => setIsSearchOpen(true)}
             onOpenSettings={() => setIsSettingsOpen(true)}
             currentProfile={currentProfile}
@@ -454,7 +468,9 @@ export default function ChatPage() {
         </aside>
 
         <main
-          className="flex-1 min-w-0 rounded-2xl overflow-hidden border border-zinc-800/80 backdrop-blur-xl flex flex-col"
+          className={`flex-1 min-w-0 rounded-2xl overflow-hidden border border-zinc-800/80 backdrop-blur-xl flex flex-col ${
+            mobileShowChat ? 'block' : 'hidden md:flex'
+          }`}
           style={{
             background: 'rgba(9, 9, 11, 0.4)',
             boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
@@ -467,6 +483,7 @@ export default function ChatPage() {
             onSendMessage={handleSendMessage}
             onDecryptMessage={handleDecryptMessage}
             decryptingMessageId={decryptingMessageId}
+            onBack={handleBackToList}
           />
         </main>
       </div>

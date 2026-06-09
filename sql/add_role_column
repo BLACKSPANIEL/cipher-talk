@@ -1,0 +1,22 @@
+-- Миграция: добавление поля role в profiles
+-- Role-Based Access Control для CipherTalk
+-- Запустите этот SQL в Supabase SQL Editor (Dashboard → SQL Editor → New query)
+
+-- 1. Добавляем поле role с значением по умолчанию 'user'
+ALTER TABLE profiles
+ADD COLUMN IF NOT EXISTS role text DEFAULT 'user';
+
+-- 2. Синхронизируем существующих is_admin: если is_admin = true → role = 'admin'
+UPDATE profiles SET role = 'admin' WHERE is_admin = true AND role = 'user';
+
+-- 3. Назначаем первого owner (замените UUID на свой)
+-- Найдите свой ID в Supabase Dashboard → Authentication → Users
+-- UPDATE profiles SET role = 'owner' WHERE id = 'ВАШ_UUID';
+
+-- 4. Чек-constraint (опционально) — допустимые значения role
+ALTER TABLE profiles
+ADD CONSTRAINT profiles_role_check
+CHECK (role IN ('owner', 'admin', 'moderator', 'user'));
+
+-- 5. RLS policy — пользователи могут читать role других
+-- (чтение profiles уже разрешено через существующие политики)

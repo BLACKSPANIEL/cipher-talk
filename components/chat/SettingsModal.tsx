@@ -146,10 +146,27 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-4xl h-[80vh] rounded-2xl border border-zinc-800 bg-zinc-900/95 backdrop-blur-md shadow-glass-lg overflow-hidden flex"
+            className="relative w-full max-w-4xl h-[80vh] max-h-[95vh] md:h-[80vh] rounded-2xl border border-zinc-800 bg-zinc-900/95 backdrop-blur-md shadow-glass-lg overflow-hidden flex flex-col md:flex-row"
           >
-            {/* ── Left: Vertical Tab Sidebar ── */}
-            <div className="w-56 flex-shrink-0 border-r border-zinc-800/80 bg-zinc-900/50 flex flex-col">
+            {/* ── Mobile: Horizontal Tab Bar (visible ≤ md) ── */}
+            <div className="md:hidden flex items-center gap-1 px-3 pt-3 pb-2 border-b border-zinc-800/60 overflow-x-auto flex-shrink-0">
+              {tabsList.map((tab) => {
+                const isActive = activeTab === tab.value;
+                return (
+                  <button key={tab.value} onClick={() => setActiveTab(tab.value)}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all whitespace-nowrap ${
+                      isActive ? 'text-emerald-300 bg-emerald-500/10 border border-emerald-500/20' : 'text-zinc-400 hover:text-zinc-200 border border-transparent'
+                    }`}>
+                    {tab.icon}<span>{t(tab.key as any)}</span>
+                  </button>
+                );
+              })}
+              <div className="flex-1" />
+              <button onClick={onClose} className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition flex-shrink-0"><X className="w-4 h-4" /></button>
+            </div>
+
+            {/* ── Desktop: Vertical Tab Sidebar (≥ md) ── */}
+            <div className="hidden md:flex w-56 flex-shrink-0 border-r border-zinc-800/80 bg-zinc-900/50 flex-col">
               {/* Header */}
               <div className="px-4 pt-5 pb-4 border-b border-zinc-800/60">
                 <div className="flex items-center gap-2 mb-3">
@@ -201,8 +218,8 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                 })}
               </nav>
 
-              {/* Logout at bottom of sidebar */}
-              <div className="p-3 border-t border-zinc-800/60">
+              {/* Logout at bottom of sidebar — desktop only */}
+              <div className="p-3 border-t border-zinc-800/60 hidden md:block">
                 <button
                   onClick={handleLogout}
                   disabled={isLoggingOut}
