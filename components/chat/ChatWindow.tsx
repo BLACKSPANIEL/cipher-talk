@@ -11,12 +11,13 @@ import { supabase } from '@/lib/supabaseClient';
 interface ChatWindowProps {
   room: ChatRoom | null;
   messages: Message[];
+  currentUserId: string | null;
   onSendMessage: (text: string, cipher: CipherType) => void;
   onDecryptMessage?: (messageId: string) => void;
   decryptingMessageId?: string | null;
 }
 
-export function ChatWindow({ room, messages, onSendMessage, onDecryptMessage, decryptingMessageId }: ChatWindowProps) {
+export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDecryptMessage, decryptingMessageId }: ChatWindowProps) {
   const [inputText, setInputText] = useState('');
   const [cipher, setCipher] = useState<CipherType>('none');
   const [showCipherMenu, setShowCipherMenu] = useState(false);
@@ -31,7 +32,7 @@ export function ChatWindow({ room, messages, onSendMessage, onDecryptMessage, de
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, typingUser]);
 
   // Typing indicator via Supabase Broadcast
   useEffect(() => {
@@ -41,7 +42,10 @@ export function ChatWindow({ room, messages, onSendMessage, onDecryptMessage, de
 
     channel
       .on('broadcast', { event: 'typing' }, (payload) => {
-        const senderName = payload.payload.username;
+        const senderId = payload.payload?.userId;
+        // Игнорируем свои события
+        if (senderId && senderId === currentUserId) return;
+        const senderName = payload.payload?.username || 'Собеседник';
         setTypingUser(senderName);
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
         typingTimeoutRef.current = setTimeout(() => setTypingUser(null), 3000);
@@ -52,20 +56,26 @@ export function ChatWindow({ room, messages, onSendMessage, onDecryptMessage, de
       supabase.removeChannel(channel);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     };
-  }, [room?.id]);
+  }, [room?.id, currentUserId]);
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputText(e.target.value);
+    const newValue = e.target.value;
+    setInputText(newValue);
 
-    // Broadcast typing status
-    if (room?.id && e.target.value.trim()) {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase.from('profiles').select('username').eq('id', user.id).single();
-        if (profile) {
-          const channel = supabase.channel(`typing-${room.id}`);
-          channel.send({ type: 'broadcast', event: 'typing', payload: { username: profile.username } });
-        }
+    // Broadcast typing status with our userId so the receiver can filter out our own events
+    if (room?.id && newValue.trim() && currentUserId) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', currentUserId)
+        .single();
+      if (profile) {
+        const channel = supabase.channel(`typing-${room.id}`);
+        channel.send({
+          type: 'broadcast',
+          event: 'typing',
+          payload: { username: profile.username, userId: currentUserId },
+        });
       }
     }
   };
@@ -100,35 +110,62 @@ export function ChatWindow({ room, messages, onSendMessage, onDecryptMessage, de
 
   if (!room) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-zinc-900/30">
-        <div className="text-center space-y-5">
-          {/* Glowing shield icon */}
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-neon-green/10 mx-auto">
-            <Shield className="w-10 h-10 text-neon-green" style={{ filter: 'drop-shadow(0 0 20px rgba(0,255,102,0.4))' }} />
+      <div className="flex-1 flex items-center justify-center relative">
+        <div className="text-center space-y-6 px-6 max-w-md mx-auto">
+          {/* Glowing shield — premium centerpiece */}
+          <div className="relative inline-flex items-center justify-center mx-auto">
+            <div
+              className="w-24 h-24 rounded-full bg-neon-green/10 flex items-center justify-center"
+              style={{ boxShadow: '0 0 60px rgba(0,255,102,0.35), 0 0 120px rgba(0,255,102,0.15)' }}
+            >
+              <Shield
+                className="w-12 h-12 text-neon-green"
+                style={{ filter: 'drop-shadow(0 0 18px rgba(0,255,102,0.7))' }}
+              />
+            </div>
+            <span className="absolute inset-0 rounded-full border border-neon-green/30 animate-pulse-glow" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white mb-1">Cipher Talk</h3>
-            <p className="text-zinc-400 text-sm max-w-xs mx-auto leading-relaxed">
-              Ваши сообщения защищены сквозным шифрованием (E2EE). 
-              Создайте или выберите чат-комнату, чтобы начать безопасное общение.
+            <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">Cipher Talk</h3>
+            <p className="text-zinc-400 text-sm leading-relaxed">
+              Ваши сообщения защищены <span className="text-neon-green font-semibold">сквозным шифрованием (E2EE)</span>.
+              Создайте или выберите чат-комнату слева, чтобы начать безопасное общение.
             </p>
+          </div>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-neon-green/20 bg-neon-green/5 mx-auto">
+            <Lock className="w-3.5 h-3.5 text-neon-green" />
+            <span className="text-[11px] uppercase tracking-wider text-neon-green font-medium">End-to-end encrypted</span>
           </div>
         </div>
       </div>
     );
   }
 
+  const otherTyping = typingUser !== null;
+
   return (
-    <div className="flex-1 flex flex-col bg-zinc-900/20">
+    <div className="flex-1 flex flex-col min-h-0">
       {/* Chat Header */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800/50 bg-zinc-900/30 backdrop-blur-lg">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800/50 bg-zinc-900/30 backdrop-blur-lg flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-neon-green/20 flex items-center justify-center text-xs font-bold text-neon-green">
-            {room.name.charAt(0).toUpperCase()}
+          <div className="w-9 h-9 rounded-xl bg-neon-green/15 flex items-center justify-center text-sm font-bold text-neon-green overflow-hidden">
+            {room.otherUserAvatar && (room.otherUserAvatar.startsWith('data:') || room.otherUserAvatar.startsWith('http')) ? (
+              <img src={room.otherUserAvatar} alt={room.name} className="w-full h-full object-cover" />
+            ) : room.otherUserAvatar ? (
+              <span className="text-lg leading-none">{room.otherUserAvatar}</span>
+            ) : (
+              room.name.charAt(0).toUpperCase()
+            )}
           </div>
           <div>
             <h3 className="font-semibold text-white text-sm">{room.name}</h3>
-            <p className="text-xs text-zinc-500">{roomMessages.length} сообщ.</p>
+            <p className="text-xs text-zinc-500">
+              {otherTyping ? (
+                <span className="text-emerald-400">{typingUser} печатает...</span>
+              ) : (
+                `${roomMessages.length} сообщ.`
+              )}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-neon-green/20 bg-neon-green/5">
@@ -138,55 +175,43 @@ export function ChatWindow({ room, messages, onSendMessage, onDecryptMessage, de
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-1">
-        {/* Typing indicator */}
-        <AnimatePresence>
-          {typingUser && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="flex items-start gap-2 mb-2"
-            >
-              <div className="bg-zinc-800/50 border border-zinc-700/30 rounded-2xl rounded-bl-md px-4 py-2.5 flex items-center gap-3 backdrop-blur-sm">
-                <div className="flex items-center gap-1">
-                  <span className="typing-dot w-1.5 h-1.5 rounded-full bg-neon-green" />
-                  <span className="typing-dot w-1.5 h-1.5 rounded-full bg-neon-green" />
-                  <span className="typing-dot w-1.5 h-1.5 rounded-full bg-neon-green" />
-                </div>
-                <span className="text-sm text-zinc-400 italic">{typingUser} печатает...</span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 min-h-0">
         {/* Encrypting indicator */}
         {showEncryptingIndicator && (
           <motion.div
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="flex justify-start mb-3"
+            className="flex justify-end mb-2"
           >
-            <div className="bg-zinc-800/50 border border-zinc-700/30 rounded-2xl rounded-bl-md px-4 py-2.5 backdrop-blur-sm">
+            <div className="bg-emerald-950/40 border border-emerald-800/30 rounded-2xl rounded-br-md px-3.5 py-2 backdrop-blur-sm">
               <div className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-neon-green" />
-                <span className="text-sm text-zinc-400 italic">Шифрование...</span>
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
+                <span className="text-xs text-emerald-300/80 italic">Шифрование...</span>
               </div>
             </div>
           </motion.div>
         )}
 
         {roomMessages.length === 0 && !showEncryptingIndicator ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center space-y-3">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-neon-green/10 mx-auto">
-                <Shield className="w-8 h-8 text-neon-green" style={{ filter: 'drop-shadow(0 0 15px rgba(0,255,102,0.3))' }} />
+          <div className="flex items-center justify-center h-full min-h-[300px]">
+            <div className="text-center space-y-5 px-6 max-w-sm mx-auto">
+              <div className="relative inline-flex items-center justify-center mx-auto">
+                <div
+                  className="w-20 h-20 rounded-full bg-neon-green/10 flex items-center justify-center"
+                  style={{ boxShadow: '0 0 40px rgba(0,255,102,0.4), 0 0 80px rgba(0,255,102,0.15)' }}
+                >
+                  <MessageSquare
+                    className="w-10 h-10 text-neon-green"
+                    style={{ filter: 'drop-shadow(0 0 14px rgba(0,255,102,0.6))' }}
+                  />
+                </div>
+                <span className="absolute inset-0 rounded-full border border-neon-green/25 animate-pulse-glow" />
               </div>
               <div>
-                <p className="text-white font-semibold">Нет сообщений</p>
-                <p className="text-zinc-500 text-xs max-w-[200px] mt-1">
-                  Напишите что-нибудь, чтобы начать зашифрованный диалог
+                <h4 className="text-lg font-bold text-white mb-1">Нет сообщений</h4>
+                <p className="text-zinc-400 text-sm leading-relaxed">
+                  Напишите что-нибудь, чтобы начать <span className="text-neon-green font-medium">защищённый E2EE</span> диалог
                 </p>
               </div>
             </div>
@@ -201,20 +226,43 @@ export function ChatWindow({ room, messages, onSendMessage, onDecryptMessage, de
             />
           ))
         )}
+
+        {/* Typing indicator — sticky at bottom of messages area */}
+        <AnimatePresence>
+          {otherTyping && !showEncryptingIndicator && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-end gap-2 mb-2 justify-start"
+            >
+              <div className="bg-zinc-800/70 border border-zinc-700/40 rounded-2xl rounded-bl-md px-3.5 py-2.5 backdrop-blur-sm flex items-center gap-1.5">
+                <span className="typing-dot w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="typing-dot w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="typing-dot w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div ref={messagesEndRef} />
       </div>
 
       {/* Floating Capsule Input */}
-      <div className="px-4 pb-4 pt-2">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-end gap-2 bg-zinc-800/60 backdrop-blur-lg border border-zinc-700/40 rounded-2xl px-4 py-3 shadow-glass">
+      <div className="px-5 md:px-8 pb-5 pt-3 flex-shrink-0">
+        <div className="max-w-3xl mx-auto">
+          <div
+            className="flex items-end gap-2 rounded-2xl px-3 py-2.5 backdrop-blur-xl border border-zinc-700/50 shadow-glass"
+            style={{ background: 'linear-gradient(180deg, rgba(39,39,42,0.65), rgba(24,24,27,0.55))' }}
+          >
             {/* Cipher Selector */}
             <div className="relative">
               <button
                 onClick={() => setShowCipherMenu(!showCipherMenu)}
-                className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border transition-all text-xs ${
+                className={`flex items-center gap-1.5 px-2.5 py-2 rounded-xl border transition-all text-xs ${
                   cipher === 'none'
-                    ? 'border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                    ? 'border-zinc-700 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
                     : 'border-neon-green/30 text-neon-green bg-neon-green/5 hover:bg-neon-green/10'
                 }`}
               >
@@ -257,13 +305,14 @@ export function ChatWindow({ room, messages, onSendMessage, onDecryptMessage, de
               />
             </div>
 
-            {/* Send Button — interactive with hover scale and glow */}
+            {/* Send Button */}
             <button
               onClick={handleSend}
               disabled={!inputText.trim()}
-              className="flex items-center justify-center w-[42px] h-[42px] rounded-xl bg-chat-gradient text-black hover:scale-105 hover:shadow-[0_0_20px_rgba(0,255,102,0.4)] disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed transition-all flex-shrink-0"
+              className="group/send flex items-center justify-center w-11 h-11 rounded-xl bg-chat-gradient text-black hover:scale-105 active:scale-95 hover:shadow-[0_0_24px_rgba(0,255,102,0.6),0_0_8px_rgba(0,255,102,0.4)] disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed transition-all flex-shrink-0"
+              style={{ boxShadow: '0 0 0 1px rgba(0,255,102,0.15)' }}
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4 transition-transform group-hover/send:translate-x-0.5" />
             </button>
           </div>
         </div>

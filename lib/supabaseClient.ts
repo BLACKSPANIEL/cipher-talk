@@ -22,4 +22,5 @@ export interface Profile {
   username: string;
   status: 'online' | 'offline' | 'away';
   created_at: string;
+  avatar_url?: string | null;
 }
