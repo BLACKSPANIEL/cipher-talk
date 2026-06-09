@@ -212,14 +212,14 @@ export default function ChatPage() {
   }, []);
 
   return (
-    <div className="h-screen flex flex-col messenger-body">
+    <div className="h-screen flex flex-col bg-[#0B0F12]">
       {/* Top bar — pure decorative, no links to / */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-neon-green/10 bg-surface-glass-dark/80 backdrop-blur-xl">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800/50 bg-zinc-900/60 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <Shield className="w-5 h-5 text-neon-green" />
           <span className="text-sm font-bold text-white tracking-wide">C I P H E R &nbsp;T A L K</span>
         </div>
-        <span className="text-xs text-gray-500">Мессенджер</span>
+        <span className="text-xs text-zinc-500">Мессенджер</span>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
