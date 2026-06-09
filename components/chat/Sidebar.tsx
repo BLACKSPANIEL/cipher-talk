@@ -67,11 +67,11 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
         <p className="text-xs text-zinc-500 mt-1">Зашифрованный чат</p>
       </div>
 
-      {/* New Chat button — opens search modal */}
+      {/* New Chat button — emerald-glass style with hover fill */}
       <div className="p-3">
         <button
           onClick={onOpenSearch}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neon-green/10 border border-neon-green/30 text-neon-green hover:bg-neon-green/20 hover:border-neon-green/50 transition-all text-sm font-medium"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-950/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-zinc-950 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all duration-300 text-sm font-medium"
         >
           <Plus className="w-4 h-4" />
           <span>Новый чат</span>
@@ -87,10 +87,21 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
             </div>
           ) : rooms.length === 0 ? (
             <div className="text-center py-10 px-3">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-zinc-800/50 mb-2">
-                <MessageSquare className="w-6 h-6 text-zinc-600" />
+              <div
+                className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-950/30 mb-3"
+                style={{ boxShadow: '0 0 18px rgba(16,185,129,0.18)' }}
+              >
+                <MessageSquare
+                  className="w-6 h-6 text-emerald-400/70"
+                  style={{ filter: 'drop-shadow(0 0 6px rgba(16,185,129,0.5))' }}
+                />
               </div>
-              <p className="text-zinc-400 text-sm font-medium">Нет чатов</p>
+              <p
+                className="text-emerald-400/80 text-sm font-medium"
+                style={{ textShadow: '0 0 10px rgba(16,185,129,0.25)' }}
+              >
+                Нет чатов
+              </p>
               <p className="text-zinc-600 text-xs mt-1">Нажмите «Новый чат» чтобы найти собеседника</p>
             </div>
           ) : (
@@ -103,9 +114,18 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   onClick={() => onSelectRoom(room.id)}
-                  className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group ${
-                    isActive ? 'bg-zinc-800/70' : 'hover:bg-zinc-800/40'
+                  className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group overflow-hidden ${
+                    isActive ? 'text-white' : 'hover:bg-zinc-800/40'
                   }`}
+                  style={
+                    isActive
+                      ? {
+                          background:
+                            'radial-gradient(circle at 0% 50%, rgba(16,185,129,0.18) 0%, rgba(16,185,129,0.05) 50%, transparent 80%)',
+                          boxShadow: '0 0 16px rgba(16,185,129,0.10) inset',
+                        }
+                      : undefined
+                  }
                 >
                   {/* Active indicator — 3px vertical neon-green bar on the left */}
                   {isActive && (
@@ -141,8 +161,8 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
 
       {/* Bottom: User Profile — click opens Settings modal */}
       <div className="relative p-3">
-        {/* Blurred separator line */}
-        <div className="absolute -top-0 left-3 right-3 h-px bg-gradient-to-r from-transparent via-zinc-700/50 to-transparent backdrop-blur-sm" />
+        {/* Blurred neon separator line */}
+        <div className="absolute -top-0 left-3 right-3 mb-4 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent h-[1px]" />
 
         {currentProfile ? (
           <button
@@ -151,9 +171,28 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
             title="Открыть настройки профиля"
           >
             <div className="relative flex-shrink-0">
-              <Avatar avatar={(currentProfile as any).avatar_url} name={currentProfile.username} size="sm" />
+              {/* Neon ring wrapper — only for online users */}
+              {currentProfile.status === 'online' ? (
+                <div
+                  className="rounded-xl p-[2px]"
+                  style={{
+                    background:
+                      'linear-gradient(135deg, rgba(16,185,129,0.6), rgba(0,255,102,0.3))',
+                    boxShadow: '0 0 12px rgba(16,185,129,0.35)',
+                  }}
+                >
+                  <div className="rounded-[10px] overflow-hidden">
+                    <Avatar avatar={(currentProfile as any).avatar_url} name={currentProfile.username} size="sm" />
+                  </div>
+                </div>
+              ) : (
+                <Avatar avatar={(currentProfile as any).avatar_url} name={currentProfile.username} size="sm" />
+              )}
               {currentProfile.status === 'online' && (
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-neon-green border-2 border-zinc-900 animate-status-pulse" />
+                <div
+                  className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-neon-green border-2 border-zinc-900 animate-status-pulse"
+                  style={{ boxShadow: '0 0 8px rgba(0,255,102,0.7)' }}
+                />
               )}
               {currentProfile.status === 'away' && (
                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-yellow-400 border-2 border-zinc-900" />

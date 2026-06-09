@@ -381,9 +381,15 @@ export default function ChatPage() {
         <div className="absolute -bottom-40 -right-40 w-[520px] h-[520px] rounded-full bg-emerald-500/[0.05] blur-3xl" />
       </div>
 
-      <div className="relative z-10 flex flex-1 overflow-hidden p-3 md:p-4 gap-3 md:gap-4">
-        {/* Desktop Sidebar — glassmorphism card */}
-        <aside className="w-64 flex-shrink-0 hidden md:block rounded-2xl overflow-hidden border border-zinc-800/50 bg-zinc-900/60 backdrop-blur-md shadow-glass">
+      <div className="relative z-10 flex flex-1 overflow-hidden p-3 md:p-5 gap-4 md:gap-6">
+        {/* Desktop Sidebar — premium glassmorphism card */}
+        <aside
+          className="w-64 flex-shrink-0 hidden md:block rounded-2xl overflow-hidden border border-zinc-800/80 backdrop-blur-xl"
+          style={{
+            background: 'rgba(9, 9, 11, 0.4)',
+            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+          }}
+        >
           <Sidebar
             rooms={rooms}
             activeRoomId={activeRoomId}
@@ -395,8 +401,14 @@ export default function ChatPage() {
           />
         </aside>
 
-        {/* Chat Window — glassmorphism card */}
-        <main className="flex-1 min-w-0 rounded-2xl overflow-hidden border border-zinc-800/50 bg-zinc-900/60 backdrop-blur-md shadow-glass flex flex-col">
+        {/* Chat Window — premium glassmorphism card */}
+        <main
+          className="flex-1 min-w-0 rounded-2xl overflow-hidden border border-zinc-800/80 backdrop-blur-xl flex flex-col"
+          style={{
+            background: 'rgba(9, 9, 11, 0.4)',
+            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+          }}
+        >
           <ChatWindow
             room={activeRoom}
             messages={messages}

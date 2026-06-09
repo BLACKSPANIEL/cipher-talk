@@ -112,8 +112,8 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
     return (
       <div className="flex-1 flex items-center justify-center relative">
         <div className="text-center space-y-6 px-6 max-w-md mx-auto">
-          {/* Glowing shield — premium centerpiece */}
-          <div className="relative inline-flex items-center justify-center mx-auto">
+          {/* Glowing shield — premium centerpiece with floating animation */}
+          <div className="relative inline-flex items-center justify-center mx-auto animate-shield-float">
             <div
               className="w-24 h-24 rounded-full bg-neon-green/10 flex items-center justify-center"
               style={{ boxShadow: '0 0 60px rgba(0,255,102,0.35), 0 0 120px rgba(0,255,102,0.15)' }}
@@ -168,10 +168,14 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-neon-green/20 bg-neon-green/5">
-          <Lock className="w-3.5 h-3.5 text-neon-green" />
+        {/* E2EE badge — pulses neon on hover */}
+        <button
+          type="button"
+          className="group/e2ee flex items-center gap-2 px-3 py-1.5 rounded-full border border-neon-green/20 bg-neon-green/5 hover:animate-e2ee-pulse transition-all duration-300"
+        >
+          <Lock className="w-3.5 h-3.5 text-neon-green transition-transform group-hover/e2ee:scale-110" />
           <span className="text-xs font-medium text-neon-green">E2EE</span>
-        </div>
+        </button>
       </div>
 
       {/* Messages Area */}

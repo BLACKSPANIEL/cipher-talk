@@ -45,6 +45,8 @@ const config: Config = {
         'status-pulse': 'status-pulse 2s ease-in-out infinite',
         'typing-bounce': 'typing-bounce 1.4s ease-in-out infinite',
         'float': 'float 6s ease-in-out infinite',
+        'shield-float': 'shield-float 4s ease-in-out infinite',
+        'e2ee-pulse': 'e2ee-pulse 2.4s ease-in-out infinite',
       },
       keyframes: {
         'pulse-glow': {
@@ -78,6 +80,22 @@ const config: Config = {
         'float': {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-8px)' },
+        },
+        'shield-float': {
+          '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+          '50%': { transform: 'translateY(-12px) rotate(1.5deg)' },
+        },
+        'e2ee-pulse': {
+          '0%, 100%': {
+            borderColor: 'rgba(16, 185, 129, 0.2)',
+            color: 'rgb(16, 185, 129)',
+            boxShadow: '0 0 0 rgba(16,185,129,0)',
+          },
+          '50%': {
+            borderColor: 'rgba(16, 185, 129, 0.7)',
+            color: 'rgb(52, 211, 153)',
+            boxShadow: '0 0 18px rgba(16,185,129,0.45)',
+          },
         },
       },
       backdropBlur: {

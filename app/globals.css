@@ -95,9 +95,10 @@ section {
   box-shadow: 0 30px 80px rgba(0, 255, 102, 0.1);
 }
 
-/* Scrollbar */
+/* Cyberpunk Scrollbar — only 4px width, transparent track, neon hover */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -105,12 +106,28 @@ section {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 255, 102, 0.15);
-  border-radius: 3px;
+  background: #27272a; /* bg-zinc-800 */
+  border-radius: 9999px;
+  transition: background 0.25s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 255, 102, 0.3);
+  background: rgba(16, 185, 129, 0.4); /* bg-emerald-500/40 */
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.35);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #27272a transparent;
+}
+
+.hover-scroll-emerald *::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.4);
 }
 
 /* Typing indicator dots */
