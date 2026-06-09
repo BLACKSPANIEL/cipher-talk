@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Unlock, Loader2 } from 'lucide-react';
+import { Lock, Unlock, Loader2, Check, CheckCheck } from 'lucide-react';
 
 export interface Message {
   id: string;
@@ -14,6 +14,7 @@ export interface Message {
   isEncrypted?: boolean;
   originalText?: string;
   isE2ee?: boolean;
+  status?: 'sent' | 'delivered';
 }
 
 interface MessageBubbleProps {
@@ -32,9 +33,7 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
   }).format(new Date(message.timestamp));
 
   const handleToggleDecrypt = () => {
-    if (!isDecrypted && onDecrypt) {
-      onDecrypt(message.id);
-    }
+    if (!isDecrypted && onDecrypt) onDecrypt(message.id);
     setIsDecrypted((prev) => !prev);
   };
 
@@ -42,26 +41,34 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      initial={{ opacity: 0, y: 16, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
       className={`flex ${isMine ? 'justify-end' : 'justify-start'} mb-3`}
     >
       <div
         className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
           isMine
-            ? 'bg-neon-green text-black rounded-br-md'
-            : 'bg-gray-800/60 text-gray-100 rounded-bl-md border border-gray-700/30'
+            ? 'bg-chat-gradient text-black rounded-br-md shadow-neon-glow-sm'
+            : 'glass-panel text-gray-100 rounded-bl-md'
         }`}
       >
-        {/* Имя отправителя — показываем только для чужих сообщений */}
+        {/* Отображаем имя отправителя для чужих сообщений */}
         {!isMine && (
-          <p className="text-[10px] uppercase tracking-wider text-neon-green/70 mb-1 font-medium">
+          <p className="text-[10px] uppercase tracking-wider text-neon-green/70 mb-1 font-semibold">
             {message.senderName}
           </p>
         )}
 
-        {/* Encrypting indicator */}
+        {/* E2EE badge for my encrypted messages */}
+        {isMine && message.isE2ee && (
+          <div className="flex items-center gap-1 mb-1">
+            <Lock className="w-2.5 h-2.5 text-black/50" />
+            <span className="text-[9px] uppercase tracking-widest text-black/50 font-medium">E2EE</span>
+          </div>
+        )}
+
+        {/* Content */}
         {message.isEncrypted && isDecrypting ? (
           <div className="flex items-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin text-neon-green" />
@@ -80,11 +87,9 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
           </p>
         )}
 
-        <div
-          className={`flex items-center gap-2 mt-1.5 ${
-            isMine ? 'justify-end' : 'justify-start'
-          }`}
-        >
+        {/* Footer */}
+        <div className={`flex items-center gap-2 mt-1.5 ${isMine ? 'justify-end' : 'justify-start'}`}>
+          {/* Decrypt button */}
           {message.isEncrypted && !isDecrypting && (
             <button
               onClick={handleToggleDecrypt}
@@ -97,40 +102,28 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
               }`}
               title={isDecrypted ? 'Скрыть расшифровку' : 'Расшифровать'}
             >
-              {isDecrypted ? (
-                <>
-                  <Unlock className="w-3 h-3" />
-                  расшифровано
-                </>
-              ) : (
-                <>
-                  <Lock className="w-3 h-3" />
-                  расшифровать
-                </>
-              )}
+              {isDecrypted ? <><Unlock className="w-3 h-3" />расшифровано</> : <><Lock className="w-3 h-3" />расшифровать</>}
             </button>
           )}
 
+          {/* Cipher label */}
           {message.cipher && message.cipher !== 'none' && !message.isEncrypted && (
-            <span
-              className={`text-[10px] uppercase tracking-wider ${
-                isMine ? 'text-black/60' : 'text-gray-500'
-              }`}
-            >
-              {message.cipher === 'caesar'
-                ? 'Цезарь'
-                : message.cipher === 'base64'
-                ? 'Base64'
-                : ''}
+            <span className={`text-[10px] uppercase tracking-wider ${isMine ? 'text-black/60' : 'text-gray-500'}`}>
+              {message.cipher === 'caesar' ? 'Цезарь' : message.cipher === 'base64' ? 'Base64' : ''}
             </span>
           )}
-          <span
-            className={`text-[10px] ${
-              isMine ? 'text-black/50' : 'text-gray-500'
-            }`}
-          >
+
+          {/* Timestamp */}
+          <span className={`text-[10px] ${isMine ? 'text-black/50' : 'text-gray-500'}`}>
             {formattedTime}
           </span>
+
+          {/* Message status icons */}
+          {isMine && message.status && (
+            <span className={`text-[10px] ${message.status === 'delivered' ? 'text-blue-400' : 'text-black/40'}`}>
+              {message.status === 'sent' ? <Check className="w-3 h-3" /> : <CheckCheck className="w-3 h-3" />}
+            </span>
+          )}
         </div>
       </div>
     </motion.div>
