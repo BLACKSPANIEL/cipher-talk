@@ -446,14 +446,14 @@ export default function ChatPage() {
         <div className="absolute -bottom-40 -right-40 w-[520px] h-[520px] rounded-full bg-emerald-500/[0.05] blur-3xl" />
       </div>
 
-      <div className="relative z-10 flex flex-1 overflow-hidden p-3 md:p-5 gap-4 md:gap-6">
+      <div className="relative z-10 flex flex-1 overflow-hidden p-0 md:p-5 gap-0 md:gap-6">
         <aside
-          className={`w-64 flex-shrink-0 rounded-2xl overflow-hidden border border-zinc-800/80 backdrop-blur-xl ${
+          className={`w-full md:w-64 flex-shrink-0 md:rounded-2xl overflow-hidden border-0 md:border border-zinc-800/80 backdrop-blur-xl ${
             mobileShowChat ? 'hidden md:block' : 'block'
           }`}
           style={{
-            background: 'rgba(9, 9, 11, 0.4)',
-            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+            background: 'rgba(9, 9, 11, 0.5)',
+            boxShadow: 'none',
           }}
         >
           <Sidebar
@@ -468,12 +468,12 @@ export default function ChatPage() {
         </aside>
 
         <main
-          className={`flex-1 min-w-0 rounded-2xl overflow-hidden border border-zinc-800/80 backdrop-blur-xl flex flex-col ${
+          className={`flex-1 min-w-0 md:rounded-2xl overflow-hidden border-0 md:border border-zinc-800/80 backdrop-blur-xl flex flex-col ${
             mobileShowChat ? 'block' : 'hidden md:flex'
           }`}
           style={{
             background: 'rgba(9, 9, 11, 0.4)',
-            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+            boxShadow: 'none',
           }}
         >
           <ChatWindow
