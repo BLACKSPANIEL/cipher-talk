@@ -5,13 +5,15 @@ import { Lock, Unlock, Loader2 } from 'lucide-react';
 export interface Message {
   id: string;
   text: string;
+  senderId: string;
+  senderName: string;
   sender: 'me' | 'other';
   timestamp: Date;
   cipher?: string;
   roomId: string;
   isEncrypted?: boolean;
   originalText?: string;
-  isE2ee?: boolean; // Флаг End-to-End Encryption
+  isE2ee?: boolean;
 }
 
 interface MessageBubbleProps {
@@ -52,6 +54,13 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
             : 'bg-gray-800/60 text-gray-100 rounded-bl-md border border-gray-700/30'
         }`}
       >
+        {/* Имя отправителя — показываем только для чужих сообщений */}
+        {!isMine && (
+          <p className="text-[10px] uppercase tracking-wider text-neon-green/70 mb-1 font-medium">
+            {message.senderName}
+          </p>
+        )}
+
         {/* Encrypting indicator */}
         {message.isEncrypted && isDecrypting ? (
           <div className="flex items-center gap-2">
@@ -76,8 +85,6 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
             isMine ? 'justify-end' : 'justify-start'
           }`}
         >
-          {/* Decrypt button for encrypted messages */}
-
           {message.isEncrypted && !isDecrypting && (
             <button
               onClick={handleToggleDecrypt}

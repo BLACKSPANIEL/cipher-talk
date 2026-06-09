@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Shield, LogOut, Settings, MessageSquare, User, Hash } from 'lucide-react';
+import { Plus, Shield, LogOut, Settings, MessageSquare, User, Hash, Wifi, WifiOff, Clock, Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import type { Profile } from '@/lib/supabaseClient';
+import { useRouter } from 'next/navigation';
 
 export interface ChatRoom {
   id: string;
@@ -19,7 +22,42 @@ interface SidebarProps {
   onCreateRoom: () => void;
 }
 
+const STATUS_ICONS: Record<Profile['status'], { icon: React.ReactNode; color: string }> = {
+  online: { icon: <Wifi className="w-3 h-3" />, color: 'bg-neon-green' },
+  away: { icon: <Clock className="w-3 h-3" />, color: 'bg-yellow-400' },
+  offline: { icon: <WifiOff className="w-3 h-3" />, color: 'bg-gray-500' },
+};
+
 export function Sidebar({ rooms, activeRoomId, onSelectRoom, onCreateRoom }: SidebarProps) {
+  const router = useRouter();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setIsLoadingProfile(false);
+        return;
+      }
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      if (data) setProfile(data);
+      setIsLoadingProfile(false);
+    };
+    loadProfile();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
+
+  const statusDisplay = profile ? STATUS_ICONS[profile.status] : STATUS_ICONS.offline;
+
   return (
     <div className="flex flex-col h-full bg-surface-darker/90 backdrop-blur border-r border-neon-green/10">
       {/* Logo + Header */}
@@ -92,20 +130,70 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onCreateRoom }: Sid
         </AnimatePresence>
       </div>
 
-      {/* Bottom: Profile / Settings */}
+      {/* Bottom: User Profile Card */}
       <div className="p-3 border-t border-neon-green/10">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5 transition cursor-pointer">
-          <div className="w-8 h-8 rounded-full bg-neon-green/20 flex items-center justify-center">
-            <User className="w-4 h-4 text-neon-green" />
+        {isLoadingProfile ? (
+          <div className="flex items-center justify-center py-3">
+            <Loader2 className="w-5 h-5 animate-spin text-neon-green" />
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">Пользователь</p>
-            <p className="text-xs text-gray-500">Ключ E2EE активен</p>
+        ) : profile ? (
+          <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-white/5">
+            {/* Avatar with status dot */}
+            <div className="relative flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-neon-green/20 flex items-center justify-center">
+                <span className="text-sm font-bold text-neon-green">
+                  {profile.username.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              {/* Status dot */}
+              <div
+                className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ${statusDisplay.color} border-2 border-surface-darker flex items-center justify-center`}
+                title={profile.status}
+              >
+                {statusDisplay.icon}
+              </div>
+            </div>
+
+            {/* Username + status text */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">
+                {profile.username}
+              </p>
+              <p className={`text-xs capitalize ${
+                profile.status === 'online' ? 'text-neon-green' :
+                profile.status === 'away' ? 'text-yellow-400' : 'text-gray-500'
+              }`}>
+                {profile.status}
+              </p>
+            </div>
+
+            {/* Settings button */}
+            <button
+              onClick={() => router.push('/settings')}
+              className="text-gray-500 hover:text-neon-green transition p-1"
+              title="Настройки"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+
+            {/* Logout button */}
+            <button
+              onClick={handleLogout}
+              className="text-gray-500 hover:text-red-400 transition p-1"
+              title="Выйти"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
-          <button className="text-gray-500 hover:text-neon-green transition">
-            <Settings className="w-4 h-4" />
+        ) : (
+          <button
+            onClick={() => router.push('/login')}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-neon-green/30 text-neon-green hover:bg-neon-green/10 transition-all text-sm"
+          >
+            <User className="w-4 h-4" />
+            <span>Войти</span>
           </button>
-        </div>
+        )}
       </div>
     </div>
   );

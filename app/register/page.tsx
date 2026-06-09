@@ -9,6 +9,7 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,8 +21,13 @@ export default function RegisterPage() {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+    if (!email.trim() || !username.trim() || !password.trim() || !confirmPassword.trim()) {
       setErrorMessage('Заполните все поля');
+      return;
+    }
+
+    if (username.trim().length < 2) {
+      setErrorMessage('Имя пользователя должно быть не менее 2 символов');
       return;
     }
 
@@ -40,6 +46,11 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
+      options: {
+        data: {
+          username: username.trim(),
+        },
+      },
     });
 
     setIsLoading(false);
@@ -52,7 +63,6 @@ export default function RegisterPage() {
       return;
     }
 
-    // Успешная регистрация
     setIsSuccess(true);
   };
 
@@ -127,6 +137,22 @@ export default function RegisterPage() {
               )}
 
               <form onSubmit={handleRegister} className="space-y-5">
+                {/* Username */}
+                <div>
+                  <label htmlFor="reg-username" className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">
+                    Имя пользователя
+                  </label>
+                  <input
+                    id="reg-username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="cyber_user"
+                    autoComplete="username"
+                    className="w-full bg-black/40 border border-neon-green/20 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-neon-green/50 transition text-sm"
+                  />
+                </div>
+
                 <div>
                   <label htmlFor="reg-email" className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">
                     Email

@@ -1,18 +1,25 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Эти переменные должны быть определены в .env.local
-// Создайте проект в Supabase и скопируйте URL и Anon Key
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Тип сообщения, который соответствует структуре таблицы Supabase
+// Тип сообщения — соответствует таблице messages
 export interface DbMessage {
-  id: string;          // uuid — генерируется базой данных
-  created_at: string;  // timestamp — генерируется базой данных
-  room_id: string;     // text — идентификатор комнаты
-  sender: string;      // text — 'me' или 'other'
-  text: string;        // text — содержимое сообщения (может быть зашифрованным)
-  cipher_type: string; // text — 'none' | 'caesar' | 'base64'
+  id: string;
+  created_at: string;
+  room_id: string;
+  sender_id: string;   // UUID пользователя из auth.users
+  text: string;
+  cipher_type: string;
+}
+
+// Тип профиля — соответствует таблице profiles
+export interface Profile {
+  id: string;           // совпадает с auth.users.id
+  username: string;
+  status: 'online' | 'offline' | 'away';
+  created_at: string;
 }

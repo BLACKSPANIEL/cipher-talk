@@ -7,8 +7,8 @@ import { ChatWindow } from '@/components/chat/ChatWindow';
 import { type Message } from '@/components/chat/MessageBubble';
 import { type CipherType, encryptText, caesarDecrypt, base64Decode } from '@/lib/ciphers';
 import { supabase } from '@/lib/supabaseClient';
-import type { DbMessage } from '@/lib/supabaseClient';
-import { encryptMessage, decryptMessage, isEncrypted } from '@/lib/cryptoUtils';
+import type { DbMessage, Profile } from '@/lib/supabaseClient';
+import { encryptMessage, decryptMessage } from '@/lib/cryptoUtils';
 import { ArrowLeft } from 'lucide-react';
 
 let roomCounter = 3;
@@ -17,29 +17,79 @@ function generateId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/**
- * Расшифровывает текст с учётом E2EE (AES) и видимого шифра (caesar/base64).
- * @returns расшифрованный текст, либо null если расшифровка не удалась
- */
+/** Кэш профилей: sender_id → username */
+const profilesCache = new Map<string, string>();
+
+/** Загружает username по sender_id (с кэшированием) */
+async function fetchUsername(senderId: string): Promise<string> {
+  if (profilesCache.has(senderId)) return profilesCache.get(senderId)!;
+  try {
+    const { data } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', senderId)
+      .single();
+    const name = data?.username || 'Unknown';
+    profilesCache.set(senderId, name);
+    return name;
+  } catch {
+    return 'Unknown';
+  }
+}
+
+/** Загружает username для всего массива сообщений одним запросом */
+async function enrichMessagesWithUsernames(
+  rows: DbMessage[],
+  currentUserId: string
+): Promise<Message[]> {
+  // Собираем все уникальные sender_id
+  const senderIds = [...new Set(rows.map((r) => r.sender_id))];
+
+  // Загружаем недостающие профили
+  const missingIds = senderIds.filter((id) => !profilesCache.has(id));
+  if (missingIds.length > 0) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, username')
+      .in('id', missingIds);
+    if (data) {
+      data.forEach((p) => profilesCache.set(p.id, p.username));
+    }
+  }
+
+  return rows.map((row) => {
+    const username = profilesCache.get(row.sender_id) || 'Unknown';
+    const { decrypted, isE2ee } = decryptDbText(row.text, row.cipher_type);
+    const hasVisibleCipher = row.cipher_type === 'caesar' || row.cipher_type === 'base64';
+
+    return {
+      id: row.id,
+      text: decrypted,
+      senderId: row.sender_id,
+      senderName: username,
+      sender: row.sender_id === currentUserId ? 'me' : 'other',
+      timestamp: new Date(row.created_at),
+      roomId: row.room_id,
+      cipher: hasVisibleCipher ? row.cipher_type : undefined,
+      isEncrypted: hasVisibleCipher,
+      originalText: hasVisibleCipher ? decrypted : undefined,
+      isE2ee,
+    };
+  });
+}
+
 function decryptDbText(text: string, cipherType: string): { decrypted: string; isE2ee: boolean } {
-  // 1. Сначала расшифровываем AES (E2EE)
   const aesDecrypted = decryptMessage(text);
+  // Проверяем, был ли E2EE: исходный текст не равен расшифрованному
+  const wasAesEncrypted = aesDecrypted !== text && aesDecrypted.length > 0;
 
-  // Проверяем, был ли это E2EE или обычный текст
-  const wasAesEncrypted = isEncrypted(text) || aesDecrypted !== text;
-
-  // 2. Если шифр caesar/base64 — текст остаётся зашифрованным для пользователя
-  //    (он расшифрует его по кнопке в UI)
   if (cipherType === 'caesar' || cipherType === 'base64') {
     return { decrypted: aesDecrypted, isE2ee: wasAesEncrypted };
   }
 
-  return { decrypted: aesDecrypted, isE2ee: false };
+  return { decrypted: aesDecrypted, isE2ee: wasAesEncrypted };
 }
 
-/**
- * Расшифровывает caesar/base64 поверх E2EE (для кнопки расшифровки)
- */
 function decryptVisibleLayer(text: string, cipherType: string): string {
   switch (cipherType) {
     case 'caesar':
@@ -49,26 +99,6 @@ function decryptVisibleLayer(text: string, cipherType: string): string {
     default:
       return text;
   }
-}
-
-// Превращает строку из БД в объект Message для компонентов
-function dbMessageToClient(row: DbMessage): Message {
-  const { decrypted, isE2ee } = decryptDbText(row.text, row.cipher_type);
-
-  const hasVisibleCipher = row.cipher_type === 'caesar' || row.cipher_type === 'base64';
-  const originalText = hasVisibleCipher ? decrypted : undefined;
-
-  return {
-    id: row.id,
-    text: decrypted,
-    sender: row.sender as 'me' | 'other',
-    timestamp: new Date(row.created_at),
-    roomId: row.room_id,
-    cipher: hasVisibleCipher ? row.cipher_type : row.cipher_type === 'aes' ? undefined : row.cipher_type,
-    isEncrypted: hasVisibleCipher,
-    originalText,
-    isE2ee: isE2ee || row.cipher_type === 'aes',
-  };
 }
 
 interface ChatWithMessages extends ChatRoom {
@@ -89,14 +119,27 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [decryptingMessageId, setDecryptingMessageId] = useState<string | null>(null);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const subscriptionRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const activeRoom = rooms.find((r) => r.id === activeRoomId) ?? null;
 
-  // ── 1. Загрузка истории сообщений из Supabase при смене комнаты ──
+  // ── 0. Получаем текущего пользователя ──
   useEffect(() => {
-    if (!activeRoomId) return;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setCurrentUserId(user.id);
+      } else {
+        // Если не авторизован — редирект на логин
+        router.push('/login');
+      }
+    });
+  }, [router]);
+
+  // ── 1. Загрузка истории сообщений ──
+  useEffect(() => {
+    if (!activeRoomId || !currentUserId) return;
 
     let cancelled = false;
     setIsLoadingHistory(true);
@@ -106,14 +149,15 @@ export default function ChatPage() {
       .select('*')
       .eq('room_id', activeRoomId)
       .order('created_at', { ascending: true })
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (cancelled) return;
 
         if (error) {
           console.error('Ошибка загрузки истории:', error);
           setMessages([]);
         } else if (data) {
-          setMessages(data.map(dbMessageToClient));
+          const enriched = await enrichMessagesWithUsernames(data, currentUserId);
+          setMessages(enriched);
         }
         setIsLoadingHistory(false);
       });
@@ -121,16 +165,16 @@ export default function ChatPage() {
     return () => {
       cancelled = true;
     };
-  }, [activeRoomId]);
+  }, [activeRoomId, currentUserId]);
 
-  // ── 2. Realtime-подписка: новые сообщения приходят мгновенно ──
+  // ── 2. Realtime-подписка ──
   useEffect(() => {
     if (subscriptionRef.current) {
       supabase.removeChannel(subscriptionRef.current);
       subscriptionRef.current = null;
     }
 
-    if (!activeRoomId) return;
+    if (!activeRoomId || !currentUserId) return;
 
     const channel = supabase
       .channel(`room-${activeRoomId}`)
@@ -142,8 +186,13 @@ export default function ChatPage() {
           table: 'messages',
           filter: `room_id=eq.${activeRoomId}`,
         },
-        (payload) => {
-          const newMessage = dbMessageToClient(payload.new);
+        async (payload) => {
+          const newRows = [payload.new];
+          const enriched = await enrichMessagesWithUsernames(newRows, currentUserId);
+          const newMessage = enriched[0];
+
+          if (!newMessage) return;
+
           setMessages((prev) => {
             if (prev.some((m) => m.id === newMessage.id)) return prev;
             return [...prev, newMessage];
@@ -168,9 +217,9 @@ export default function ChatPage() {
         subscriptionRef.current = null;
       }
     };
-  }, [activeRoomId]);
+  }, [activeRoomId, currentUserId]);
 
-  // ── 3. Создание новой комнаты ──
+  // ── 3. Создание комнаты ──
   const handleCreateRoom = useCallback(() => {
     roomCounter++;
     const newRoom: ChatWithMessages = {
@@ -182,20 +231,19 @@ export default function ChatPage() {
     setActiveRoomId(newRoom.id);
   }, []);
 
-  // ── 4. Отправка сообщения: шифрование → E2EE (AES) → Supabase ──
+  // ── 4. Отправка сообщения ──
   const handleSendMessage = useCallback(
     (text: string, cipher: CipherType) => {
-      if (!activeRoomId) return;
+      if (!activeRoomId || !currentUserId) return;
 
-      // Шаг 1: если выбран видимый шифр (caesar/base64) — применяем его
+      // Шаг 1: видимый шифр
       const visibleCipherText = cipher !== 'none' ? encryptText(text, cipher) : text;
-
-      // Шаг 2: шифруем E2EE (AES-256) — в БД летит ТОЛЬКО зашифрованный текст
+      // Шаг 2: E2EE
       const e2eeCipherText = encryptMessage(visibleCipherText);
 
       const newDbMessage: Omit<DbMessage, 'id' | 'created_at'> = {
         room_id: activeRoomId,
-        sender: 'me',
+        sender_id: currentUserId,    // ← реальный UUID из auth
         text: e2eeCipherText,
         cipher_type: cipher,
       };
@@ -210,10 +258,10 @@ export default function ChatPage() {
           }
         });
     },
-    [activeRoomId]
+    [activeRoomId, currentUserId]
   );
 
-  // ── 5. Расшифровка видимого слоя (caesar/base64) по кнопке ──
+  // ── 5. Расшифровка видимого слоя ──
   const handleDecryptMessage = useCallback(
     (messageId: string) => {
       setDecryptingMessageId(messageId);
