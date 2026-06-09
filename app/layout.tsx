@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Space_Grotesk } from 'next/font/google';
+import { LanguageProvider } from '@/lib/i18n';
 import './globals.css';
 
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
@@ -34,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru" suppressHydrationWarning>
       <body className={`${spaceGrotesk.variable} font-sans text-white`}>
-        {children}
+        <LanguageProvider>{children}</LanguageProvider>
       </body>
     </html>
   );

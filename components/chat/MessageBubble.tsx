@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Unlock, Loader2, Check, CheckCheck } from 'lucide-react';
+import { Lock, Unlock, Loader2, AlertCircle, Check, CheckCheck } from 'lucide-react';
 
 export interface Message {
   id: string;
@@ -15,7 +15,8 @@ export interface Message {
   isEncrypted?: boolean;
   originalText?: string;
   isE2ee?: boolean;
-  status?: 'sent' | 'delivered' | 'read';
+  /** Optimistic status: 'sending' while request is in flight, 'sent' after server ack, 'error' if it failed. */
+  status?: 'sending' | 'sent' | 'delivered' | 'read' | 'error';
 }
 
 interface MessageBubbleProps {
@@ -50,8 +51,14 @@ function Avatar({ avatar, name }: { avatar?: string | null; name: string }) {
   );
 }
 
-function StatusIcon({ status }: { status?: 'sent' | 'delivered' | 'read' }) {
+function StatusIcon({ status }: { status?: Message['status'] }) {
   if (!status) return null;
+  if (status === 'sending') {
+    return <Loader2 className="w-3.5 h-3.5 text-zinc-400 animate-spin" />;
+  }
+  if (status === 'error') {
+    return <AlertCircle className="w-3.5 h-3.5 text-red-400" />;
+  }
   if (status === 'read') {
     return <CheckCheck className="w-3.5 h-3.5 text-emerald-400" />;
   }
@@ -64,6 +71,8 @@ function StatusIcon({ status }: { status?: 'sent' | 'delivered' | 'read' }) {
 export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbleProps) {
   const [isDecrypted, setIsDecrypted] = useState(false);
   const isMine = message.sender === 'me';
+  const isOptimistic = message.status === 'sending';
+  const isError = message.status === 'error';
 
   const formattedTime = new Intl.DateTimeFormat('ru-RU', {
     hour: '2-digit',
@@ -82,28 +91,28 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
       initial={{ opacity: 0, y: 12, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className={`flex items-end gap-2 mb-2 ${isMine ? 'justify-end' : 'justify-start'}`}
+      className={`flex items-end gap-2 mb-2 ${isMine ? 'justify-end' : 'justify-start'} ${
+        isError ? 'opacity-70' : ''
+      }`}
     >
-      {/* Other's avatar (left side) */}
       {!isMine && <Avatar avatar={message.senderAvatar} name={message.senderName} />}
 
       <div className={`flex flex-col max-w-[75%] ${isMine ? 'items-end' : 'items-start'}`}>
-        {/* Sender name for other's messages */}
         {!isMine && (
           <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1 px-1 font-semibold">
             {message.senderName}
           </p>
         )}
 
-        {/* Bubble */}
         <div
           className={`relative rounded-2xl px-3.5 py-2 backdrop-blur-sm ${
             isMine
-              ? 'bg-emerald-950/40 border border-emerald-800/30 text-emerald-50 rounded-br-md shadow-[0_4px_20px_rgba(16,185,129,0.08)]'
+              ? `bg-emerald-950/40 border border-emerald-800/30 text-emerald-50 rounded-br-md shadow-[0_4px_20px_rgba(16,185,129,0.08)] ${
+                  isError ? 'border-red-500/50' : ''
+                }`
               : 'bg-zinc-800/60 border border-zinc-700/40 text-zinc-100 rounded-bl-md'
           }`}
         >
-          {/* E2EE badge for my encrypted messages */}
           {isMine && message.isE2ee && (
             <div className="flex items-center gap-1 mb-1">
               <Lock className="w-2.5 h-2.5 text-emerald-400/70" />
@@ -111,7 +120,6 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
             </div>
           )}
 
-          {/* Content */}
           {message.isEncrypted && isDecrypting ? (
             <div className="flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
@@ -130,9 +138,7 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
             </p>
           )}
 
-          {/* Footer — timestamp + status for mine / timestamp + decrypt for other */}
           <div className={`flex items-center gap-1.5 mt-1 ${isMine ? 'justify-end' : 'justify-start'}`}>
-            {/* Decrypt button for other */}
             {message.isEncrypted && !isDecrypting && !isMine && (
               <button
                 onClick={handleToggleDecrypt}
@@ -143,7 +149,6 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
               </button>
             )}
 
-            {/* Cipher label */}
             {message.cipher && message.cipher !== 'none' && !message.isEncrypted && (
               <span className="text-[10px] uppercase tracking-wider text-zinc-500">
                 {message.cipher === 'caesar' ? 'Цезарь' : message.cipher === 'base64' ? 'Base64' : ''}
@@ -154,14 +159,15 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
               {formattedTime}
             </span>
 
-            {/* Status icon for my messages (sent / delivered / read) */}
             {isMine && <StatusIcon status={message.status} />}
           </div>
         </div>
       </div>
 
-      {/* My avatar (right side) */}
       {isMine && <Avatar avatar={message.senderAvatar} name={message.senderName} />}
+
+      {/* Unused ref to silence isOptimistic warning when only used in dev */}
+      {isOptimistic && null}
     </motion.div>
   );
 }

@@ -32,7 +32,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Защищённые роуты — требуют авторизации
-  const protectedRoutes = ['/chat', '/settings'];
+  const protectedRoutes = ['/chat', '/settings', '/admin'];
   const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));
 
   if (isProtected && !user) {
@@ -44,5 +44,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/chat/:path*', '/settings/:path*'],
+  matcher: ['/chat/:path*', '/settings/:path*', '/admin/:path*'],
 };

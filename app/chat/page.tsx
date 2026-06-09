@@ -17,7 +17,6 @@ const profilesCache = new Map<string, string>();
 /** Кэш аватаров: user_id → avatar_url */
 const avatarsCache = new Map<string, string | null>();
 
-/** Загружает username и avatar_url для всего массива сообщений */
 async function enrichMessagesWithProfiles(
   rows: DbMessage[],
   currentUserId: string
@@ -76,9 +75,7 @@ interface ChatWithProfile extends ChatRoom {
   otherUserAvatar?: string | null;
 }
 
-/** Загружает все комнаты текущего пользователя + других участников */
 async function loadRooms(currentUserId: string): Promise<ChatWithProfile[]> {
-  // Получаем все комнаты, где пользователь — участник
   const { data: members, error: membersErr } = await supabase
     .from('room_members')
     .select('room_id')
@@ -91,7 +88,6 @@ async function loadRooms(currentUserId: string): Promise<ChatWithProfile[]> {
 
   const roomIds = members.map((m) => m.room_id);
 
-  // Получаем сами комнаты
   const { data: rooms, error: roomsErr } = await supabase
     .from('rooms')
     .select('id, name, created_at, is_encrypted')
@@ -103,7 +99,6 @@ async function loadRooms(currentUserId: string): Promise<ChatWithProfile[]> {
   }
   if (!rooms) return [];
 
-  // Для каждой комнаты получаем других участников
   const result: ChatWithProfile[] = [];
   for (const room of rooms) {
     const { data: otherMembers } = await supabase
@@ -118,10 +113,11 @@ async function loadRooms(currentUserId: string): Promise<ChatWithProfile[]> {
     let displayName = room.name || 'Чат';
 
     if (otherMembers && otherMembers.length > 0) {
-      otherUserId = otherMembers[0].user_id ?? undefined;
-      if (otherUserId) {
-        const cachedName = profilesCache.get(otherUserId);
-        const cachedAvatar = avatarsCache.get(otherUserId);
+      const candidateId = otherMembers[0].user_id;
+      if (candidateId) {
+        otherUserId = candidateId;
+        const cachedName = profilesCache.get(candidateId);
+        const cachedAvatar = avatarsCache.get(candidateId);
         if (cachedName) {
           displayName = cachedName;
           otherUserAvatar = cachedAvatar ?? null;
@@ -129,13 +125,13 @@ async function loadRooms(currentUserId: string): Promise<ChatWithProfile[]> {
           const { data: profile } = await supabase
             .from('profiles')
             .select('username, avatar_url')
-            .eq('id', otherUserId)
+            .eq('id', candidateId)
             .single();
           if (profile) {
             displayName = profile.username;
             otherUserAvatar = (profile as any).avatar_url || null;
-            profilesCache.set(otherUserId, profile.username);
-            avatarsCache.set(otherUserId, otherUserAvatar);
+            profilesCache.set(candidateId, profile.username);
+            avatarsCache.set(candidateId, otherUserAvatar);
           }
         }
       }
@@ -152,9 +148,7 @@ async function loadRooms(currentUserId: string): Promise<ChatWithProfile[]> {
   return result;
 }
 
-/** Находит существующую комнату с этим пользователем или создаёт новую */
 async function findOrCreateRoom(currentUserId: string, otherUserId: string): Promise<string | null> {
-  // Найти комнату, где есть оба пользователя
   const { data: myRooms } = await supabase
     .from('room_members')
     .select('room_id')
@@ -172,7 +166,6 @@ async function findOrCreateRoom(currentUserId: string, otherUserId: string): Pro
     if (sharedRoom) return sharedRoom.room_id;
   }
 
-  // Создаём новую комнату
   const { data: newRoom, error: roomErr } = await supabase
     .from('rooms')
     .insert({ name: '', is_encrypted: true })
@@ -182,7 +175,6 @@ async function findOrCreateRoom(currentUserId: string, otherUserId: string): Pro
     console.error('createRoom:', roomErr);
     return null;
   }
-  // Добавляем обоих участников
   const { error: membersErr } = await supabase
     .from('room_members')
     .insert([
@@ -214,12 +206,11 @@ export default function ChatPage() {
 
   const activeRoom = rooms.find((r) => r.id === activeRoomId) ?? null;
 
-  // Auth guard
+  // Auth guard + load profile + rooms
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (user) {
         setCurrentUserId(user.id);
-        // Загружаем профиль
         const { data: prof } = await supabase
           .from('profiles')
           .select('*')
@@ -230,7 +221,6 @@ export default function ChatPage() {
           profilesCache.set(prof.id, prof.username);
           avatarsCache.set(prof.id, (prof as any).avatar_url || null);
         }
-        // Загружаем комнаты
         const loaded = await loadRooms(user.id);
         setRooms(loaded);
         if (loaded.length > 0) setActiveRoomId(loaded[0].id);
@@ -282,7 +272,21 @@ export default function ChatPage() {
           newMessage.status = 'delivered';
 
           setMessages((prev) => {
+            // Skip if we already have this id (echoed by our optimistic insert)
             if (prev.some((m) => m.id === newMessage.id)) return prev;
+            // If the server message has the same content + sender as a recent optimistic, replace it
+            const optimisticIdx = prev.findIndex(
+              (m) =>
+                m.sender === 'me' &&
+                m.status === 'sending' &&
+                m.text === newMessage.text &&
+                m.roomId === newMessage.roomId
+            );
+            if (optimisticIdx !== -1) {
+              const next = [...prev];
+              next[optimisticIdx] = newMessage;
+              return next;
+            }
             return [...prev, newMessage];
           });
 
@@ -320,8 +324,6 @@ export default function ChatPage() {
       if (!currentUserId) return;
       const roomId = await findOrCreateRoom(currentUserId, otherUser.id);
       if (!roomId) return;
-
-      // Перезагружаем список комнат
       const loaded = await loadRooms(currentUserId);
       setRooms(loaded);
       setActiveRoomId(roomId);
@@ -329,12 +331,43 @@ export default function ChatPage() {
     [currentUserId]
   );
 
+  /**
+   * Optimistic send: instantly add the message with status='sending' and a temp UUID,
+   * clear the input, then fire-and-forget the Supabase request. On success we mark 'sent'
+   * with the server id; on error we mark 'error'. The realtime subscription will replace
+   * the optimistic record with the real one when it echoes back.
+   */
   const handleSendMessage = useCallback(
-    (text: string, cipher: CipherType) => {
+    async (text: string, cipher: CipherType) => {
       if (!activeRoomId || !currentUserId) return;
 
       const visibleCipherText = cipher !== 'none' ? encryptText(text, cipher) : text;
       const e2eeCipherText = encryptMessage(visibleCipherText);
+
+      const tempId = (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function')
+        ? globalThis.crypto.randomUUID()
+        : `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+      const optimisticMessage: Message = {
+        id: tempId,
+        text: visibleCipherText,
+        senderId: currentUserId,
+        senderName: currentProfile?.username || 'Я',
+        sender: 'me',
+        senderAvatar: (currentProfile as any)?.avatar_url || null,
+        timestamp: new Date(),
+        roomId: activeRoomId,
+        cipher: cipher !== 'none' ? cipher : undefined,
+        isEncrypted: cipher !== 'none',
+        originalText: visibleCipherText,
+        isE2ee: true,
+        status: 'sending',
+      };
+
+      setMessages((prev) => [...prev, optimisticMessage]);
+      setRooms((prev) =>
+        prev.map((r) => r.id === activeRoomId ? { ...r, lastMessage: visibleCipherText } : r)
+      );
 
       const newDbMessage: Omit<DbMessage, 'id' | 'created_at'> = {
         room_id: activeRoomId,
@@ -343,11 +376,32 @@ export default function ChatPage() {
         cipher_type: cipher,
       };
 
-      supabase.from('messages').insert(newDbMessage).select('id').then(({ error }) => {
-        if (error) console.error('Ошибка отправки:', error);
-      });
+      const { data, error } = await supabase
+        .from('messages')
+        .insert(newDbMessage)
+        .select('id')
+        .single();
+
+      if (error) {
+        console.error('Ошибка отправки:', error);
+        setMessages((prev) =>
+          prev.map((m) => (m.id === tempId ? { ...m, status: 'error' } : m))
+        );
+        return;
+      }
+
+      // Replace temp id with server id; mark as 'sent'. Realtime may also echo, but we dedupe.
+      if (data?.id) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === tempId ? { ...m, id: data.id, status: 'sent' } : m))
+        );
+      } else {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === tempId ? { ...m, status: 'sent' } : m))
+        );
+      }
     },
-    [activeRoomId, currentUserId]
+    [activeRoomId, currentUserId, currentProfile]
   );
 
   const handleDecryptMessage = useCallback((messageId: string) => {
@@ -375,14 +429,12 @@ export default function ChatPage() {
 
   return (
     <div className="h-screen flex flex-col bg-[#0B0F12] text-white relative overflow-hidden">
-      {/* Decorative ambient glow on the deep graphite background */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 -left-32 w-[420px] h-[420px] rounded-full bg-neon-green/[0.06] blur-3xl" />
         <div className="absolute -bottom-40 -right-40 w-[520px] h-[520px] rounded-full bg-emerald-500/[0.05] blur-3xl" />
       </div>
 
       <div className="relative z-10 flex flex-1 overflow-hidden p-3 md:p-5 gap-4 md:gap-6">
-        {/* Desktop Sidebar — premium glassmorphism card */}
         <aside
           className="w-64 flex-shrink-0 hidden md:block rounded-2xl overflow-hidden border border-zinc-800/80 backdrop-blur-xl"
           style={{
@@ -401,7 +453,6 @@ export default function ChatPage() {
           />
         </aside>
 
-        {/* Chat Window — premium glassmorphism card */}
         <main
           className="flex-1 min-w-0 rounded-2xl overflow-hidden border border-zinc-800/80 backdrop-blur-xl flex flex-col"
           style={{

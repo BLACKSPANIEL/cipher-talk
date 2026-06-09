@@ -5,6 +5,8 @@ import {
   Plus, Shield, MessageSquare, User, Loader2
 } from 'lucide-react';
 import { supabase, type Profile } from '@/lib/supabaseClient';
+import { TierBadge } from './TierBadge';
+import { useLanguage } from '@/lib/i18n';
 
 export interface ChatRoom {
   id: string;
@@ -56,6 +58,7 @@ function Avatar({ avatar, name, size = 'md' }: { avatar?: string | null; name: s
 }
 
 export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpenSettings, currentProfile, isLoadingRooms }: SidebarProps) {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col h-full bg-transparent">
       {/* Logo — decorative */}
@@ -64,7 +67,7 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
           <Shield className="w-5 h-5 text-neon-green drop-shadow-[0_0_8px_rgba(0,255,102,0.5)]" />
           <span className="font-bold text-white text-lg tracking-wide">C I P H E R</span>
         </div>
-        <p className="text-xs text-zinc-500 mt-1">Зашифрованный чат</p>
+        <p className="text-xs text-zinc-500 mt-1">{t('sidebar.encrypted_chat')}</p>
       </div>
 
       {/* New Chat button — emerald-glass style with hover fill */}
@@ -74,7 +77,7 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-950/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-zinc-950 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all duration-300 text-sm font-medium"
         >
           <Plus className="w-4 h-4" />
-          <span>Новый чат</span>
+          <span>{t('sidebar.new_chat')}</span>
         </button>
       </div>
 
@@ -100,9 +103,9 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
                 className="text-emerald-400/80 text-sm font-medium"
                 style={{ textShadow: '0 0 10px rgba(16,185,129,0.25)' }}
               >
-                Нет чатов
+                {t('sidebar.no_chats')}
               </p>
-              <p className="text-zinc-600 text-xs mt-1">Нажмите «Новый чат» чтобы найти собеседника</p>
+              <p className="text-zinc-600 text-xs mt-1">{t('sidebar.no_chats_hint')}</p>
             </div>
           ) : (
             rooms.map((room) => {
@@ -127,14 +130,12 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
                       : undefined
                   }
                 >
-                  {/* Active indicator — 3px vertical neon-green bar on the left */}
                   {isActive && (
                     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-8 bg-neon-green rounded-r-full shadow-[0_0_8px_rgba(0,255,102,0.5)]" />
                   )}
 
                   <Avatar avatar={room.otherUserAvatar} name={room.name} />
 
-                  {/* Room info */}
                   <div className="flex-1 min-w-0 text-left">
                     <div className="flex items-center justify-between">
                       <span className={`text-sm font-medium truncate ${isActive ? 'text-white' : 'text-zinc-200'}`}>
@@ -161,7 +162,6 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
 
       {/* Bottom: User Profile — click opens Settings modal */}
       <div className="relative p-3">
-        {/* Blurred neon separator line */}
         <div className="absolute -top-0 left-3 right-3 mb-4 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent h-[1px]" />
 
         {currentProfile ? (
@@ -171,7 +171,6 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
             title="Открыть настройки профиля"
           >
             <div className="relative flex-shrink-0">
-              {/* Neon ring wrapper — only for online users */}
               {currentProfile.status === 'online' ? (
                 <div
                   className="rounded-xl p-[2px]"
@@ -202,10 +201,13 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
               )}
             </div>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-sm font-medium text-white truncate">{currentProfile.username}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium text-white truncate">{currentProfile.username}</p>
+                {/* Tier badge — read-only display next to username */}
+                <TierBadge tier={currentProfile.tier ?? 'free'} size="sm" />
+              </div>
               <p className="text-xs text-zinc-500 capitalize">{currentProfile.status}</p>
             </div>
-            {/* Settings indicator */}
             <div className="flex items-center justify-center w-7 h-7 rounded-md text-zinc-500 group-hover:text-neon-green group-hover:bg-zinc-800/60 transition-colors">
               <User className="w-3.5 h-3.5" />
             </div>

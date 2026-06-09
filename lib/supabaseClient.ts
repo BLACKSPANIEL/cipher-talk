@@ -23,4 +23,8 @@ export interface Profile {
   status: 'online' | 'offline' | 'away';
   created_at: string;
   avatar_url?: string | null;
+  /** Tier подписки: free / pro / elite. Только для чтения для самого пользователя. */
+  tier?: 'free' | 'pro' | 'elite';
+  /** Флаг администратора. Назначается другим админом через /admin. */
+  is_admin?: boolean;
 }
