@@ -6,9 +6,11 @@ import { supabase } from '@/lib/supabaseClient';
 import { Shield, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
 import { TermsModal } from '@/components/ui/TermsModal';
 import { PrivacyModal } from '@/components/ui/PrivacyModal';
+import { useLanguage } from '@/lib/i18n';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useLanguage();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,7 +25,7 @@ export default function LoginPage() {
     setErrorMessage(null);
 
     if (!email.trim() || !password.trim()) {
-      setErrorMessage('Заполните все поля');
+      setErrorMessage(t('auth.fill_all'));
       return;
     }
 
@@ -38,15 +40,15 @@ export default function LoginPage() {
 
     if (error) {
       setErrorMessage(error.message === 'Invalid login credentials'
-        ? 'Неверный email или пароль'
+        ? t('auth.invalid_credentials')
         : error.message === 'Email not confirmed'
-        ? 'Email не подтверждён. Проверьте почту'
+        ? t('auth.email_not_confirmed')
         : error.message
       );
       return;
     }
 
-    // Успешный вход — редирект на чат + refresh для синхронизации с middleware
+    // Successful login — redirect to chat + refresh for middleware sync
     router.push('/chat');
     router.refresh();
   };
@@ -83,10 +85,10 @@ export default function LoginPage() {
               </div>
 
               <h1 className="text-2xl font-bold text-center text-white mb-1">
-                Вход в Cipher Talk
+                {t('auth.login_title')}
               </h1>
               <p className="text-sm text-gray-500 text-center mb-8">
-                Защищённый мессенджер с E2EE
+                {t('auth.login_subtitle')}
               </p>
 
               {/* Error message */}
@@ -103,7 +105,7 @@ export default function LoginPage() {
                     htmlFor="email"
                     className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5"
                   >
-                    Email
+                    {t('auth.email')}
                   </label>
                   <input
                     id="email"
@@ -122,7 +124,7 @@ export default function LoginPage() {
                     htmlFor="password"
                     className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5"
                   >
-                    Пароль
+                    {t('auth.password')}
                   </label>
                   <div className="relative">
                     <input
@@ -158,10 +160,10 @@ export default function LoginPage() {
                   {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Вход...
+                      {t('auth.logging_in')}
                     </>
                   ) : (
-                    'Войти'
+                    t('auth.login_button')
                   )}
                 </button>
               </form>
@@ -169,41 +171,38 @@ export default function LoginPage() {
               {/* Divider */}
               <div className="flex items-center gap-3 my-6">
                 <div className="flex-1 border-t border-neon-green/10" />
-                <span className="text-xs text-gray-600">или</span>
+                <span className="text-xs text-gray-600">{t('auth.or')}</span>
                 <div className="flex-1 border-t border-neon-green/10" />
               </div>
 
               {/* Register link */}
               <p className="text-center text-sm text-gray-500">
-                Нет аккаунта?{' '}
+                {t('auth.no_account')}{' '}
                 <button
-                  onClick={() => {
-                    // Показываем форму регистрации или редирект
-                    router.push('/register');
-                  }}
+                  onClick={() => router.push('/register')}
                   className="text-neon-green hover:text-neon-dark-green transition font-medium"
                 >
-                  Зарегистрироваться
+                  {t('auth.register_link')}
                 </button>
               </p>
 
               {/* Legal notice */}
               <p className="text-xs text-zinc-500 mt-4 text-center leading-relaxed">
-                Регистрируясь, вы соглашаетесь с{' '}
+                {t('legal.agree_prefix')}{' '}
                 <button
                   type="button"
                   onClick={() => setIsTermsOpen(true)}
                   className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300 transition-colors font-medium"
                 >
-                  Правилами использования
+                  {t('legal.terms')}
                 </button>{' '}
-                и{' '}
+                {t('auth.or')}{' '}
                 <button
                   type="button"
                   onClick={() => setIsPrivacyOpen(true)}
                   className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300 transition-colors font-medium"
                 >
-                  Политикой конфиденциальности
+                  {t('legal.privacy')}
                 </button>
                 .
               </p>

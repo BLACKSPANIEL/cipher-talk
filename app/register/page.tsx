@@ -6,9 +6,11 @@ import { supabase } from '@/lib/supabaseClient';
 import { Shield, Eye, EyeOff, Loader2, ArrowLeft, CheckCircle } from 'lucide-react';
 import { TermsModal } from '@/components/ui/TermsModal';
 import { PrivacyModal } from '@/components/ui/PrivacyModal';
+import { useLanguage } from '@/lib/i18n';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { t } = useLanguage();
 
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -26,22 +28,22 @@ export default function RegisterPage() {
     setErrorMessage(null);
 
     if (!email.trim() || !username.trim() || !password.trim() || !confirmPassword.trim()) {
-      setErrorMessage('Заполните все поля');
+      setErrorMessage(t('auth.fill_all'));
       return;
     }
 
     if (username.trim().length < 2) {
-      setErrorMessage('Имя пользователя должно быть не менее 2 символов');
+      setErrorMessage(t('auth.username_min'));
       return;
     }
 
     if (password.length < 6) {
-      setErrorMessage('Пароль должен быть не менее 6 символов');
+      setErrorMessage(t('auth.password_min'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setErrorMessage('Пароли не совпадают');
+      setErrorMessage(t('auth.passwords_mismatch'));
       return;
     }
 
@@ -61,7 +63,7 @@ export default function RegisterPage() {
 
     if (error) {
       setErrorMessage(error.message === 'User already registered'
-        ? 'Пользователь с таким email уже существует'
+        ? t('auth.user_exists')
         : error.message
       );
       return;
@@ -81,16 +83,15 @@ export default function RegisterPage() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-neon-green/10 border border-neon-green/20 mx-auto">
                   <CheckCircle className="w-8 h-8 text-neon-green" />
                 </div>
-                <h2 className="text-xl font-bold text-white">Регистрация успешна!</h2>
+                <h2 className="text-xl font-bold text-white">{t('auth.register_success')}</h2>
                 <p className="text-sm text-gray-400">
-                  Мы отправили письмо с подтверждением на <strong className="text-white">{email}</strong>.
-                  Перейдите по ссылке в письме, чтобы активировать аккаунт.
+                  {t('auth.register_success_desc', { email })}
                 </p>
                 <button
                   onClick={() => router.push('/login')}
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-neon-green text-black font-semibold hover:bg-neon-dark-green transition-all mt-4"
                 >
-                  Перейти к входу
+                  {t('auth.go_to_login')}
                 </button>
               </div>
             </div>
@@ -128,10 +129,10 @@ export default function RegisterPage() {
               </div>
 
               <h1 className="text-2xl font-bold text-center text-white mb-1">
-                Создать аккаунт
+                {t('auth.register_title')}
               </h1>
               <p className="text-sm text-gray-500 text-center mb-8">
-                Защищённая регистрация в Cipher Talk
+                {t('auth.register_subtitle')}
               </p>
 
               {errorMessage && (
@@ -144,7 +145,7 @@ export default function RegisterPage() {
                 {/* Username */}
                 <div>
                   <label htmlFor="reg-username" className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">
-                    Имя пользователя
+                    {t('auth.username')}
                   </label>
                   <input
                     id="reg-username"
@@ -159,7 +160,7 @@ export default function RegisterPage() {
 
                 <div>
                   <label htmlFor="reg-email" className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">
-                    Email
+                    {t('auth.email')}
                   </label>
                   <input
                     id="reg-email"
@@ -174,7 +175,7 @@ export default function RegisterPage() {
 
                 <div>
                   <label htmlFor="reg-password" className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">
-                    Пароль
+                    {t('auth.password')}
                   </label>
                   <div className="relative">
                     <input
@@ -182,7 +183,7 @@ export default function RegisterPage() {
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Минимум 6 символов"
+                      placeholder={t('auth.password_placeholder')}
                       autoComplete="new-password"
                       className="w-full bg-black/40 border border-neon-green/20 rounded-xl pl-4 pr-11 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-neon-green/50 transition text-sm"
                     />
@@ -199,7 +200,7 @@ export default function RegisterPage() {
 
                 <div>
                   <label htmlFor="reg-confirm" className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">
-                    Подтвердите пароль
+                    {t('auth.confirm_password')}
                   </label>
                   <input
                     id="reg-confirm"
@@ -220,47 +221,47 @@ export default function RegisterPage() {
                   {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Создание...
+                      {t('auth.creating')}
                     </>
                   ) : (
-                    'Создать аккаунт'
+                    t('auth.register_button')
                   )}
                 </button>
               </form>
 
               <div className="flex items-center gap-3 my-6">
                 <div className="flex-1 border-t border-neon-green/10" />
-                <span className="text-xs text-gray-600">или</span>
+                <span className="text-xs text-gray-600">{t('auth.or')}</span>
                 <div className="flex-1 border-t border-neon-green/10" />
               </div>
 
               <p className="text-center text-sm text-gray-500">
-                Уже есть аккаунт?{' '}
+                {t('auth.has_account')}{' '}
                 <button
                   onClick={() => router.push('/login')}
                   className="text-neon-green hover:text-neon-dark-green transition font-medium"
                 >
-                  Войти
+                  {t('auth.login_link')}
                 </button>
               </p>
 
               {/* Legal notice */}
               <p className="text-xs text-zinc-500 mt-4 text-center leading-relaxed">
-                Регистрируясь, вы соглашаетесь с{' '}
+                {t('legal.agree_prefix')}{' '}
                 <button
                   type="button"
                   onClick={() => setIsTermsOpen(true)}
                   className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300 transition-colors font-medium"
                 >
-                  Правилами использования
+                  {t('legal.terms')}
                 </button>{' '}
-                и{' '}
+                {t('auth.or')}{' '}
                 <button
                   type="button"
                   onClick={() => setIsPrivacyOpen(true)}
                   className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300 transition-colors font-medium"
                 >
-                  Политикой конфиденциальности
+                  {t('legal.privacy')}
                 </button>
                 .
               </p>

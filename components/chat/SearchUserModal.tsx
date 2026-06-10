@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, UserPlus, Loader2, MessageCircle, AtSign, Users } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
+import { useDebounce } from '@/lib/hooks/useDebounce';
+import { useLanguage } from '@/lib/i18n';
 
 interface ProfileRow {
   id: string;
@@ -74,16 +76,38 @@ function UserAvatar({ user }: { user: ProfileRow }) {
   );
 }
 
+/** Skeleton loader for search results */
+function SearchSkeleton() {
+  return (
+    <div className="space-y-0.5 px-1">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-xl animate-pulse">
+          <div className="w-9 h-9 rounded-xl bg-white/[0.06] flex-shrink-0" />
+          <div className="flex-1 space-y-1.5">
+            <div className="h-3.5 w-28 rounded-md bg-white/[0.06]" />
+            <div className="h-2.5 w-16 rounded-md bg-white/[0.04]" />
+          </div>
+          <div className="w-4 h-4 rounded-md bg-white/[0.04]" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function SearchUserModal({ isOpen, onClose, currentUserId, onStartChat }: SearchUserModalProps) {
+  const { t } = useLanguage();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ProfileRow[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [creating, setCreating] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const trimmedQuery = query.trim();
-  const sortedResults = useMemo(() => rankResults(trimmedQuery, results), [trimmedQuery, results]);
+  // Debounce the query with 300ms delay to avoid spamming Supabase
+  const debouncedQuery = useDebounce(query.trim(), 300);
 
+  const sortedResults = useMemo(() => rankResults(debouncedQuery, results), [debouncedQuery, results]);
+
+  // Focus input when modal opens
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 80);
@@ -93,22 +117,27 @@ export function SearchUserModal({ isOpen, onClose, currentUserId, onStartChat }:
     }
   }, [isOpen]);
 
+  // Search effect — uses debouncedQuery to avoid excessive API calls
   useEffect(() => {
     if (!isOpen) return;
-    if (!trimmedQuery) {
+    if (!debouncedQuery) {
       setResults([]);
       setIsSearching(false);
       return;
     }
 
+    let cancelled = false;
     setIsSearching(true);
-    const handle = setTimeout(async () => {
-      const escaped = trimmedQuery.replace(/[%_]/g, '\\$&');
+
+    const searchUsers = async () => {
+      const escaped = debouncedQuery.replace(/[%_]/g, '\\$&');
       const { data, error } = await supabase
         .from('profiles')
         .select('id, username, status, avatar_url')
         .or(`username.ilike.${escaped}%,username.ilike.%${escaped}%`)
         .limit(24);
+
+      if (cancelled) return;
 
       if (!error && data) {
         setResults(data.filter((p) => p.id !== currentUserId));
@@ -116,11 +145,14 @@ export function SearchUserModal({ isOpen, onClose, currentUserId, onStartChat }:
         setResults([]);
       }
       setIsSearching(false);
-    }, 220);
+    };
 
-    return () => clearTimeout(handle);
-  }, [trimmedQuery, currentUserId, isOpen]);
+    searchUsers();
 
+    return () => { cancelled = true; };
+  }, [debouncedQuery, currentUserId, isOpen]);
+
+  // Keyboard shortcut: Escape to close
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -130,7 +162,31 @@ export function SearchUserModal({ isOpen, onClose, currentUserId, onStartChat }:
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen, onClose]);
 
-  const handleSelect = async (user: ProfileRow) => {
+  // Realtime subscription for user status updates (online/offline)
+  useEffect(() => {
+    if (!isOpen || results.length === 0) return;
+
+    const userIds = results.map((r) => r.id);
+    const channel = supabase
+      .channel('search-user-status')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=in.(${userIds.join(',')})` },
+        (payload) => {
+          const updated = payload.new as ProfileRow;
+          setResults((prev) =>
+            prev.map((u) => (u.id === updated.id ? { ...u, status: updated.status } : u))
+          );
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isOpen, results.length]);
+
+  const handleSelect = useCallback(async (user: ProfileRow) => {
     setCreating(user.id);
     try {
       await onStartChat(user);
@@ -138,7 +194,7 @@ export function SearchUserModal({ isOpen, onClose, currentUserId, onStartChat }:
     } finally {
       setCreating(null);
     }
-  };
+  }, [onStartChat, onClose]);
 
   return (
     <AnimatePresence>
@@ -187,15 +243,15 @@ export function SearchUserModal({ isOpen, onClose, currentUserId, onStartChat }:
                   <UserPlus className="w-4 h-4 text-emerald-400" style={{ filter: 'drop-shadow(0 0 6px rgba(16,245,181,0.6))' }} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white text-[15px] leading-tight">Новый чат</h3>
-                  <p className="text-[10px] text-zinc-500 mt-0.5">Найдите пользователя по nickname</p>
+                  <h3 className="font-semibold text-white text-[15px] leading-tight">{t('search.title')}</h3>
+                  <p className="text-[10px] text-zinc-500 mt-0.5">{t('search.hint')}</p>
                 </div>
               </div>
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
                 className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-colors"
-                title="Закрыть"
+                title={t('common.close')}
               >
                 <X className="w-4 h-4" />
               </motion.button>
@@ -210,7 +266,7 @@ export function SearchUserModal({ isOpen, onClose, currentUserId, onStartChat }:
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="nickname..."
+                  placeholder={t('search.placeholder')}
                   autoComplete="off"
                   spellCheck={false}
                   className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-9 pr-10 py-2.5 text-white text-[13px] placeholder-zinc-600 focus:outline-none focus:border-emerald-400/40 focus:bg-white/[0.06] transition-colors"
@@ -229,7 +285,7 @@ export function SearchUserModal({ isOpen, onClose, currentUserId, onStartChat }:
             {/* Results */}
             <div className="max-h-[min(52vh,320px)] sm:max-h-80 overflow-y-auto overscroll-contain px-2 py-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               <AnimatePresence mode="wait">
-                {trimmedQuery === '' ? (
+                {debouncedQuery === '' ? (
                   <motion.div
                     key="hint"
                     initial={{ opacity: 0, y: 6 }}
@@ -247,8 +303,18 @@ export function SearchUserModal({ isOpen, onClose, currentUserId, onStartChat }:
                     >
                       <Users className="w-5 h-5 text-emerald-500/50" />
                     </div>
-                    <p className="text-zinc-400 text-[13px] font-medium">Введите nickname</p>
-                    <p className="text-zinc-600 text-[10px] mt-1">Точное совпадение показывается первым</p>
+                    <p className="text-zinc-400 text-[13px] font-medium">{t('search.empty_start')}</p>
+                    <p className="text-zinc-600 text-[10px] mt-1">{t('search.hint')}</p>
+                  </motion.div>
+                ) : isSearching && sortedResults.length === 0 ? (
+                  /* Skeleton loader while searching */
+                  <motion.div
+                    key="skeleton"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <SearchSkeleton />
                   </motion.div>
                 ) : sortedResults.length === 0 && !isSearching ? (
                   <motion.div
@@ -258,8 +324,8 @@ export function SearchUserModal({ isOpen, onClose, currentUserId, onStartChat }:
                     exit={{ opacity: 0 }}
                     className="text-center py-8 px-4"
                   >
-                    <p className="text-zinc-400 text-[13px]">Никого не найдено</p>
-                    <p className="text-zinc-600 text-[10px] mt-1">Проверьте написание nickname</p>
+                    <p className="text-zinc-400 text-[13px]">{t('search.empty_results')}</p>
+                    <p className="text-zinc-600 text-[10px] mt-1">{t('search.hint')}</p>
                   </motion.div>
                 ) : (
                   <motion.ul
@@ -294,7 +360,7 @@ export function SearchUserModal({ isOpen, onClose, currentUserId, onStartChat }:
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-[13px] font-medium text-zinc-100 truncate">
-                                {highlightMatch(user.username, trimmedQuery)}
+                                {highlightMatch(user.username, debouncedQuery)}
                               </p>
                               {user.status && (
                                 <p className={`text-[10px] capitalize mt-px ${isOnline ? 'text-emerald-400/80' : 'text-zinc-500'}`}>

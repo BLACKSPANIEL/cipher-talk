@@ -7,6 +7,7 @@ import { Sidebar, type ChatRoom } from '@/components/chat/Sidebar';
 import { ChatWindow } from '@/components/chat/ChatWindow';
 import { SearchUserModal } from '@/components/chat/SearchUserModal';
 import { SettingsModal } from '@/components/chat/SettingsModal';
+import { BottomNavBar } from '@/components/chat/BottomNavBar';
 import { type Message } from '@/components/chat/MessageBubble';
 import { type CipherType, encryptText, caesarDecrypt, base64Decode } from '@/lib/ciphers';
 import { supabase } from '@/lib/supabaseClient';
@@ -203,6 +204,8 @@ export default function ChatPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   /** Mobile: when a room is selected, hide sidebar and show only chat */
   const [mobileShowChat, setMobileShowChat] = useState(false);
+  /** Mobile: bottom nav active view */
+  const [mobileActiveView, setMobileActiveView] = useState<'chats' | 'settings'>('chats');
 
   const subscriptionRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const presenceRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -217,6 +220,16 @@ export default function ChatPage() {
 
   const handleBackToList = useCallback(() => {
     setMobileShowChat(false);
+  }, []);
+
+  const handleMobileSwitchView = useCallback((view: 'chats' | 'settings') => {
+    setMobileActiveView(view);
+    if (view === 'settings') {
+      setIsSettingsOpen(true);
+    } else {
+      setIsSettingsOpen(false);
+      setMobileShowChat(false);
+    }
   }, []);
 
   // Auth guard + load profile + rooms
@@ -479,6 +492,18 @@ export default function ChatPage() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Bottom Navigation Bar — mobile only */}
+      <BottomNavBar
+        activeView={mobileActiveView}
+        onSwitchView={handleMobileSwitchView}
+        onOpenSearch={() => setIsSearchOpen(true)}
+        currentProfile={currentProfile}
+        unreadCount={rooms.reduce((sum, r) => sum + (r.unread ?? 0), 0)}
+      />
+
+      {/* Bottom padding for mobile nav bar */}
+      <div className="md:hidden h-16 shrink-0" />
 
       {/* Modals */}
       <SearchUserModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} currentUserId={currentUserId} onStartChat={handleStartChat} />

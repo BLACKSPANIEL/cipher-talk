@@ -94,11 +94,11 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      setError('Выберите изображение');
+      setError(t('settings.upload_photo'));
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      setError('Файл больше 2 МБ');
+      setError('File > 2 MB');
       return;
     }
     const reader = new FileReader();
@@ -384,9 +384,9 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <p className="text-sm text-white font-medium">
-                                {isMobileDevice ? 'Мобильное устройство' : 'Компьютер'}
-                              </p>
+              <p className="text-sm text-white font-medium">
+                {isMobileDevice ? t('chat.device_mobile') : t('chat.device_desktop')}
+              </p>
                               <span className="text-[9px] uppercase font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
                                 {t('settings.session_current')}
                               </span>

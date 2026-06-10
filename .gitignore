@@ -31,5 +31,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
- 
- .cursor
+
+# Desktop builds (Electron)
+/desktop-dist/
+/dist/
+
+.cursor

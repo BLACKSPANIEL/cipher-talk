@@ -1,6 +1,9 @@
+'use client';
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, Unlock, Loader2, AlertCircle, Check, CheckCheck } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n';
 
 export interface Message {
   id: string;
@@ -69,6 +72,7 @@ function StatusIcon({ status }: { status?: Message['status'] }) {
 }
 
 export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbleProps) {
+  const { t } = useLanguage();
   const [isDecrypted, setIsDecrypted] = useState(false);
   const isMine = message.sender === 'me';
   const isOptimistic = message.status === 'sending';
@@ -116,14 +120,14 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
           {isMine && message.isE2ee && (
             <div className="flex items-center gap-1 mb-1">
               <Lock className="w-2.5 h-2.5 text-emerald-400/70" />
-              <span className="text-[9px] uppercase tracking-widest text-emerald-400/70 font-medium">E2EE</span>
+              <span className="text-[9px] uppercase tracking-widest text-emerald-400/70 font-medium">{t('chat.e2ee_badge')}</span>
             </div>
           )}
 
           {message.isEncrypted && isDecrypting ? (
             <div className="flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
-              <span className="text-sm italic opacity-70">Расшифровка...</span>
+              <span className="text-sm italic opacity-70">{t('chat.decrypting_indicator')}</span>
             </div>
           ) : (
             <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
@@ -143,15 +147,15 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
               <button
                 onClick={handleToggleDecrypt}
                 className="text-[10px] uppercase tracking-wider flex items-center gap-1 transition text-zinc-500 hover:text-emerald-300"
-                title="Расшифровать"
+                title={t('chat.decrypt')}
               >
-                {isDecrypted ? <><Unlock className="w-3 h-3" />расшифровано</> : <><Lock className="w-3 h-3" />расшифровать</>}
+                {isDecrypted ? <><Unlock className="w-3 h-3" />{t('chat.decrypted')}</> : <><Lock className="w-3 h-3" />{t('chat.decrypt')}</>}
               </button>
             )}
 
             {message.cipher && message.cipher !== 'none' && !message.isEncrypted && (
               <span className="text-[10px] uppercase tracking-wider text-zinc-500">
-                {message.cipher === 'caesar' ? 'Цезарь' : message.cipher === 'base64' ? 'Base64' : ''}
+                {message.cipher === 'caesar' ? t('chat.cipher_caesar') : message.cipher === 'base64' ? 'Base64' : ''}
               </span>
             )}
 

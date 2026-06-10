@@ -7,6 +7,7 @@ import { MessageBubble, type Message } from './MessageBubble';
 import { type ChatRoom } from './Sidebar';
 import { CIPHER_OPTIONS, type CipherType } from '@/lib/ciphers';
 import { supabase } from '@/lib/supabaseClient';
+import { useLanguage } from '@/lib/i18n';
 
 interface ChatWindowProps {
   room: ChatRoom | null;
@@ -19,6 +20,7 @@ interface ChatWindowProps {
 }
 
 export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDecryptMessage, decryptingMessageId, onBack }: ChatWindowProps) {
+  const { t } = useLanguage();
   const [inputText, setInputText] = useState('');
   const [cipher, setCipher] = useState<CipherType>('none');
   const [showCipherMenu, setShowCipherMenu] = useState(false);
@@ -36,7 +38,7 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
     channel.on('broadcast', { event: 'typing' }, (payload) => {
       const senderId = payload.payload?.userId;
       if (senderId && senderId === currentUserId) return;
-      setTypingUser(payload.payload?.username || 'Собеседник');
+      setTypingUser(payload.payload?.username || '...');
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = setTimeout(() => setTypingUser(null), 3000);
     }).subscribe();
@@ -66,7 +68,7 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
-  const activeCipherLabel = CIPHER_OPTIONS.find((o) => o.value === cipher)?.label ?? 'Обычный текст';
+  const activeCipherLabel = CIPHER_OPTIONS.find((o) => o.value === cipher)?.label ?? t('chat.cipher_none');
   const roomMessages = messages.filter((m) => m.roomId === room?.id);
 
   if (!room) {
@@ -81,14 +83,14 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
             <span className="absolute inset-0 rounded-full border border-neon-green/25 animate-pulse-glow" />
           </div>
           <div>
-            <h3 className="text-lg md:text-2xl font-bold text-white mb-1 md:mb-2 tracking-tight">Cipher Talk</h3>
+            <h3 className="text-lg md:text-2xl font-bold text-white mb-1 md:mb-2 tracking-tight">{t('chat.empty_title')}</h3>
             <p className="text-zinc-400 text-xs md:text-sm leading-relaxed px-2 md:px-0">
-              Ваши сообщения защищены <span className="text-neon-green font-semibold">сквозным шифрованием (E2EE)</span>. Создайте или выберите чат-комнату слева, чтобы начать безопасное общение.
+              {t('chat.empty_desc')}
             </p>
           </div>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-neon-green/20 bg-neon-green/5 mx-auto">
             <Lock className="w-3 h-3 md:w-3.5 md:h-3.5 text-neon-green" />
-            <span className="text-[10px] md:text-[11px] uppercase tracking-wider text-neon-green font-medium">End-to-end encrypted</span>
+            <span className="text-[10px] md:text-[11px] uppercase tracking-wider text-neon-green font-medium">{t('chat.e2ee_label')}</span>
           </div>
         </div>
       </div>
@@ -104,7 +106,7 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
         <div className="flex items-center gap-3">
           {/* Mobile back button */}
           {onBack && (
-            <button onClick={onBack} className="md:hidden p-1.5 -ml-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition" aria-label="Назад к списку">
+            <button onClick={onBack} className="md:hidden p-1.5 -ml-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition" aria-label={t('chat.back')}>
               <ChevronLeft className="w-5 h-5" />
             </button>
           )}
@@ -118,13 +120,13 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
           <div>
             <h3 className="font-semibold text-white text-sm">{room.name}</h3>
             <p className="text-xs text-zinc-500">
-              {otherTyping ? <span className="text-emerald-400">{typingUser} печатает...</span> : `${roomMessages.length} сообщ.`}
+              {otherTyping ? <span className="text-emerald-400">{typingUser} {t('chat.typing_indicator').replace('{name}', '').trim()}</span> : t('chat.messages_count_short', { count: roomMessages.length })}
             </p>
           </div>
         </div>
         <button type="button" className="group/e2ee flex items-center gap-2 px-3 py-1.5 rounded-full border border-neon-green/20 bg-neon-green/5 hover:animate-e2ee-pulse transition-all duration-300">
           <Lock className="w-3.5 h-3.5 text-neon-green transition-transform group-hover/e2ee:scale-110" />
-          <span className="text-xs font-medium text-neon-green">E2EE</span>
+          <span className="text-xs font-medium text-neon-green">{t('chat.e2ee_badge')}</span>
         </button>
       </div>
 
@@ -138,7 +140,7 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
         {showEncryptingIndicator && (
           <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex justify-end mb-2">
             <div className="bg-emerald-950/40 border border-emerald-800/30 rounded-2xl rounded-br-md px-3.5 py-2 backdrop-blur-sm">
-              <div className="flex items-center gap-2"><Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" /><span className="text-xs text-emerald-300/80 italic">Шифрование...</span></div>
+              <div className="flex items-center gap-2"><Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" /><span className="text-xs text-emerald-300/80 italic">{t('chat.encrypting_indicator')}</span></div>
             </div>
           </motion.div>
         )}
@@ -153,8 +155,8 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
                 <span className="absolute inset-0 rounded-full border border-neon-green/25 animate-pulse-glow" />
               </div>
               <div>
-                <h4 className="text-base md:text-lg font-bold text-white mb-0.5 md:mb-1">Нет сообщений</h4>
-                <p className="text-zinc-400 text-xs md:text-sm leading-relaxed">Напишите что-нибудь, чтобы начать <span className="text-neon-green font-medium">защищённый E2EE</span> диалог</p>
+                <h4 className="text-base md:text-lg font-bold text-white mb-0.5 md:mb-1">{t('chat.no_messages')}</h4>
+                <p className="text-zinc-400 text-xs md:text-sm leading-relaxed">{t('chat.no_messages_hint')}</p>
               </div>
             </div>
           </div>
@@ -209,7 +211,7 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
               )}
             </div>
             <div className="flex-1 relative">
-              <textarea value={inputText} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Напишите сообщение..." rows={1} className="w-full bg-transparent border-none rounded-xl px-2 py-2 text-white placeholder-zinc-500 focus:outline-none resize-none text-sm max-h-32" style={{ minHeight: '36px' }} />
+              <textarea value={inputText} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder={t('chat.input_placeholder')} rows={1} className="w-full bg-transparent border-none rounded-xl px-2 py-2 text-white placeholder-zinc-500 focus:outline-none resize-none text-sm max-h-32" style={{ minHeight: '36px' }} />
             </div>
             <button onClick={handleSend} disabled={!inputText.trim()} className="group/send flex items-center justify-center w-11 h-11 rounded-xl bg-chat-gradient text-black hover:scale-105 active:scale-95 hover:shadow-[0_0_24px_rgba(0,255,102,0.6),0_0_8px_rgba(0,255,102,0.4)] disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed transition-all flex-shrink-0" style={{ boxShadow: '0 0 0 1px rgba(0,255,102,0.15)' }}>
               <Send className="w-4 h-4 transition-transform group-hover/send:translate-x-0.5" />

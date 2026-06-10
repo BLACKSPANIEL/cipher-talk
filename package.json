@@ -2,11 +2,73 @@
   "name": "cipher-talk",
   "private": true,
   "version": "0.1.0",
+  "main": "electron/main.js",
+  "author": "CipherTalk Team",
+  "description": "Secure encrypted messenger with E2EE",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+
+    "electron:dev": "concurrently \"next dev\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:build:win": "cross-env NEXT_OUTPUT=export next build && electron-builder --win",
+    "electron:build:mac": "cross-env NEXT_OUTPUT=export next build && electron-builder --mac",
+    "electron:build:linux": "cross-env NEXT_OUTPUT=export next build && electron-builder --linux",
+    "electron:build:all": "cross-env NEXT_OUTPUT=export next build && electron-builder --win --mac --linux",
+    "tauri:build": "next build --experimental-build-mode compile"
+  },
+  "build": {
+    "appId": "com.ciphertalk.app",
+    "productName": "Cipher Talk",
+    "directories": {
+      "output": "desktop-dist",
+      "buildResources": "build-resources"
+    },
+    "files": [
+      "out/**/*",
+      "electron/**/*",
+      "!node_modules/**/*"
+    ],
+    "extraResources": [],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "public/favicon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "public/favicon.ico",
+      "uninstallerIcon": "public/favicon.ico",
+      "installerHeaderIcon": "public/favicon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Cipher Talk"
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "icon": "public/favicon.ico",
+      "category": "public.app-category.social-networking"
+    },
+    "linux": {
+      "target": ["AppImage", "deb", "rpm"],
+      "icon": "public/favicon.ico",
+      "category": "Network;InstantMessaging"
+    },
+    "portable": {
+      "artifactName": "CipherTalk-${version}-portable.exe"
+    }
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.15.0",
@@ -26,8 +88,13 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0",
     "postcss": "^8.4.50",
     "tailwindcss": "^3.4.5",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "wait-on": "^7.2.0"
   }
 }

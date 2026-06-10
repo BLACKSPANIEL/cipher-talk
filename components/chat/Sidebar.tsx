@@ -283,7 +283,7 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
                 {currentProfile.tier && currentProfile.tier !== 'free' && <TierBadge tier={currentProfile.tier} size="sm" />}
               </div>
               <p className={`text-[10px] capitalize leading-tight mt-px ${isOnline ? 'text-emerald-400/90' : 'text-zinc-500'}`}>
-                {isOnline ? 'Online' : currentProfile.status}
+                {isOnline ? t('common.online') : currentProfile.status}
               </p>
             </div>
 
