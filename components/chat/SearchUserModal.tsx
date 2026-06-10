@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, UserPlus, Loader2, MessageCircle } from 'lucide-react';
+import { Search, X, UserPlus, Loader2, MessageCircle, AtSign, Users } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
 interface ProfileRow {
@@ -19,6 +19,61 @@ interface SearchUserModalProps {
   onStartChat: (otherUser: ProfileRow) => void | Promise<void>;
 }
 
+function rankResults(query: string, rows: ProfileRow[]): ProfileRow[] {
+  const q = query.toLowerCase();
+  return [...rows].sort((a, b) => {
+    const aName = a.username.toLowerCase();
+    const bName = b.username.toLowerCase();
+    const score = (name: string) => {
+      if (name === q) return 0;
+      if (name.startsWith(q)) return 1;
+      if (name.includes(q)) return 2;
+      return 3;
+    };
+    const diff = score(aName) - score(bName);
+    if (diff !== 0) return diff;
+    return aName.localeCompare(bName);
+  });
+}
+
+function highlightMatch(text: string, query: string) {
+  if (!query.trim()) return text;
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <span className="text-emerald-300 font-semibold">{text.slice(idx, idx + query.length)}</span>
+      {text.slice(idx + query.length)}
+    </>
+  );
+}
+
+function UserAvatar({ user }: { user: ProfileRow }) {
+  const isImage = user.avatar_url && (user.avatar_url.startsWith('data:') || user.avatar_url.startsWith('http'));
+  const isEmoji = user.avatar_url && !isImage;
+
+  if (isImage) {
+    return (
+      <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-white/10 flex-shrink-0">
+        <img src={user.avatar_url!} alt={user.username} className="w-full h-full object-cover" />
+      </div>
+    );
+  }
+  if (isEmoji) {
+    return (
+      <div className="w-9 h-9 rounded-xl bg-emerald-500/15 ring-1 ring-emerald-500/20 flex items-center justify-center flex-shrink-0">
+        <span className="text-base leading-none">{user.avatar_url}</span>
+      </div>
+    );
+  }
+  return (
+    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 ring-1 ring-emerald-500/25 flex items-center justify-center flex-shrink-0">
+      <span className="text-xs font-bold text-emerald-300">{user.username.charAt(0).toUpperCase()}</span>
+    </div>
+  );
+}
+
 export function SearchUserModal({ isOpen, onClose, currentUserId, onStartChat }: SearchUserModalProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ProfileRow[]>([]);
@@ -26,42 +81,46 @@ export function SearchUserModal({ isOpen, onClose, currentUserId, onStartChat }:
   const [creating, setCreating] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const trimmedQuery = query.trim();
+  const sortedResults = useMemo(() => rankResults(trimmedQuery, results), [trimmedQuery, results]);
+
   useEffect(() => {
     if (isOpen) {
-      // focus input when opened
-      setTimeout(() => inputRef.current?.focus(), 50);
+      setTimeout(() => inputRef.current?.focus(), 80);
     } else {
       setQuery('');
       setResults([]);
     }
   }, [isOpen]);
 
-  // Debounced search by username
   useEffect(() => {
     if (!isOpen) return;
-    const trimmed = query.trim();
-    if (!trimmed) {
+    if (!trimmedQuery) {
       setResults([]);
+      setIsSearching(false);
       return;
     }
+
     setIsSearching(true);
     const handle = setTimeout(async () => {
+      const escaped = trimmedQuery.replace(/[%_]/g, '\\$&');
       const { data, error } = await supabase
         .from('profiles')
         .select('id, username, status, avatar_url')
-        .ilike('username', `%${trimmed}%`)
-        .limit(20);
+        .or(`username.ilike.${escaped}%,username.ilike.%${escaped}%`)
+        .limit(24);
+
       if (!error && data) {
         setResults(data.filter((p) => p.id !== currentUserId));
       } else {
         setResults([]);
       }
       setIsSearching(false);
-    }, 250);
-    return () => clearTimeout(handle);
-  }, [query, currentUserId, isOpen]);
+    }, 220);
 
-  // Escape to close
+    return () => clearTimeout(handle);
+  }, [trimmedQuery, currentUserId, isOpen]);
+
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -89,98 +148,172 @@ export function SearchUserModal({ isOpen, onClose, currentUserId, onStartChat }:
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md"
           onClick={onClose}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
+            initial={{ opacity: 0, y: 40, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 24, scale: 0.98 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-md rounded-2xl border border-zinc-800/60 bg-zinc-900/85 backdrop-blur-2xl shadow-glass-lg overflow-hidden"
+            className="relative w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden"
+            style={{
+              background: 'linear-gradient(180deg, rgba(12,18,26,0.95) 0%, rgba(6,10,16,0.98) 100%)',
+              boxShadow: '0 -24px 80px rgba(0,0,0,0.6), 0 0 60px rgba(16,245,181,0.06), inset 0 1px 0 rgba(255,255,255,0.08)',
+              border: '1px solid rgba(16,245,181,0.12)',
+              borderBottom: 'none',
+            }}
           >
+            {/* Ambient glow */}
+            <div className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-64 h-32 bg-emerald-400/10 blur-3xl" />
+
+            {/* Mobile drag handle */}
+            <div className="sm:hidden flex justify-center pt-2.5 pb-1">
+              <div className="w-10 h-1 rounded-full bg-white/15" />
+            </div>
+
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800/60">
-              <div className="flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-neon-green" />
-                <h3 className="font-semibold text-white text-base">Новый чат</h3>
+            <div className="relative flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-white/[0.06]">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="w-8 h-8 rounded-xl flex items-center justify-center"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(16,245,181,0.15), rgba(6,182,212,0.08))',
+                    boxShadow: '0 0 20px rgba(16,245,181,0.15), inset 0 1px 0 rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(16,245,181,0.25)',
+                  }}
+                >
+                  <UserPlus className="w-4 h-4 text-emerald-400" style={{ filter: 'drop-shadow(0 0 6px rgba(16,245,181,0.6))' }} />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white text-[15px] leading-tight">Новый чат</h3>
+                  <p className="text-[10px] text-zinc-500 mt-0.5">Найдите пользователя по nickname</p>
+                </div>
               </div>
-              <button
+              <motion.button
+                whileTap={{ scale: 0.9 }}
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition"
+                className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-colors"
                 title="Закрыть"
               >
                 <X className="w-4 h-4" />
-              </button>
+              </motion.button>
             </div>
 
-            {/* Search input */}
-            <div className="p-4 border-b border-zinc-800/60">
+            {/* Search */}
+            <div className="relative px-4 sm:px-5 py-3 border-b border-white/[0.06]">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500/60" />
                 <input
                   ref={inputRef}
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Поиск по nickname..."
-                  className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-xl pl-9 pr-3 py-2.5 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-neon-green/50 focus:bg-zinc-800/80 transition"
+                  placeholder="nickname..."
+                  autoComplete="off"
+                  spellCheck={false}
+                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-9 pr-10 py-2.5 text-white text-[13px] placeholder-zinc-600 focus:outline-none focus:border-emerald-400/40 focus:bg-white/[0.06] transition-colors"
+                  style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)' }}
                 />
-                {isSearching && (
-                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neon-green animate-spin" />
-                )}
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {isSearching ? (
+                    <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />
+                  ) : (
+                    <Search className="w-4 h-4 text-zinc-600" />
+                  )}
+                </div>
               </div>
-              <p className="text-[10px] text-zinc-500 mt-2 px-1">
-                Введите nickname пользователя из таблицы <span className="text-zinc-400">profiles</span>
-              </p>
             </div>
 
             {/* Results */}
-            <div className="max-h-80 overflow-y-auto p-2">
-              {query.trim() === '' ? (
-                <div className="text-center py-10 px-4">
-                  <Search className="w-8 h-8 text-zinc-700 mx-auto mb-2" />
-                  <p className="text-zinc-500 text-sm">Начните вводить nickname</p>
-                </div>
-              ) : results.length === 0 && !isSearching ? (
-                <div className="text-center py-10 px-4">
-                  <p className="text-zinc-500 text-sm">Пользователи не найдены</p>
-                </div>
-              ) : (
-                <ul className="space-y-1">
-                  {results.map((user) => (
-                    <li key={user.id}>
-                      <button
-                        onClick={() => handleSelect(user)}
-                        disabled={creating === user.id}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-800/60 transition text-left disabled:opacity-50"
-                      >
-                        <div className="w-9 h-9 rounded-full bg-neon-green/15 flex items-center justify-center flex-shrink-0">
-                          {user.avatar_url ? (
-                            <img src={user.avatar_url} alt={user.username} className="w-full h-full rounded-full object-cover" />
-                          ) : (
-                            <span className="text-sm font-bold text-neon-green">
-                              {user.username.charAt(0).toUpperCase()}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-white truncate">{user.username}</p>
-                          {user.status && (
-                            <p className="text-xs text-zinc-500 capitalize">{user.status}</p>
-                          )}
-                        </div>
-                        {creating === user.id ? (
-                          <Loader2 className="w-4 h-4 text-neon-green animate-spin" />
-                        ) : (
-                          <MessageCircle className="w-4 h-4 text-zinc-500 group-hover:text-neon-green" />
-                        )}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
+            <div className="max-h-[min(52vh,320px)] sm:max-h-80 overflow-y-auto overscroll-contain px-2 py-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+              <AnimatePresence mode="wait">
+                {trimmedQuery === '' ? (
+                  <motion.div
+                    key="hint"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="text-center py-8 px-4"
+                  >
+                    <div
+                      className="w-11 h-11 mx-auto mb-2.5 rounded-2xl flex items-center justify-center"
+                      style={{
+                        background: 'rgba(16,245,181,0.06)',
+                        border: '1px solid rgba(16,245,181,0.12)',
+                        boxShadow: 'inset 0 0 20px rgba(16,245,181,0.04)',
+                      }}
+                    >
+                      <Users className="w-5 h-5 text-emerald-500/50" />
+                    </div>
+                    <p className="text-zinc-400 text-[13px] font-medium">Введите nickname</p>
+                    <p className="text-zinc-600 text-[10px] mt-1">Точное совпадение показывается первым</p>
+                  </motion.div>
+                ) : sortedResults.length === 0 && !isSearching ? (
+                  <motion.div
+                    key="empty"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="text-center py-8 px-4"
+                  >
+                    <p className="text-zinc-400 text-[13px]">Никого не найдено</p>
+                    <p className="text-zinc-600 text-[10px] mt-1">Проверьте написание nickname</p>
+                  </motion.div>
+                ) : (
+                  <motion.ul
+                    key="results"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="space-y-0.5"
+                  >
+                    {sortedResults.map((user, i) => {
+                      const isOnline = user.status === 'online';
+                      return (
+                        <motion.li
+                          key={user.id}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.04, duration: 0.22 }}
+                        >
+                          <motion.button
+                            whileTap={{ scale: 0.985 }}
+                            onClick={() => handleSelect(user)}
+                            disabled={creating === user.id}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.04] active:bg-white/[0.06] transition-colors text-left disabled:opacity-50 group"
+                          >
+                            <div className="relative">
+                              <UserAvatar user={user} />
+                              {isOnline && (
+                                <span
+                                  className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-[#0a0f17]"
+                                  style={{ boxShadow: '0 0 6px rgba(16,245,181,0.8)' }}
+                                />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[13px] font-medium text-zinc-100 truncate">
+                                {highlightMatch(user.username, trimmedQuery)}
+                              </p>
+                              {user.status && (
+                                <p className={`text-[10px] capitalize mt-px ${isOnline ? 'text-emerald-400/80' : 'text-zinc-500'}`}>
+                                  {user.status}
+                                </p>
+                              )}
+                            </div>
+                            {creating === user.id ? (
+                              <Loader2 className="w-4 h-4 text-emerald-400 animate-spin flex-shrink-0" />
+                            ) : (
+                              <MessageCircle className="w-4 h-4 text-zinc-600 group-hover:text-emerald-400 transition-colors flex-shrink-0" />
+                            )}
+                          </motion.button>
+                        </motion.li>
+                      );
+                    })}
+                  </motion.ul>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         </motion.div>

@@ -328,6 +328,7 @@ export default function ChatPage() {
       const loaded = await loadRooms(currentUserId);
       setRooms(loaded);
       setActiveRoomId(roomId);
+      setMobileShowChat(true);
     },
     [currentUserId]
   );
@@ -384,23 +385,38 @@ export default function ChatPage() {
   }, []);
 
   return (
-    <div className="h-screen flex flex-col bg-[#0B0F12] text-white relative overflow-hidden">
+    <div className="h-[100dvh] flex flex-col bg-[#05070d] text-white relative overflow-hidden">
       {/* Premium gradient background overlay */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-32 -left-32 w-[420px] h-[420px] rounded-full bg-neon-green/[0.06] blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 w-[520px] h-[520px] rounded-full bg-emerald-500/[0.05] blur-3xl" />
-        {/* Subtle grid texture across the whole app */}
-        <div className="absolute inset-0 opacity-[0.015] md:opacity-[0.02]"
-          style={{ backgroundImage: 'linear-gradient(rgba(0,255,102,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,102,0.3) 1px, transparent 1px)', backgroundSize: '60px 60px' }}
+        <motion.div
+          className="absolute -top-32 -left-32 w-[380px] h-[380px] rounded-full bg-emerald-400/[0.07] blur-3xl"
+          animate={{ opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <div className="absolute -bottom-40 -right-40 w-[480px] h-[480px] rounded-full bg-cyan-400/[0.04] blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full bg-emerald-500/[0.03] blur-3xl" />
+        <div
+          className="absolute inset-0 opacity-[0.018] md:opacity-[0.025]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(16,245,181,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(16,245,181,0.25) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+          }}
         />
       </div>
 
-      <div className="relative z-10 flex flex-1 overflow-hidden p-0 md:p-5 gap-0 md:gap-6">
-        <aside
-          className={`w-full md:w-64 flex-shrink-0 md:rounded-2xl overflow-hidden border-0 md:border border-zinc-800/80 backdrop-blur-xl ${
-            mobileShowChat ? 'hidden md:block' : 'block'
+      <div className="relative z-10 flex flex-1 overflow-hidden min-h-0 p-0 md:p-5 gap-0 md:gap-5">
+        <motion.aside
+          initial={false}
+          animate={{ opacity: mobileShowChat ? 0 : 1, x: mobileShowChat ? -20 : 0 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className={`w-full md:w-72 flex-shrink-0 md:rounded-2xl overflow-hidden border-0 md:border border-white/[0.06] backdrop-blur-xl flex flex-col min-h-0 ${
+            mobileShowChat ? 'hidden md:flex' : 'flex'
           }`}
-          style={{ background: 'rgba(9, 9, 11, 0.5)', boxShadow: 'none' }}
+          style={{
+            background: 'linear-gradient(180deg, rgba(8,12,18,0.72) 0%, rgba(5,7,13,0.85) 100%)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+          }}
         >
           <Sidebar
             rooms={rooms}
@@ -411,19 +427,22 @@ export default function ChatPage() {
             currentProfile={currentProfile}
             isLoadingRooms={!currentUserId}
           />
-        </aside>
+        </motion.aside>
 
         {/* Chat window with slide-in animation on mobile */}
         <AnimatePresence mode="wait">
           {mobileShowChat ? (
             <motion.main
               key="chat"
-              initial={{ x: '100%', opacity: 0 }}
+              initial={{ x: '100%', opacity: 0.6 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: '100%', opacity: 0 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 300, mass: 0.8 }}
-              className="flex-1 min-w-0 md:rounded-2xl overflow-hidden border-0 md:border border-zinc-800/80 backdrop-blur-xl flex flex-col absolute md:relative inset-0 z-30 md:z-auto"
-              style={{ background: 'rgba(9, 9, 11, 0.4)', boxShadow: 'none' }}
+              exit={{ x: '100%', opacity: 0.6 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 340, mass: 0.75 }}
+              className="flex-1 min-w-0 md:rounded-2xl overflow-hidden border-0 md:border border-white/[0.06] backdrop-blur-xl flex flex-col absolute md:relative inset-0 z-30 md:z-auto min-h-0"
+              style={{
+                background: 'linear-gradient(180deg, rgba(8,12,18,0.78) 0%, rgba(5,7,13,0.92) 100%)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+              }}
             >
               <ChatWindow
                 room={activeRoom}
@@ -438,11 +457,14 @@ export default function ChatPage() {
           ) : (
             <motion.main
               key="empty"
-              initial={{ x: '-20%', opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.2 }}
-              className="flex-1 min-w-0 md:rounded-2xl overflow-hidden border-0 md:border border-zinc-800/80 backdrop-blur-xl flex-col hidden md:flex"
-              style={{ background: 'rgba(9, 9, 11, 0.4)', boxShadow: 'none' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.25 }}
+              className="flex-1 min-w-0 md:rounded-2xl overflow-hidden border-0 md:border border-white/[0.06] backdrop-blur-xl flex-col hidden md:flex min-h-0"
+              style={{
+                background: 'linear-gradient(180deg, rgba(8,12,18,0.78) 0%, rgba(5,7,13,0.92) 100%)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+              }}
             >
               <ChatWindow
                 room={activeRoom}
