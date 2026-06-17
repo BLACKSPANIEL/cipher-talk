@@ -4,9 +4,9 @@ const isExport = process.env.NEXT_OUTPUT === 'export';
 const nextConfig = {
   reactStrictMode: true,
 
-  // ── Tauri/Electron production: static export to /out ──
-  //  В tauri.conf.json beforeBuildCommand устанавливает NEXT_OUTPUT=export
-  //  автоматически перед npm run build
+  // ── Desktop (Neutralino/Tauri/Electron) static export ──
+  //  Neutralino требует строгий trailingSlash для корректной
+  //  маршрутизации: /login → /login/index.html
   output: isExport ? 'export' : undefined,
 
   // ── Image optimization не работает со static export ──
@@ -14,17 +14,18 @@ const nextConfig = {
     unoptimized: isExport,
   },
 
-  // ── Trailing slashes для совместимости с file:// протоколом ──
-  //  В Tauri production статические файлы грузятся через asset:// протокол,
-  //  поэтому trailingSlash не требуется, но оставляем для безопасности
+  // ── Trailing slashes — ОБЯЗАТЕЛЬНО для Neutralino ──
+  //  Neutralino сервер ожидает /login/index.html, а не /login.html
+  //  trailingSlash заставляет Next.js создавать /login/index.html
+  //  В dev-режиме false, чтобы не ломать App Router
   trailingSlash: isExport,
 
-  // ── Отключаем линтер при сборке (ускоряет Tauri build) ──
+  // ── Отключаем линтер при сборке (ускоряет build) ──
   eslint: {
     ignoreDuringBuilds: isExport,
   },
 
-  // ── TypeScript ошибки не блокируют сборку (для Tauri build) ──
+  // ── TypeScript ошибки не блокируют сборку ──
   typescript: {
     ignoreBuildErrors: isExport,
   },

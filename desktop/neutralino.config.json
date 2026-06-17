@@ -4,10 +4,21 @@
   "defaultMode": "window",
   "port": 0,
   "documentRoot": "./resources/",
-  "url": "/",
+  "url": "/login/",
   "enableServer": true,
   "enableNativeAPI": true,
-  "nativeAllowList": ["app.*", "window.*", "computer.*", "os.*", "tray.*", "debug.log", "events.*", "notification.*", "clipboard.*", "filesystem.*"],
+  "nativeAllowList": [
+    "app.*",
+    "window.*",
+    "computer.*",
+    "os.*",
+    "tray.*",
+    "debug.log",
+    "events.*",
+    "notification.*",
+    "clipboard.*",
+    "filesystem.*"
+  ],
   "modes": {
     "window": {
       "title": "Cipher Talk",
@@ -31,8 +42,8 @@
     "binaryVersion": "5.6.0",
     "clientVersion": "5.6.0",
     "frontendLibrary": {
-      "patchFile": "../index.html",
-      "devUrl": "http://localhost:3000",
+      "patchFile": "../out/login/index.html",
+      "devUrl": "http://localhost:3000/login",
       "projectPath": "../",
       "initCommand": "",
       "buildCommand": "cross-env NEXT_OUTPUT=export next build",
