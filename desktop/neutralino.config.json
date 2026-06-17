@@ -4,8 +4,8 @@
   "defaultMode": "window",
   "port": 0,
   "documentRoot": "/",
-  "url": "https://cipher-talk-sigma.vercel.app/login",
-  "enableServer": false,
+  "url": "/login/index.html",
+  "enableServer": true,
   "enableNativeAPI": true,
   "nativeAllowList": [
     "app.*",
@@ -20,7 +20,8 @@
     "filesystem.*"
   ],
   "allowOrigins": [
-    "https://cipher-talk-sigma.vercel.app"
+    "http://localhost:3000",
+    "http://localhost:8080"
   ],
   "modes": {
     "window": {

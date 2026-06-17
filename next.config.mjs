@@ -7,6 +7,7 @@ const nextConfig = {
   // ── Desktop (Neutralino/Tauri/Electron) static export ──
   //  Neutralino требует строгий trailingSlash для корректной
   //  маршрутизации: /login → /login/index.html
+  //  Для Vercel (SSR) оставляем undefined
   output: isExport ? 'export' : undefined,
 
   // ── Image optimization не работает со static export ──

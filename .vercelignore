@@ -8,9 +8,9 @@ node_modules/
 out/
 
 # Desktop builds
-desktop/dist/
-desktop/bin/
-desktop/resources/
+desktop/
+desktop-dist/
+out/
 
 # Tauri
 src-tauri/target/

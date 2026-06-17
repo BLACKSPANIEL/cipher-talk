@@ -7,6 +7,9 @@ import { supabase, type Profile } from '@/lib/supabaseClient';
 import { TierBadge } from '@/components/chat/TierBadge';
 import { useLanguage } from '@/lib/i18n';
 
+// Skip admin page during static export (requires Supabase credentials)
+const isStaticExport = process.env.NEXT_OUTPUT === 'export';
+
 interface AdminLog {
   id: string;
   admin_username: string;
@@ -32,6 +35,13 @@ export default function AdminPage() {
 
   useEffect(() => {
     (async () => {
+      // Skip during static export
+      if (isStaticExport) {
+        setIsLoading(false);
+        setAccessDenied(true);
+        return;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push('/login'); return; }
 

@@ -13,7 +13,7 @@
     "icons": "node scripts/generate-icons.mjs",
 
     "neutralino:dev": "Set-Location desktop; npx neu run",
-    "neutralino:build:win": "desktop\\build.bat",
+    "neutralino:build:win": "cross-env NEXT_OUTPUT=export desktop\\build.bat",
     "neutralino:update": "Set-Location desktop; npx neu update",
     "neutralino:release": "node desktop/generate-updater-json.mjs",
 
