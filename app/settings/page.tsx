@@ -9,7 +9,7 @@ import { getEncryptionKey, setEncryptionKey, generateRandomKey } from '@/lib/cry
 import {
   User, Lock, Bell, Palette, Globe, ArrowLeft, Save, Loader2,
   RefreshCw, Copy, CheckCircle, Camera, KeyRound, LogOut, ChevronRight,
-  Shield, ShieldCheck, Monitor, Smartphone, Globe2, X, Check
+  Shield, ShieldCheck, Monitor, Smartphone, Crown, Check
 } from 'lucide-react';
 
 type SettingsTab = 'profile' | 'privacy' | 'notifications' | 'appearance' | 'language';
@@ -25,9 +25,9 @@ const tabs: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
 const STATUS_EMOJIS = ['🟢', '🟡', '🔴', '🌙', '⚡', '🔥', '💤', '🎮'];
 
 const SESSIONS = [
-  { id: 1, device: 'Windows Desktop', os: 'Windows 11', location: 'Москва, RU', time: 'Сейчас', active: true },
-  { id: 2, device: 'Chrome Browser', os: 'Windows 11', location: 'Москва, RU', time: '2 часа назад', active: false },
-  { id: 3, device: 'Mobile App', os: 'iOS 17', location: 'Санкт-Петербург, RU', time: '1 день назад', active: false },
+  { id: 1, device: 'Windows Desktop', os: 'Windows 11', location: 'Москва, RU', time: 'Сейчас', active: true, icon: 'desktop' },
+  { id: 2, device: 'Chrome Browser', os: 'Windows 11', location: 'Москва, RU', time: '2 часа назад', active: false, icon: 'desktop' },
+  { id: 3, device: 'Mobile App', os: 'iOS 17', location: 'Санкт-Петербург, RU', time: '1 день назад', active: false, icon: 'mobile' },
 ];
 
 export default function SettingsPage() {
@@ -45,7 +45,6 @@ export default function SettingsPage() {
   const [keyCopied, setKeyCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
 
-  // Notifications state
   const [notifications, setNotifications] = useState({
     messages: true,
     online: true,
@@ -53,11 +52,8 @@ export default function SettingsPage() {
     sounds: true,
   });
 
-  // Appearance state
   const [theme, setTheme] = useState<'dark' | 'light' | 'system'>('dark');
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
-
-  // Language state
   const [language, setLanguage] = useState('ru');
 
   useEffect(() => {
@@ -137,18 +133,18 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#05070d] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0e0f12] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#05070d] flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-[#0e0f12] flex flex-col relative overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-emerald-500/[0.04] blur-[120px]" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-cyan-500/[0.03] blur-[100px]" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-emerald-500/[0.03] blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-cyan-500/[0.02] blur-[100px]" />
       </div>
 
       {/* Top bar */}
@@ -167,15 +163,16 @@ export default function SettingsPage() {
 
       <div className="flex-1 flex relative">
         {/* ── Left Sidebar ── */}
-        <div className="w-72 border-r border-white/[0.06] bg-black/20 backdrop-blur-xl p-4 flex flex-col">
+        <div className="w-72 border-r border-white/[0.04] bg-[#0e0f12]/90 backdrop-blur-xl p-4 flex flex-col">
           {/* Avatar */}
           <div className="mb-6">
             <div className="relative w-24 h-24 mx-auto mb-4 group cursor-pointer">
               <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border-2 border-emerald-500/20 flex items-center justify-center shadow-[0_0_40px_rgba(16,245,181,0.2)]">
                 <User className="w-12 h-12 text-emerald-400" />
               </div>
-              <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
                 <Camera className="w-8 h-8 text-white" />
+                <span className="text-[10px] text-white font-medium">Изменить</span>
               </div>
             </div>
             <p className="text-center text-sm font-medium text-white">{username || 'Пользователь'}</p>
@@ -248,8 +245,7 @@ export default function SettingsPage() {
                 animate={{ opacity: 1, x: 0 }}
                 className="space-y-6"
               >
-                {/* Avatar & Status */}
-                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6">
+                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
                       <User className="w-5 h-5 text-emerald-400" />
@@ -267,8 +263,9 @@ export default function SettingsPage() {
                         <div className="w-32 h-32 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border-2 border-emerald-500/20 flex items-center justify-center shadow-[0_0_50px_rgba(16,245,181,0.25)]">
                           <User className="w-16 h-16 text-emerald-400" />
                         </div>
-                        <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
                           <Camera className="w-10 h-10 text-white" />
+                          <span className="text-[10px] text-white font-medium">Изменить</span>
                         </div>
                       </div>
                     </div>
@@ -278,7 +275,7 @@ export default function SettingsPage() {
                       <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
                         Эмодзи статуса
                       </label>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2 max-h-[120px] overflow-y-auto custom-scrollbar p-2 rounded-xl bg-black/20 border border-white/[0.04]">
                         {STATUS_EMOJIS.map((emoji) => (
                           <button
                             key={emoji}
@@ -286,7 +283,7 @@ export default function SettingsPage() {
                             onClick={() => setStatusEmoji(emoji)}
                             className={`w-10 h-10 rounded-lg border transition-all duration-200 flex items-center justify-center text-lg ${
                               statusEmoji === emoji
-                                ? 'border-emerald-500/40 bg-emerald-500/10 scale-110'
+                                ? 'border-emerald-500 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.2)] scale-110'
                                 : 'border-white/10 hover:border-white/20'
                             }`}
                           >
@@ -306,7 +303,7 @@ export default function SettingsPage() {
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/40 transition-all text-sm"
+                        className="w-full bg-black/40 border border-white/[0.08] rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all text-sm"
                       />
                     </div>
 
@@ -320,7 +317,7 @@ export default function SettingsPage() {
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
                         rows={3}
-                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/40 transition-all text-sm resize-none"
+                        className="w-full bg-black/40 border border-white/[0.08] rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all text-sm resize-none"
                       />
                     </div>
 
@@ -352,10 +349,21 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
+                    {/* Tier Badge */}
+                    {profile?.tier && profile.tier !== 'free' && (
+                      <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30">
+                        <Crown className="w-5 h-5 text-amber-400" />
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-amber-400">Тариф {profile.tier.toUpperCase()}</p>
+                          <p className="text-[10px] text-gray-500">Назначен администратором</p>
+                        </div>
+                      </div>
+                    )}
+
                     <button
                       type="submit"
                       disabled={isSaving}
-                      className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-black font-bold text-sm hover:from-emerald-400 hover:to-emerald-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-[0_0_20px_rgba(16,245,181,0.2)] flex items-center justify-center gap-2"
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-black font-medium text-sm hover:from-emerald-400 hover:to-teal-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-[0_4px_20px_rgba(16,185,129,0.2)] flex items-center justify-center gap-2"
                     >
                       {isSaving ? (
                         <>
@@ -365,7 +373,7 @@ export default function SettingsPage() {
                       ) : (
                         <>
                           <Save className="w-4 h-4" />
-                          Сохранить профиль
+                          Сохранить изменения
                         </>
                       )}
                     </button>
@@ -382,7 +390,7 @@ export default function SettingsPage() {
                 className="space-y-6"
               >
                 {/* E2EE Key */}
-                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6">
+                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
                       <KeyRound className="w-5 h-5 text-cyan-400" />
@@ -409,11 +417,11 @@ export default function SettingsPage() {
                           type="text"
                           value={e2eeKey}
                           readOnly
-                          className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-cyan-400 font-mono text-xs focus:outline-none"
+                          className="flex-1 bg-black/40 border border-white/[0.08] rounded-lg px-4 py-3 text-cyan-400 font-mono text-xs focus:outline-none"
                         />
                         <button
                           onClick={handleCopyKey}
-                          className="px-4 py-3 rounded-xl border border-white/10 text-gray-400 hover:border-cyan-500/40 hover:text-cyan-400 transition-all"
+                          className="px-4 py-3 rounded-lg border border-white/10 text-gray-400 hover:border-cyan-500/40 hover:text-cyan-400 transition-all"
                           title="Скопировать ключ"
                         >
                           {keyCopied ? <CheckCircle className="w-4 h-4 text-cyan-400" /> : <Copy className="w-4 h-4" />}
@@ -432,7 +440,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Active Sessions */}
-                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6">
+                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
                       <Shield className="w-5 h-5 text-violet-400" />
@@ -450,14 +458,14 @@ export default function SettingsPage() {
                         className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
                           session.active
                             ? 'border-emerald-500/20 bg-emerald-500/5'
-                            : 'border-white/[0.06] bg-white/[0.01]'
+                            : 'bg-white/[0.02] border-white/[0.05]'
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                             session.active ? 'bg-emerald-500/15' : 'bg-white/5'
                           }`}>
-                            {session.device.includes('Mobile') ? (
+                            {session.icon === 'mobile' ? (
                               <Smartphone className={`w-6 h-6 ${session.active ? 'text-emerald-400' : 'text-gray-500'}`} />
                             ) : (
                               <Monitor className={`w-6 h-6 ${session.active ? 'text-emerald-400' : 'text-gray-500'}`} />
@@ -474,17 +482,21 @@ export default function SettingsPage() {
                             Активна
                           </span>
                         ) : (
-                          <button className="px-3 py-1.5 rounded-lg text-[10px] font-medium border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-all">
+                          <button className="px-3 py-1.5 rounded-lg text-[10px] font-medium border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all">
                             Завершить
                           </button>
                         )}
                       </div>
                     ))}
                   </div>
+
+                  <button className="w-full mt-4 py-3 rounded-xl border border-red-500/30 text-red-400 font-medium text-sm hover:bg-red-500/10 transition-all duration-200">
+                    Завершить другие сессии
+                  </button>
                 </div>
 
                 {/* Two-Factor Auth */}
-                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6">
+                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center">
                       <ShieldCheck className="w-5 h-5 text-yellow-400" />
@@ -519,7 +531,7 @@ export default function SettingsPage() {
                 animate={{ opacity: 1, x: 0 }}
                 className="space-y-6"
               >
-                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6">
+                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center">
                       <Bell className="w-5 h-5 text-yellow-400" />
@@ -568,7 +580,7 @@ export default function SettingsPage() {
                 animate={{ opacity: 1, x: 0 }}
                 className="space-y-6"
               >
-                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6">
+                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
                       <Palette className="w-5 h-5 text-violet-400" />
@@ -643,10 +655,10 @@ export default function SettingsPage() {
                 animate={{ opacity: 1, x: 0 }}
                 className="space-y-6"
               >
-                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6">
+                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-                      <Globe2 className="w-5 h-5 text-cyan-400" />
+                      <Globe className="w-5 h-5 text-cyan-400" />
                     </div>
                     <div>
                       <h2 className="text-lg font-bold text-white">Язык / Language</h2>
