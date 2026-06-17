@@ -5,30 +5,8 @@ echo  Cipher Talk - Neutralino.js Build
 echo ═══════════════════════════════════════════
 echo.
 
-REM ── 1. Build Next.js to static export ──
-echo [1/3] Building Next.js frontend...
-cd /d "%~dp0.."
-call npx cross-env NEXT_OUTPUT=export npx next build
-if %errorlevel% neq 0 (
-    echo ❌ Next.js build failed!
-    pause
-    exit /b 1
-)
-echo ✓ Next.js build complete
-echo.
-
-REM ── 2. Copy static files to Neutralino resources ──
-echo [2/3] Copying resources...
-cd /d "%~dp0"
-if not exist "resources" mkdir resources
-if exist "resources\*" rmdir /s /q resources
-mkdir resources
-xcopy /e /i /y "..\out\*" "resources\" >nul
-echo ✓ Resources copied
-echo.
-
-REM ── 3. Build Neutralino binary ──
-echo [3/3] Building Neutralino app...
+REM ── Build Neutralino binary (loads from Vercel, no local build needed) ──
+echo [1/1] Building Neutralino app...
 cd /d "%~dp0"
 call npx neu build --release
 if %errorlevel% neq 0 (
@@ -42,10 +20,10 @@ echo.
 echo ═══════════════════════════════════════════
 echo  ✅ Build complete!
 echo.
-echo  Output: dist/CipherTalk/
-echo    - CipherTalk.exe (portable)
+echo  Output: desktop/dist/CipherTalk/
+echo    - CipherTalk.exe (portable, ~5 MB)
 echo.
-echo  Чтобы запустить без сборки:
-echo    npm run neutralino:dev
+echo  При запуске .exe автоматически откроет:
+echo    https://cipher-talk-sigma.vercel.app/login
 echo ═══════════════════════════════════════════
 pause

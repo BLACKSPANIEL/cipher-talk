@@ -4,7 +4,7 @@
   "defaultMode": "window",
   "port": 0,
   "documentRoot": "/",
-  "url": "https://cipher-talk-sigma.vercel.app/chat",
+  "url": "https://cipher-talk-sigma.vercel.app/login",
   "enableServer": false,
   "enableNativeAPI": true,
   "nativeAllowList": [
@@ -34,7 +34,7 @@
       "resizable": true,
       "icon": "icons/icon.png",
       "exitProcessOnClose": false,
-      "enableInspector": true
+      "enableInspector": false
     }
   },
   "cli": {
@@ -46,10 +46,10 @@
     "clientVersion": "5.6.0",
     "frontendLibrary": {
       "patchFile": "../index.html",
-      "devUrl": "http://localhost:3000",
+      "devUrl": "http://localhost:3000/login",
       "projectPath": "../",
       "initCommand": "",
-      "buildCommand": "cross-env NEXT_OUTPUT=export next build",
+      "buildCommand": "",
       "devCommand": "next dev"
     }
   }
