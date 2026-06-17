@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Shield, MessageSquare, User, Loader2, Settings, Sparkles } from 'lucide-react';
+import { Plus, Shield, MessageSquare, User, Loader2, Settings, Sparkles, Search } from 'lucide-react';
 import { type Profile } from '@/lib/supabaseClient';
 import { TierBadge } from './TierBadge';
 import { useLanguage } from '@/lib/i18n';
@@ -30,13 +30,37 @@ function getRoomInitial(name: string): string {
   return name.charAt(0).toUpperCase();
 }
 
-function Avatar({ avatar, name, size = 'md' }: { avatar?: string | null; name: string; size?: 'sm' | 'md' }) {
+function Avatar({ avatar, name, size = 'md', showStatus = false, status }: { avatar?: string | null; name: string; size?: 'sm' | 'md'; showStatus?: boolean; status?: string }) {
   const isImage = avatar && (avatar.startsWith('data:') || avatar.startsWith('http'));
   const isEmoji = avatar && !isImage;
-  const sizeClass = size === 'sm' ? 'w-8 h-8 text-sm' : 'w-9 h-9 text-sm';
-  if (isImage) return <div className={`${sizeClass} rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-white/10`}><img src={avatar} alt={name} className="w-full h-full object-cover" /></div>;
-  if (isEmoji) return <div className={`${sizeClass} rounded-xl bg-neon-green/15 flex items-center justify-center flex-shrink-0 ring-1 ring-emerald-500/20`}><span className="text-base leading-none">{avatar}</span></div>;
-  return <div className={`${sizeClass} rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 flex items-center justify-center flex-shrink-0 ring-1 ring-emerald-500/25`}><span className="font-bold text-emerald-300 text-xs">{getRoomInitial(name)}</span></div>;
+  const sizeClass = size === 'sm' ? 'w-9 h-9 text-sm' : 'w-10 h-10 text-base';
+  
+  const statusDot = showStatus && status === 'online' ? (
+    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#0b0c10]" style={{ boxShadow: '0 0 8px rgba(16,245,181,0.6)' }} />
+  ) : showStatus && status === 'away' ? (
+    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-amber-400 border-2 border-[#0b0c10]" />
+  ) : showStatus ? (
+    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-zinc-600 border-2 border-[#0b0c10]" />
+  ) : null;
+
+  if (isImage) return (
+    <div className={`${sizeClass} rounded-xl overflow-hidden flex-shrink-0 relative ring-1 ring-white/10`}>
+      <img src={avatar} alt={name} className="w-full h-full object-cover" />
+      {statusDot}
+    </div>
+  );
+  if (isEmoji) return (
+    <div className={`${sizeClass} rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0 relative ring-1 ring-emerald-500/20`}>
+      <span className="text-base leading-none">{avatar}</span>
+      {statusDot}
+    </div>
+  );
+  return (
+    <div className={`${sizeClass} rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 flex items-center justify-center flex-shrink-0 relative ring-1 ring-emerald-500/25`}>
+      <span className="font-bold text-emerald-300 text-xs">{getRoomInitial(name)}</span>
+      {statusDot}
+    </div>
+  );
 }
 
 const listItem = {
@@ -52,10 +76,10 @@ function EmptyChatsState({ onOpenSearch }: { onOpenSearch: () => void }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="flex flex-col items-center text-center px-4 pt-6 pb-2 md:pt-10 md:pb-4"
+      className="flex flex-col items-center text-center px-4 pt-8 pb-4"
     >
       {/* Neon icon cluster */}
-      <div className="relative mb-3 md:mb-4">
+      <div className="relative mb-4">
         <motion.div
           className="absolute inset-0 -m-4 rounded-full bg-emerald-400/20 blur-2xl"
           animate={{ opacity: [0.35, 0.65, 0.35], scale: [0.92, 1.08, 0.92] }}
@@ -68,60 +92,39 @@ function EmptyChatsState({ onOpenSearch }: { onOpenSearch: () => void }) {
           transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
         />
         <div
-          className="relative w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center"
+          className="relative w-14 h-14 rounded-2xl flex items-center justify-center"
           style={{
             background: 'linear-gradient(145deg, rgba(16,185,129,0.18), rgba(6,78,59,0.35))',
             boxShadow: '0 0 32px rgba(16,245,181,0.45), 0 0 64px rgba(0,255,102,0.15), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 0 24px rgba(16,245,181,0.08)',
             border: '1px solid rgba(16,245,181,0.35)',
           }}
         >
-          <MessageSquare
-            className="w-5 h-5 md:w-6 md:h-6 text-emerald-300"
-            style={{ filter: 'drop-shadow(0 0 10px rgba(16,245,181,0.9)) drop-shadow(0 0 20px rgba(0,255,102,0.5))' }}
-          />
+          <MessageSquare className="w-6 h-6 text-emerald-300" style={{ filter: 'drop-shadow(0 0 10px rgba(16,245,181,0.9)) drop-shadow(0 0 20px rgba(0,255,102,0.5))' }} />
         </div>
       </div>
 
-      <p className="text-[13px] md:text-sm font-semibold text-white tracking-tight">
+      <p className="text-sm font-semibold text-white tracking-tight">
         {t('sidebar.no_chats')}
       </p>
-      <p className="mt-1 text-[10px] md:text-[11px] text-zinc-400 leading-snug max-w-[200px]">
+      <p className="mt-1.5 text-[11px] text-zinc-400 leading-relaxed max-w-[200px]">
         {t('sidebar.no_chats_hint')}
       </p>
 
       <motion.button
         onClick={onOpenSearch}
         whileTap={{ scale: 0.97 }}
-        className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] md:text-[11px] font-medium text-emerald-300/90"
+        className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-[11px] font-medium text-emerald-300/90"
         style={{
           background: 'rgba(16,185,129,0.08)',
           border: '1px solid rgba(16,245,181,0.2)',
           boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
         }}
       >
-        <Sparkles className="w-3 h-3 text-emerald-400" />
+        <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
         <span>{t('sidebar.new_chat')}</span>
       </motion.button>
     </motion.div>
   );
-}
-
-function StatusDot({ status }: { status: string }) {
-  if (status === 'online') {
-    return (
-      <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" />
-        <span
-          className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 border-[1.5px] border-[#0a0f17]"
-          style={{ boxShadow: '0 0 8px rgba(16,245,181,0.95), 0 0 16px rgba(0,255,102,0.4)' }}
-        />
-      </span>
-    );
-  }
-  if (status === 'away') {
-    return <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-amber-400 border-[1.5px] border-[#0a0f17]" />;
-  }
-  return <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-zinc-600 border-[1.5px] border-[#0a0f17]" />;
 }
 
 export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpenSettings, currentProfile, isLoadingRooms }: SidebarProps) {
@@ -130,55 +133,55 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
 
   return (
     <div className="flex flex-col h-full bg-transparent relative min-h-0">
-      {/* Ambient glow — mobile */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden md:hidden">
-        <div className="absolute -top-16 -left-16 w-[220px] h-[220px] rounded-full bg-emerald-400/[0.08] blur-3xl" />
-        <div className="absolute top-1/3 -right-12 w-[160px] h-[160px] rounded-full bg-cyan-400/[0.05] blur-3xl" />
+      {/* Ambient glow */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-16 -left-16 w-[220px] h-[220px] rounded-full bg-emerald-400/[0.06] blur-3xl" />
+        <div className="absolute top-1/3 -right-12 w-[160px] h-[160px] rounded-full bg-cyan-400/[0.04] blur-3xl" />
       </div>
 
-      {/* Header — compact */}
+      {/* Header */}
       <div className="relative z-10 px-3 pt-[max(0.625rem,env(safe-area-inset-top))] pb-2 md:px-4 md:pt-4 md:pb-2.5 border-b border-white/[0.06]">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-2">
             <motion.div
               whileTap={{ scale: 0.95 }}
-              className="w-7 h-7 md:w-8 md:h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center ring-1 ring-emerald-500/30"
+              className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center ring-1 ring-emerald-500/30"
               style={{ boxShadow: '0 0 20px rgba(16,245,181,0.25), inset 0 1px 0 rgba(255,255,255,0.08)' }}
             >
-              <Shield className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-400" style={{ filter: 'drop-shadow(0 0 6px rgba(16,245,181,0.7))' }} />
+              <Shield className="w-4 h-4 text-emerald-400" style={{ filter: 'drop-shadow(0 0 6px rgba(16,245,181,0.7))' }} />
             </motion.div>
             <div>
-              <span className="font-bold text-white text-[11px] md:text-sm tracking-[0.18em] block leading-none">C I P H E R</span>
+              <span className="font-bold text-white text-xs md:text-sm tracking-[0.18em] block leading-none">CIPHER TALK</span>
               <p className="text-[9px] md:text-[10px] text-zinc-500 leading-tight mt-0.5">{t('sidebar.encrypted_chat')}</p>
             </div>
           </div>
           <motion.button
             whileTap={{ scale: 0.92 }}
             onClick={onOpenSettings}
-            className="w-7 h-7 md:w-8 md:h-8 rounded-xl flex items-center justify-center text-zinc-500 hover:text-emerald-400 hover:bg-white/[0.04] transition-colors"
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-500 hover:text-emerald-400 hover:bg-white/[0.04] transition-colors"
             aria-label="Settings"
           >
-            <Settings className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <Settings className="w-4 h-4" />
           </motion.button>
         </div>
 
+        {/* Search */}
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={onOpenSearch}
-          className="w-full flex items-center justify-center gap-1.5 px-3 py-2 md:py-2.5 rounded-xl text-emerald-200 transition-all duration-300 text-[11px] md:text-sm font-semibold"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-emerald-200/80 transition-all duration-300 text-xs md:text-sm font-medium"
           style={{
-            background: 'linear-gradient(135deg, rgba(16,245,181,0.14), rgba(6,182,212,0.06))',
-            boxShadow: '0 0 28px rgba(16,245,181,0.12), inset 0 1px 0 rgba(255,255,255,0.1)',
-            border: '1px solid rgba(16,245,181,0.28)',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.06)',
           }}
         >
-          <Plus className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-400" />
-          <span>{t('sidebar.new_chat')}</span>
+          <Search className="w-3.5 h-3.5 text-zinc-500" />
+          <span className="text-zinc-500">{t('sidebar.search_placeholder')}</span>
         </motion.button>
       </div>
 
       {/* Room list */}
-      <div className="relative z-10 flex-1 overflow-y-auto overscroll-contain px-1.5 py-1 md:px-2 md:py-1 min-h-0">
+      <div className="relative z-10 flex-1 overflow-y-auto overscroll-contain px-2 py-1.5 md:px-2.5 md:py-1.5 min-h-0">
         <AnimatePresence mode="popLayout">
           {isLoadingRooms ? (
             <motion.div
@@ -186,7 +189,7 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex items-center justify-center py-6"
+              className="flex items-center justify-center py-8"
             >
               <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
             </motion.div>
@@ -205,18 +208,11 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
                   transition={{ duration: 0.22, delay: i * 0.03 }}
                   whileTap={{ scale: 0.985 }}
                   onClick={() => onSelectRoom(room.id)}
-                  className={`relative w-full flex items-center gap-2.5 px-2.5 py-2 md:py-2.5 rounded-xl transition-colors group overflow-hidden mb-px ${
-                    isActive ? 'text-white' : 'hover:bg-white/[0.04] active:bg-white/[0.06]'
+                  className={`relative w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl transition-all duration-200 group overflow-hidden mb-px ${
+                    isActive ? 'bg-emerald-500/5' : 'hover:bg-white/[0.03] active:bg-white/[0.05]'
                   }`}
-                  style={
-                    isActive
-                      ? {
-                          background: 'linear-gradient(90deg, rgba(16,245,181,0.14) 0%, rgba(16,245,181,0.04) 55%, transparent 100%)',
-                          boxShadow: 'inset 0 0 20px rgba(16,245,181,0.06)',
-                        }
-                      : undefined
-                  }
                 >
+                  {/* Active indicator — left border */}
                   {isActive && (
                     <motion.div
                       layoutId="sidebar-active-indicator"
@@ -224,18 +220,19 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
                       style={{ boxShadow: '0 0 10px rgba(16,245,181,0.8)' }}
                     />
                   )}
-                  <Avatar avatar={room.otherUserAvatar} name={room.name} />
+
+                  <Avatar avatar={room.otherUserAvatar} name={room.name} showStatus={!!room.otherUserId} status={room.otherUserId ? 'online' : undefined} />
                   <div className="flex-1 min-w-0 text-left">
                     <div className="flex items-center justify-between gap-1">
                       <span className={`text-[13px] font-medium truncate ${isActive ? 'text-white' : 'text-zinc-100'}`}>{room.name}</span>
-                      {room.isEncrypted && <Shield className="w-3 h-3 text-emerald-500/70 flex-shrink-0" />}
+                      {room.isEncrypted && <Shield className="w-3 h-3 text-emerald-500/60 flex-shrink-0" />}
                     </div>
                     {room.lastMessage && (
                       <p className="text-[10px] text-zinc-500 mt-px truncate leading-snug">{room.lastMessage}</p>
                     )}
                   </div>
                   {room.unread && room.unread > 0 && (
-                    <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-emerald-400 text-[#05070d] text-[9px] font-bold">
+                    <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-emerald-400 text-[#0b0c10] text-[9px] font-bold">
                       {room.unread}
                     </span>
                   )}
@@ -246,16 +243,16 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
         </AnimatePresence>
       </div>
 
-      {/* Profile dock — glued to bottom */}
+      {/* Profile dock */}
       <div className="relative z-20 mt-auto shrink-0">
-        <div className="absolute -top-6 left-0 right-0 h-6 bg-gradient-to-b from-transparent via-[#05070d]/40 to-[#05070d]/80 pointer-events-none" />
-        <div className="absolute top-0 left-3 right-3 h-px bg-gradient-to-r from-transparent via-emerald-400/25 to-transparent" />
+        <div className="absolute -top-5 left-0 right-0 h-5 bg-gradient-to-b from-transparent via-[#0b0c10]/60 to-[#0b0c10] pointer-events-none" />
+        <div className="absolute top-0 left-3 right-3 h-px bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent" />
 
         {currentProfile ? (
           <motion.button
             whileTap={{ scale: 0.99 }}
             onClick={onOpenSettings}
-            className="w-full flex items-center gap-2.5 px-3 md:px-4 py-2 md:py-2.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] rounded-none md:rounded-xl transition-colors group"
+            className="w-full flex items-center gap-2.5 px-3 md:px-4 py-2.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] rounded-none md:rounded-xl transition-colors group"
             style={{
               background: 'linear-gradient(180deg, rgba(14,20,28,0.82) 0%, rgba(8,12,18,0.92) 100%)',
               backdropFilter: 'blur(24px)',
@@ -270,11 +267,10 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
                 className={`rounded-[11px] p-[1.5px] ${isOnline ? 'bg-gradient-to-br from-emerald-400 via-emerald-300 to-cyan-400' : 'bg-white/10'}`}
                 style={isOnline ? { boxShadow: '0 0 20px rgba(16,245,181,0.35)' } : undefined}
               >
-                <div className="rounded-[10px] overflow-hidden bg-[#0a0f17]">
+                <div className="rounded-[10px] overflow-hidden bg-[#0b0c10]">
                   <Avatar avatar={(currentProfile as { avatar_url?: string | null }).avatar_url} name={currentProfile.username} size="sm" />
                 </div>
               </div>
-              <StatusDot status={currentProfile.status} />
             </div>
 
             <div className="flex-1 min-w-0 text-left">

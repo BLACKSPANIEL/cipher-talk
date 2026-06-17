@@ -18,7 +18,6 @@ export interface Message {
   isEncrypted?: boolean;
   originalText?: string;
   isE2ee?: boolean;
-  /** Optimistic status: 'sending' while request is in flight, 'sent' after server ack, 'error' if it failed. */
   status?: 'sending' | 'sent' | 'delivered' | 'read' | 'error';
 }
 
@@ -35,21 +34,21 @@ function Avatar({ avatar, name }: { avatar?: string | null; name: string }) {
 
   if (isImage) {
     return (
-      <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-zinc-700/50">
+      <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-white/10">
         <img src={avatar} alt={name} className="w-full h-full object-cover" />
       </div>
     );
   }
   if (isEmoji) {
     return (
-      <div className="w-8 h-8 rounded-full bg-zinc-800/70 flex items-center justify-center flex-shrink-0 ring-1 ring-zinc-700/50">
+      <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 ring-1 ring-emerald-500/20">
         <span className="text-base leading-none">{avatar}</span>
       </div>
     );
   }
   return (
-    <div className="w-8 h-8 rounded-full bg-zinc-800/70 flex items-center justify-center flex-shrink-0 ring-1 ring-zinc-700/50">
-      <span className="text-xs font-bold text-zinc-300">{initial}</span>
+    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 flex items-center justify-center flex-shrink-0 ring-1 ring-emerald-500/25">
+      <span className="text-xs font-bold text-emerald-300">{initial}</span>
     </div>
   );
 }
@@ -111,10 +110,10 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
         <div
           className={`relative rounded-2xl px-3.5 py-2 backdrop-blur-sm ${
             isMine
-              ? `bg-emerald-950/40 border border-emerald-800/30 text-emerald-50 rounded-br-md shadow-[0_4px_20px_rgba(16,185,129,0.08)] ${
+              ? `bg-emerald-600/20 border border-emerald-500/30 text-emerald-50 rounded-br-sm ${
                   isError ? 'border-red-500/50' : ''
                 }`
-              : 'bg-zinc-800/60 border border-zinc-700/40 text-zinc-100 rounded-bl-md'
+              : 'bg-white/5 border border-white/10 text-neutral-200 rounded-bl-sm'
           }`}
         >
           {isMine && message.isE2ee && (
@@ -170,7 +169,6 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
 
       {isMine && <Avatar avatar={message.senderAvatar} name={message.senderName} />}
 
-      {/* Unused ref to silence isOptimistic warning when only used in dev */}
       {isOptimistic && null}
     </motion.div>
   );

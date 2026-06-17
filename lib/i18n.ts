@@ -34,6 +34,7 @@ const dictionaries = {
     // Sidebar
     'sidebar.encrypted_chat': 'Зашифрованный чат',
     'sidebar.new_chat': 'Новый чат',
+    'sidebar.search_placeholder': 'Поиск чатов…',
     'sidebar.no_chats': 'Нет чатов',
     'sidebar.no_chats_hint': 'Нажмите «Новый чат» чтобы найти собеседника',
 
@@ -181,6 +182,7 @@ const dictionaries = {
 
     'sidebar.encrypted_chat': 'Encrypted chat',
     'sidebar.new_chat': 'New chat',
+    'sidebar.search_placeholder': 'Search chats…',
     'sidebar.no_chats': 'No chats',
     'sidebar.no_chats_hint': 'Click "New chat" to find a contact',
 
