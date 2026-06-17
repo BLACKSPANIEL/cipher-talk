@@ -47,6 +47,9 @@ const config: Config = {
         'radial-glow': 'radial-gradient(circle at 50% 50%, rgba(0, 255, 102, 0.08), transparent 70%)',
         'messenger-bg': 'radial-gradient(circle at 20% 30%, rgba(0, 255, 102, 0.06), transparent 50%), radial-gradient(circle at 80% 70%, rgba(0, 200, 80, 0.04), transparent 40%), linear-gradient(180deg, #08080C, #0C0C0E)',
       },
+      fontFamily: {
+        sans: ['Space Grotesk', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+      },
       backdropBlur: {
         '3xl': '48px',
         '4xl': '64px',

@@ -1,0 +1,84 @@
+{
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-config-schema/schema.json",
+  "productName": "Cipher Talk",
+  "version": "0.1.0",
+  "identifier": "com.ciphertalk.app",
+
+  "build": {
+    "beforeBuildCommand": "cross-env NEXT_OUTPUT=export npm run build",
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:3000",
+    "frontendDist": "../out"
+  },
+
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Cipher Talk",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 480,
+        "minHeight": 600,
+        "center": true,
+        "decorations": false,
+        "resizable": true,
+        "fullscreen": false,
+        "visible": true,
+        "url": "/",
+        "closable": true,
+        "minimizable": true,
+        "maximizable": true,
+        "backgroundColor": "#05070d"
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: asset:; connect-src 'self' https://*.supabase.co wss://*.supabase.co http://localhost:3000; font-src 'self' https://fonts.gstatic.com; frame-src 'self';"
+    },
+    "withGlobalTauri": false
+  },
+
+  "bundle": {
+    "active": true,
+    "targets": ["nsis", "msi"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.png",
+      "icons/icon.ico"
+    ],
+    "category": "SocialNetworking",
+    "shortDescription": "Private Encrypted Messenger",
+    "longDescription": "Cipher Talk is a premium private messenger with end-to-end encryption, modern dark design, and exceptional user experience.",
+    "windows": {
+      "nsis": null,
+      "wix": null
+    }
+  },
+
+  "plugins": {
+    "updater": {
+      "pubkey": "",
+      "endpoints": [
+        "https://github.com/BLACKSPANIEL/cipher-talk/releases/latest/download/updater.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    },
+    "notification": {
+      "all": true
+    },
+    "shell": {
+      "open": true,
+      "scope": [
+        {
+          "name": "external",
+          "url": "https://**"
+        }
+      ]
+    }
+  }
+}

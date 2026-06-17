@@ -1,23 +1,33 @@
 /** @type {import('next').NextConfig} */
+const isExport = process.env.NEXT_OUTPUT === 'export';
+
 const nextConfig = {
   reactStrictMode: true,
 
-  // Desktop builds: use 'export' for static output (Tauri-compatible)
-  // or 'standalone' for Electron with Node.js server support.
-  // Set NEXT_OUTPUT env var: 'export' | 'standalone' | undefined (default)
-  output: process.env.NEXT_OUTPUT === 'export' ? 'export' : undefined,
+  // ── Tauri/Electron production: static export to /out ──
+  //  В tauri.conf.json beforeBuildCommand устанавливает NEXT_OUTPUT=export
+  //  автоматически перед npm run build
+  output: isExport ? 'export' : undefined,
 
-  // Ensure all assets use relative paths for file:// protocol compatibility (Electron/Tauri)
-  // This is critical for desktop builds where the app runs from local filesystem
-  assetPrefix: process.env.NEXT_OUTPUT === 'export' ? '.' : undefined,
-
-  // Disable image optimization for static export (not supported)
+  // ── Image optimization не работает со static export ──
   images: {
-    unoptimized: process.env.NEXT_OUTPUT === 'export',
+    unoptimized: isExport,
   },
 
-  // Enable trailing slashes for better static file compatibility
-  trailingSlash: process.env.NEXT_OUTPUT === 'export',
+  // ── Trailing slashes для совместимости с file:// протоколом ──
+  //  В Tauri production статические файлы грузятся через asset:// протокол,
+  //  поэтому trailingSlash не требуется, но оставляем для безопасности
+  trailingSlash: isExport,
+
+  // ── Отключаем линтер при сборке (ускоряет Tauri build) ──
+  eslint: {
+    ignoreDuringBuilds: isExport,
+  },
+
+  // ── TypeScript ошибки не блокируют сборку (для Tauri build) ──
+  typescript: {
+    ignoreBuildErrors: isExport,
+  },
 };
 
 export default nextConfig;

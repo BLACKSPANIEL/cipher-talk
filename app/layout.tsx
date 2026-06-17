@@ -1,9 +1,6 @@
 import type { Metadata } from 'next';
-import { Space_Grotesk } from 'next/font/google';
 import { LanguageProvider } from '@/lib/i18n';
 import './globals.css';
-
-const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
 
 export const metadata: Metadata = {
   title: 'Cipher Talk — приватный мессенджер с E2EE',
@@ -34,7 +31,30 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru" suppressHydrationWarning>
-      <body className={`${spaceGrotesk.variable} font-sans text-white`}>
+      <head>
+        {/*
+          Инжектим скрипт, который до отрисовки добавляет класс 'neutralino' или 'tauri'
+          на <html>, чтобы CSS мог адаптироваться под Desktop-окно.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var d = document.documentElement;
+                if (typeof window !== 'undefined') {
+                  if (window.__NL__) d.classList.add('neutralino');
+                  if (window.__TAURI_INTERNALS__) d.classList.add('tauri');
+                }
+                // Если есть Custom TitleBar — добавляем padding для body
+                if (d.classList.contains('neutralino') || d.classList.contains('tauri')) {
+                  d.style.setProperty('--desktop-titlebar', '40px');
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className="font-sans text-white">
         <LanguageProvider>{children}</LanguageProvider>
       </body>
     </html>

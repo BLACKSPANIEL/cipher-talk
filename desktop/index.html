@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cipher Talk</title>
+
+  <!-- Neutralino.js client library (injected by CLI during build) -->
+  <script src="lib/neutralino.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      color-scheme: dark;
+      font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+      --bg-deep: #05070d;
+      --bg-dark: #0a0f17;
+      --surface: rgba(12, 16, 24, 0.72);
+      --border: rgba(255, 255, 255, 0.06);
+      --text: #ffffff;
+      --muted: #888888;
+      --neon: #10f5b5;
+      --neon-dark: #0cc99a;
+      --danger: #ef4444;
+      --titlebar-height: 42px;
+      --radius: 10px;
+      --apple-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-deep);
+      color: var(--text);
+      font-family: 'Space Grotesk', var(--apple-font);
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+    }
+
+    /* ── TitleBar ── */
+    #titlebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--titlebar-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      background: rgba(5, 7, 13, 0.92);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      z-index: 99999;
+      app-region: drag;
+      -webkit-app-region: drag;
+    }
+
+    #titlebar .left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #titlebar .logo-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: rgba(16, 245, 181, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 0 12px rgba(16, 245, 181, 0.15);
+    }
+
+    #titlebar .logo-icon::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 6px;
+      border: 1px solid rgba(16, 245, 181, 0.25);
+    }
+
+    #titlebar .logo-icon svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: #10f5b5;
+      stroke-width: 2;
+    }
+
+    #titlebar .app-title {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    #titlebar .app-title span {
+      color: #10f5b5;
+    }
+
+    #titlebar .controls {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      app-region: no-drag;
+      -webkit-app-region: no-drag;
+    }
+
+    #titlebar .controls button {
+      width: 38px;
+      height: 30px;
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      transition: all 0.15s ease;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    #titlebar .controls button:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    #titlebar .controls button#closeBtn:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    /* ── WebView container ── */
+    #app-content {
+      position: fixed;
+      top: var(--titlebar-height);
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg-deep);
+    }
+
+    /* ── Loading overlay ── */
+    #loading-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-deep);
+      z-index: 99998;
+      transition: opacity 0.4s ease;
+    }
+
+    #loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loader {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(16, 245, 181, 0.1);
+      border-top-color: #10f5b5;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Update Modal (Cipher Talk glassmorphism) ── */
+    #update-modal {
+      position: fixed;
+      inset: 0;
+      display: none;           /* hidden by default */
+      align-items: center;
+      justify-content: center;
+      z-index: 100000;
+      background: rgba(5, 7, 13, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      animation: fadeIn 0.25s ease;
+    }
+
+    #update-modal.open {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    #update-modal .modal-card {
+      width: 420px;
+      max-width: 90vw;
+      max-height: 80vh;
+      background: rgba(8, 10, 20, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 32px 28px 28px;
+      box-shadow:
+        0 32px 80px rgba(0, 0, 0, 0.5),
+        0 0 60px rgba(16, 245, 181, 0.05);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      animation: slideUp 0.3s ease;
+    }
+
+    #update-modal .modal-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(16, 245, 181, 0.15), rgba(16, 245, 181, 0.05));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      border: 1px solid rgba(16, 245, 181, 0.2);
+      box-shadow: 0 0 24px rgba(16, 245, 181, 0.1);
+    }
+
+    #update-modal .modal-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: #10f5b5;
+      stroke-width: 1.5;
+    }
+
+    #update-modal h2 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+
+    #update-modal .version-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      background: rgba(16, 245, 181, 0.12);
+      color: #10f5b5;
+      border: 1px solid rgba(16, 245, 181, 0.2);
+      margin-bottom: 16px;
+    }
+
+    #update-modal .release-notes {
+      font-size: 13px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin: 14px 0 20px;
+      max-height: 160px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-family: inherit;
+    }
+
+    #update-modal .release-notes::-webkit-scrollbar {
+      width: 3px;
+    }
+    #update-modal .release-notes::-webkit-scrollbar-thumb {
+      background: rgba(16, 245, 181, 0.3);
+      border-radius: 9999px;
+    }
+
+    #update-modal .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    #update-modal .modal-actions button {
+      padding: 9px 22px;
+      border-radius: 10px;
+      border: none;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    #update-modal .btn-primary {
+      background: linear-gradient(135deg, #10f5b5 0%, #0cc99a 100%);
+      color: #05070d;
+      box-shadow: 0 0 20px rgba(16, 245, 181, 0.25);
+    }
+
+    #update-modal .btn-primary:hover {
+      box-shadow: 0 0 32px rgba(16, 245, 181, 0.4);
+      transform: translateY(-1px);
+    }
+
+    #update-modal .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    #update-modal .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    /* ── Update errors / no-update toast ── */
+    #update-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(8, 10, 20, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      color: rgba(255, 255, 255, 0.7);
+      z-index: 100001;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    #update-toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.4); }
+  </style>
+</head>
+<body>
+  <!-- ── Loading overlay ── -->
+  <div id="loading-overlay">
+    <div class="loader"></div>
+  </div>
+
+  <!-- ── Custom TitleBar ── -->
+  <div id="titlebar">
+    <div class="left">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7z"/>
+          <path d="M12 6l-6 3v4c0 3.7 2.52 7.16 6 8 3.48-.84 6-4.3 6-8V9z" opacity="0.4"/>
+        </svg>
+      </div>
+      <span class="app-title">Cipher<span>Talk</span></span>
+    </div>
+
+    <div class="controls">
+      <button id="minimizeBtn" title="Свернуть">─</button>
+      <button id="maximizeBtn" title="Развернуть">☐</button>
+      <button id="closeBtn" title="Закрыть">✕</button>
+    </div>
+  </div>
+
+  <!-- ── App WebView ── -->
+  <div id="app-content"></div>
+
+  <!-- ── Update Modal ── -->
+  <div id="update-modal">
+    <div class="modal-card">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7z"/>
+          <path d="M12 6l-6 3v4c0 3.7 2.52 7.16 6 8 3.48-.84 6-4.3 6-8V9z" opacity="0.4"/>
+          <path d="M12 16v-4m0 0l-2 2m2-2l2 2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2>Доступно обновление</h2>
+      <span class="version-badge" id="update-version-badge">v0.0.0</span>
+      <div class="release-notes" id="update-release-notes">Загрузка информации о версии…</div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="update-later-btn">Позже</button>
+        <button class="btn-primary" id="update-now-btn">Обновить сейчас</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast ── -->
+  <div id="update-toast"></div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════
+    //  CONFIGURATION
+    // ═══════════════════════════════════════════════════════════════
+
+    const CONFIG = {
+      // Текущая версия приложения — берётся из package.json,
+      // встроенная в бинарник при сборке
+      CURRENT_VERSION: '0.1.0',
+
+      // URL к updater.json на GitHub Releases
+      UPDATER_URL: 'https://github.com/BLACKSPANIEL/cipher-talk/releases/latest/download/updater.json',
+
+      // URL для скачивания — основа, к ней добавляется имя файла
+      DOWNLOAD_BASE: 'https://github.com/BLACKSPANIEL/cipher-talk/releases/latest/download',
+
+      // Имя файла для Windows
+      DOWNLOAD_FILENAME: 'CipherTalk-Setup.exe',
+
+      // Проверять обновления раз в N миллисекунд (24 часа)
+      CHECK_INTERVAL_MS: 24 * 60 * 60 * 1000,
+
+      // Задержка перед первой проверкой после запуска (5 секунд)
+      INITIAL_DELAY_MS: 5000,
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    //  UPDATE CHECKER
+    // ═══════════════════════════════════════════════════════════════
+
+    let isChecking = false;
+
+    /**
+     * Сравнивает две семантические версии "x.y.z".
+     * Возвращает:
+     *   1  если a > b
+     *  -1  если a < b
+     *   0  если равны
+     */
+    function compareVersions(a, b) {
+      const pa = a.split('.').map(Number);
+      const pb = b.split('.').map(Number);
+      for (let i = 0; i < 3; i++) {
+        const va = pa[i] || 0;
+        const vb = pb[i] || 0;
+        if (va > vb) return 1;
+        if (va < vb) return -1;
+      }
+      return 0;
+    }
+
+    /**
+     * Парсит release notes из строки в читаемый вид.
+     * GitHub может возвращать Markdown или plain text.
+     */
+    function formatReleaseNotes(body) {
+      if (!body || body === '') return '✓ Исправления и улучшения';
+      // Обрезаем слишком длинные заметки
+      const maxLen = 600;
+      const trimmed = body.length > maxLen ? body.slice(0, maxLen) + '…' : body;
+      return trimmed;
+    }
+
+    /**
+     * Показывает модальное окно с информацией об обновлении.
+     */
+    function showUpdateModal(info) {
+      const versionEl = document.getElementById('update-version-badge');
+      const notesEl = document.getElementById('update-release-notes');
+      const modal = document.getElementById('update-modal');
+
+      versionEl.textContent = 'v' + info.version;
+      notesEl.textContent = formatReleaseNotes(info.releaseNotes) || '✓ Исправления и улучшения';
+
+      modal.classList.add('open');
+
+      // Кнопка "Обновить сейчас" — открывает GitHub Release в браузере
+      document.getElementById('update-now-btn').onclick = () => {
+        modal.classList.remove('open');
+        const downloadUrl = CONFIG.DOWNLOAD_BASE + '/' + CONFIG.DOWNLOAD_FILENAME;
+        if (typeof Neutralino !== 'undefined' && Neutralino.computer) {
+          Neutralino.computer.open(downloadUrl);
+        } else {
+          window.open(downloadUrl, '_blank');
+        }
+      };
+
+      // Кнопка "Позже" — просто закрывает
+      document.getElementById('update-later-btn').onclick = () => {
+        modal.classList.remove('open');
+      };
+    }
+
+    /**
+     * Показывает toast-уведомление внизу экрана.
+     */
+    function showToast(message, duration = 4000) {
+      const toast = document.getElementById('update-toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toast._hideTimer);
+      toast._hideTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, duration);
+    }
+
+    /**
+     * Главная функция проверки обновлений.
+     * 1. Запрашивает updater.json с GitHub
+     * 2. Сравнивает версии
+     * 3. Если есть новая — показывает модалку
+     */
+    async function checkForUpdates() {
+      if (isChecking) return;
+      isChecking = true;
+
+      try {
+        console.log('[Updater] Checking for updates…');
+
+        const response = await fetch(CONFIG.UPDATER_URL, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          cache: 'no-cache',
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        // Валидация ответа
+        if (!data.version) {
+          throw new Error('Invalid updater.json: missing "version"');
+        }
+
+        const remote = data.version;
+        const local = CONFIG.CURRENT_VERSION;
+
+        console.log(`[Updater] Local: v${local}, Remote: v${remote}`);
+
+        const cmp = compareVersions(remote, local);
+
+        if (cmp > 0) {
+          // Новая версия доступна
+          console.log(`[Updater] Update available: v${remote}`);
+
+          // Сохраняем в localStorage, чтобы не показывать повторно
+          const lastShown = localStorage.getItem('update_dismissed');
+          if (lastShown === remote) {
+            console.log('[Updater] Update already dismissed, skipping modal');
+            return;
+          }
+
+          showUpdateModal({
+            version: remote,
+            releaseNotes: data.releaseNotes || data.body || '',
+            downloadUrl: data.downloadUrl || null,
+          });
+        } else if (cmp === 0) {
+          console.log('[Updater] Already up to date (v' + local + ')');
+        } else {
+          console.log('[Updater] Local version is newer than remote (dev mode?)');
+        }
+      } catch (err) {
+        console.warn('[Updater] Check failed:', err.message);
+        // Тихий провал — не показываем ошибку пользователю
+        // В production можно раскомментировать, чтобы видеть ошибки:
+        // showToast('Ошибка проверки обновлений: ' + err.message, 3000);
+      } finally {
+        isChecking = false;
+      }
+    }
+
+    /**
+     * Запускает проверку обновлений с интервалом.
+     */
+    function startUpdateChecker() {
+      // Первая проверка через INITIAL_DELAY_MS после запуска
+      setTimeout(() => {
+        checkForUpdates();
+      }, CONFIG.INITIAL_DELAY_MS);
+
+      // Проверка раз в CHECK_INTERVAL_MS
+      setInterval(() => {
+        checkForUpdates();
+      }, CONFIG.CHECK_INTERVAL_MS);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  NEUTRALINO INIT
+    // ═══════════════════════════════════════════════════════════════
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        await Neutralino.init();
+
+        if (Neutralino.window) {
+          document.getElementById('minimizeBtn').addEventListener('click', () => {
+            Neutralino.window.minimize();
+          });
+
+          document.getElementById('maximizeBtn').addEventListener('click', async () => {
+            const maximized = await Neutralino.window.isMaximized();
+            if (maximized) {
+              await Neutralino.window.unmaximize();
+            } else {
+              await Neutralino.window.maximize();
+            }
+          });
+
+          document.getElementById('closeBtn').addEventListener('click', () => {
+            Neutralino.window.hide();
+          });
+
+          document.getElementById('titlebar').addEventListener('dblclick', async () => {
+            const maximized = await Neutralino.window.isMaximized();
+            if (maximized) {
+              await Neutralino.window.unmaximize();
+            } else {
+              await Neutralino.window.maximize();
+            }
+          });
+
+          const updateMaxBtn = async () => {
+            const maximized = await Neutralino.window.isMaximized();
+            document.getElementById('maximizeBtn').textContent = maximized ? '❐' : '☐';
+          };
+          setInterval(updateMaxBtn, 500);
+          Neutralino.events.on('windowMaximize', updateMaxBtn);
+          Neutralino.events.on('windowUnmaximize', updateMaxBtn);
+        }
+      } catch (e) {
+        console.warn('Neutralino not available (running in browser):', e);
+      }
+
+      // ── Hide loading ──
+      setTimeout(() => {
+        document.getElementById('loading-overlay').classList.add('hidden');
+      }, 300);
+    });
+
+    // ═══════════════════════════════════════════════════════════════
+    //  GLOBAL SHORTCUTS
+    // ═══════════════════════════════════════════════════════════════
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'F12') {
+        e.preventDefault();
+        if (typeof Neutralino !== 'undefined' && Neutralino.debug) {
+          Neutralino.debug.log('DevTools requested');
+        }
+      }
+      if (e.ctrlKey && e.key === 'q') {
+        e.preventDefault();
+        if (typeof Neutralino !== 'undefined' && Neutralino.app) {
+          Neutralino.app.exit();
+        }
+      }
+    });
+
+    // ═══════════════════════════════════════════════════════════════
+    //  TRAY SETUP
+    // ═══════════════════════════════════════════════════════════════
+
+    async function setupTray() {
+      try {
+        if (typeof Neutralino === 'undefined' || !Neutralino.tray) return;
+
+        const TRAY_ICON = 'icons/icon.png';
+
+        await Neutralino.tray.create({
+          icon: TRAY_ICON,
+          menuItems: [
+            { id: 'show', text: 'Открыть Cipher Talk' },
+            { id: 'separator', text: '-' },
+            { id: 'check_updates', text: 'Проверить обновления' },
+            { id: 'separator2', text: '-' },
+            { id: 'quit', text: 'Выйти' }
+          ]
+        });
+
+        Neutralino.events.on('trayMenuItemClicked', async (event) => {
+          const { id } = event.detail;
+          if (id === 'show') {
+            await Neutralino.window.show();
+            await Neutralino.window.setFullScreen(false);
+            await Neutralino.window.focus();
+          } else if (id === 'check_updates') {
+            checkForUpdates();
+          } else if (id === 'quit') {
+            if (Neutralino.app) {
+              await Neutralino.app.exit();
+            }
+          }
+        });
+      } catch (e) {
+        console.warn('[Tray] Setup failed:', e);
+      }
+    }
+
+    // ── Initialize everything after Neutralino is ready ──
+    if (typeof Neutralino !== 'undefined') {
+      Neutralino.events.on('ready', () => {
+        setupTray();
+        startUpdateChecker();
+      });
+      setTimeout(() => {
+        setupTray();
+        startUpdateChecker();
+      }, 1000);
+    } else {
+      // Fallback for browser testing — still check updates
+      setTimeout(() => {
+        startUpdateChecker();
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

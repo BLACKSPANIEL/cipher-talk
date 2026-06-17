@@ -10,65 +10,26 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "icons": "node scripts/generate-icons.mjs",
+
+    "neutralino:dev": "Set-Location desktop; npx neu run",
+    "neutralino:build:win": "desktop\\build.bat",
+    "neutralino:update": "Set-Location desktop; npx neu update",
+    "neutralino:release": "node desktop/generate-updater-json.mjs",
+
+    "tauri:dev": "Set-Location ..\\src-tauri; cargo tauri dev",
+    "tauri:build:win": "cross-env NEXT_OUTPUT=export tauri build --target windows --bundles nsis",
+    "tauri:icon": "npx tauri icon src-tauri/icons/icon.png",
 
     "electron:dev": "concurrently \"next dev\" \"wait-on http://localhost:3000 && electron .\"",
-    "electron:build:win": "cross-env NEXT_OUTPUT=export next build && electron-builder --win",
-    "electron:build:mac": "cross-env NEXT_OUTPUT=export next build && electron-builder --mac",
+    "electron:build:win": "cross-env NEXT_OUTPUT=export CSC_IDENTITY_AUTO_DISCOVERY=false next build && electron-builder --win",
+    "electron:build:mac": "cross-env NEXT_OUTPUT=export CSC_IDENTITY_AUTO_DISCOVERY=false next build && electron-builder --mac",
     "electron:build:linux": "cross-env NEXT_OUTPUT=export next build && electron-builder --linux",
-    "electron:build:all": "cross-env NEXT_OUTPUT=export next build && electron-builder --win --mac --linux",
-    "tauri:build": "next build --experimental-build-mode compile"
-  },
-  "build": {
-    "appId": "com.ciphertalk.app",
-    "productName": "Cipher Talk",
-    "directories": {
-      "output": "desktop-dist",
-      "buildResources": "build-resources"
-    },
-    "files": [
-      "out/**/*",
-      "electron/**/*",
-      "!node_modules/**/*"
-    ],
-    "extraResources": [],
-    "asar": true,
-    "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": ["x64", "arm64"]
-        },
-        {
-          "target": "portable",
-          "arch": ["x64"]
-        }
-      ],
-      "icon": "public/favicon.ico"
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": true,
-      "allowToChangeInstallationDirectory": true,
-      "installerIcon": "public/favicon.ico",
-      "uninstallerIcon": "public/favicon.ico",
-      "installerHeaderIcon": "public/favicon.ico",
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "Cipher Talk"
-    },
-    "mac": {
-      "target": ["dmg", "zip"],
-      "icon": "public/favicon.ico",
-      "category": "public.app-category.social-networking"
-    },
-    "linux": {
-      "target": ["AppImage", "deb", "rpm"],
-      "icon": "public/favicon.ico",
-      "category": "Network;InstantMessaging"
-    },
-    "portable": {
-      "artifactName": "CipherTalk-${version}-portable.exe"
-    }
+    "electron:build:all": "cross-env NEXT_OUTPUT=export CSC_IDENTITY_AUTO_DISCOVERY=false next build && electron-builder --win --mac --linux",
+    "electron:publish:win": "cross-env NEXT_OUTPUT=export CSC_IDENTITY_AUTO_DISCOVERY=false next build && electron-builder --win --publish always",
+    "electron:publish:mac": "cross-env NEXT_OUTPUT=export CSC_IDENTITY_AUTO_DISCOVERY=false next build && electron-builder --mac --publish always",
+    "electron:publish:linux": "cross-env NEXT_OUTPUT=export next build && electron-builder --linux --publish always",
+    "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.15.0",
@@ -76,6 +37,8 @@
     "@supabase/supabase-js": "^2.108.0",
     "@vercel/speed-insights": "^2.0.0",
     "crypto-js": "^4.2.0",
+    "electron-log": "^5.2.0",
+    "electron-updater": "^6.8.9",
     "framer-motion": "^11.2.0",
     "lucide-react": "^0.471.0",
     "next": "^15.0.0",
@@ -83,6 +46,17 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@neutralinojs/neu": "^11.0.0",
+    "@tauri-apps/api": "^2.11.1",
+    "@tauri-apps/cli": "^2.11.2",
+    "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-fs": "^2.5.1",
+    "@tauri-apps/plugin-global-shortcut": "^2.3.2",
+    "@tauri-apps/plugin-notification": "^2.3.3",
+    "@tauri-apps/plugin-process": "^2.3.1",
+    "@tauri-apps/plugin-shell": "^2.3.5",
+    "@tauri-apps/plugin-updater": "^2.10.1",
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.3",
@@ -90,8 +64,8 @@
     "autoprefixer": "^10.4.19",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
-    "electron": "^32.0.0",
-    "electron-builder": "^25.0.0",
+    "electron": "^32.3.3",
+    "electron-builder": "^25.1.8",
     "postcss": "^8.4.50",
     "tailwindcss": "^3.4.5",
     "typescript": "^5.5.4",

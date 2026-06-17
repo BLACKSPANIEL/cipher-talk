@@ -1,0 +1,42 @@
+{
+  "applicationId": "com.ciphertalk.app",
+  "version": "0.1.0",
+  "defaultMode": "window",
+  "port": 0,
+  "documentRoot": "./resources/",
+  "url": "/",
+  "enableServer": true,
+  "enableNativeAPI": true,
+  "nativeAllowList": ["app.*", "window.*", "computer.*", "os.*", "tray.*", "debug.log", "events.*", "notification.*", "clipboard.*", "filesystem.*"],
+  "modes": {
+    "window": {
+      "title": "Cipher Talk",
+      "width": 1280,
+      "height": 800,
+      "minWidth": 480,
+      "minHeight": 600,
+      "center": true,
+      "fullScreen": false,
+      "resizable": true,
+      "icon": "icons/icon.png",
+      "exitProcessOnClose": false,
+      "enableInspector": false
+    }
+  },
+  "cli": {
+    "binaryName": "CipherTalk",
+    "resourcesPath": "./resources/",
+    "extensionsPath": "./extensions/",
+    "clientLibrary": "../lib/neutralino.js",
+    "binaryVersion": "5.6.0",
+    "clientVersion": "5.6.0",
+    "frontendLibrary": {
+      "patchFile": "../index.html",
+      "devUrl": "http://localhost:3000",
+      "projectPath": "../",
+      "initCommand": "",
+      "buildCommand": "cross-env NEXT_OUTPUT=export next build",
+      "devCommand": "next dev"
+    }
+  }
+}
