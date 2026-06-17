@@ -7,27 +7,25 @@ import { supabase } from '@/lib/supabaseClient';
 import type { Profile } from '@/lib/supabaseClient';
 import { getEncryptionKey, setEncryptionKey, generateRandomKey } from '@/lib/cryptoUtils';
 import {
-  User, Lock, Bell, Palette, Globe, ArrowLeft, Save, Loader2,
-  RefreshCw, Copy, CheckCircle, Camera, KeyRound, LogOut, ChevronRight,
-  Shield, ShieldCheck, Monitor, Smartphone, Crown, Check
+  User, Lock, Globe, ArrowLeft, Save, Loader2,
+  RefreshCw, Copy, CheckCircle, Camera, KeyRound, LogOut,
+  Shield, Monitor, Smartphone, Crown, Check
 } from 'lucide-react';
 
-type SettingsTab = 'profile' | 'privacy' | 'notifications' | 'appearance' | 'language';
+type SettingsTab = 'profile' | 'security' | 'language';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
-  { id: 'profile', label: 'Мой профиль', icon: <User className="w-4 h-4" /> },
-  { id: 'privacy', label: 'Конфиденциальность', icon: <Lock className="w-4 h-4" /> },
-  { id: 'notifications', label: 'Уведомления', icon: <Bell className="w-4 h-4" /> },
-  { id: 'appearance', label: 'Внешний вид', icon: <Palette className="w-4 h-4" /> },
-  { id: 'language', label: 'Язык', icon: <Globe className="w-4 h-4" /> },
+  { id: 'profile', label: 'Профиль', icon: <User className="w-4 h-4" /> },
+  { id: 'security', label: 'Безопасность', icon: <Lock className="w-4 h-4" /> },
+  { id: 'language', label: 'Язык / Language', icon: <Globe className="w-4 h-4" /> },
 ];
 
 const STATUS_EMOJIS = ['🟢', '🟡', '🔴', '🌙', '⚡', '🔥', '💤', '🎮'];
 
 const SESSIONS = [
-  { id: 1, device: 'Windows Desktop', os: 'Windows 11', location: 'Москва, RU', time: 'Сейчас', active: true, icon: 'desktop' },
-  { id: 2, device: 'Chrome Browser', os: 'Windows 11', location: 'Москва, RU', time: '2 часа назад', active: false, icon: 'desktop' },
-  { id: 3, device: 'Mobile App', os: 'iOS 17', location: 'Санкт-Петербург, RU', time: '1 день назад', active: false, icon: 'mobile' },
+  { id: 1, device: 'Windows Desktop', os: 'Windows 11', location: 'Москва, RU', time: 'Сейчас', active: true, type: 'desktop' },
+  { id: 2, device: 'Chrome Browser', os: 'Windows 11', location: 'Москва, RU', time: '2 часа назад', active: false, type: 'desktop' },
+  { id: 3, device: 'Mobile App', os: 'iOS 17', location: 'Санкт-Петербург, RU', time: '1 день назад', active: false, type: 'mobile' },
 ];
 
 export default function SettingsPage() {
@@ -44,16 +42,6 @@ export default function SettingsPage() {
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [keyCopied, setKeyCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
-
-  const [notifications, setNotifications] = useState({
-    messages: true,
-    online: true,
-    updates: false,
-    sounds: true,
-  });
-
-  const [theme, setTheme] = useState<'dark' | 'light' | 'system'>('dark');
-  const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
   const [language, setLanguage] = useState('ru');
 
   useEffect(() => {
@@ -127,10 +115,6 @@ export default function SettingsPage() {
     router.push('/login');
   };
 
-  const toggleNotification = (key: keyof typeof notifications) => {
-    setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0e0f12] flex items-center justify-center">
@@ -140,263 +124,215 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0e0f12] flex flex-col relative overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-emerald-500/[0.03] blur-[120px]" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-cyan-500/[0.02] blur-[100px]" />
-      </div>
-
-      {/* Top bar */}
-      <div className="relative flex items-center justify-between px-4 py-3 border-b border-white/[0.06] bg-black/20 backdrop-blur-md">
-        <button
-          onClick={() => router.push('/chat')}
-          className="flex items-center gap-2 group"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-400 group-hover:text-emerald-400 transition-colors" />
-          <span className="text-sm font-semibold text-white group-hover:text-emerald-400 transition-colors">
-            Cipher Talk
-          </span>
-        </button>
-        <span className="text-xs text-gray-500">Настройки</span>
-      </div>
-
-      <div className="flex-1 flex relative">
-        {/* ── Left Sidebar ── */}
-        <div className="w-72 border-r border-white/[0.04] bg-[#0e0f12]/90 backdrop-blur-xl p-4 flex flex-col">
-          {/* Avatar */}
+    <div className="min-h-screen bg-[#0e0f12] flex items-center justify-center p-4">
+      {/* Main Glass Container */}
+      <div className="backdrop-blur-xl bg-[#0e0f12]/90 border border-white/[0.08] shadow-[0_25px_50px_rgba(0,0,0,0.7)] rounded-2xl flex overflow-hidden min-h-[550px] w-full max-w-4xl">
+        
+        {/* Left Sidebar */}
+        <div className="w-72 border-r border-white/[0.05] bg-black/20 backdrop-blur-xl p-5 flex flex-col">
+          {/* Profile Block */}
           <div className="mb-6">
-            <div className="relative w-24 h-24 mx-auto mb-4 group cursor-pointer">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border-2 border-emerald-500/20 flex items-center justify-center shadow-[0_0_40px_rgba(16,245,181,0.2)]">
-                <User className="w-12 h-12 text-emerald-400" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-14 h-14 rounded-full border border-emerald-500/30 bg-black/40 flex items-center justify-center flex-shrink-0">
+                <User className="w-7 h-7 text-emerald-400" />
               </div>
-              <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
-                <Camera className="w-8 h-8 text-white" />
-                <span className="text-[10px] text-white font-medium">Изменить</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-medium text-sm truncate">{username || 'Пользователь'}</p>
+                <p className="text-[10px] text-gray-500 capitalize">{status}</p>
               </div>
             </div>
-            <p className="text-center text-sm font-medium text-white">{username || 'Пользователь'}</p>
-            <p className="text-center text-[10px] text-gray-500">@{username || 'username'}</p>
           </div>
 
-          {/* Navigation */}
+          {/* Navigation Tabs */}
           <nav className="flex-1 space-y-1">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative ${
                   activeTab === tab.id
-                    ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
+                    ? 'bg-emerald-500/10 text-emerald-400'
+                    : 'hover:bg-white/[0.03] text-neutral-300'
                 }`}
               >
-                {tab.icon}
-                <span className="text-sm font-medium">{tab.label}</span>
+                {/* Active indicator */}
                 {activeTab === tab.id && (
                   <motion.div
                     layoutId="activeTab"
-                    className="ml-auto"
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </motion.div>
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-6 bg-emerald-400 rounded-r-full"
+                    style={{ boxShadow: '0 0 10px rgba(16,245,181,0.8)' }}
+                  />
                 )}
+                {tab.icon}
+                <span className="text-sm font-medium">{tab.label}</span>
               </button>
             ))}
           </nav>
 
-          {/* Logout */}
+          {/* Logout Button */}
           <button
             onClick={handleLogout}
-            className="mt-4 w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-all text-sm"
+            className="mt-auto flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-500 hover:text-red-400 hover:bg-red-500/5 transition-all text-sm"
           >
             <LogOut className="w-4 h-4" />
-            <span className="font-medium">Выйти</span>
+            <span className="font-medium">Выйти из аккаунта</span>
           </button>
         </div>
 
-        {/* ── Main Content ── */}
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-          <div className="max-w-4xl mx-auto">
-            {/* Toast */}
-            <AnimatePresence>
-              {saveMessage && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className={`mb-6 px-4 py-3 rounded-xl border text-sm flex items-center gap-2 ${
-                    saveMessage.type === 'success'
-                      ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                      : 'bg-red-500/10 border-red-500/20 text-red-400'
-                  }`}
-                >
-                  {saveMessage.type === 'success' && <CheckCircle className="w-4 h-4" />}
-                  <span>{saveMessage.text}</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Profile Tab */}
+        {/* Right Content Area */}
+        <div className="flex-1 p-6 overflow-y-auto max-h-[550px] custom-scrollbar">
+          <AnimatePresence mode="wait">
             {activeTab === 'profile' && (
               <motion.div
+                key="profile"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
                 className="space-y-6"
               >
-                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                      <User className="w-5 h-5 text-emerald-400" />
+                {/* Avatar Section */}
+                <div className="flex justify-center">
+                  <div className="relative group cursor-pointer">
+                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border-2 border-emerald-500/20 flex items-center justify-center shadow-[0_0_50px_rgba(16,245,181,0.25)]">
+                      <User className="w-16 h-16 text-emerald-400" />
                     </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-white">Мой профиль</h2>
-                      <p className="text-[10px] text-gray-500">Управляйте своей информацией</p>
+                    <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
+                      <Camera className="w-10 h-10 text-white" />
+                      <span className="text-[10px] text-white font-medium">Изменить</span>
                     </div>
                   </div>
-
-                  <form onSubmit={handleSaveProfile} className="space-y-5">
-                    {/* Avatar */}
-                    <div className="flex justify-center">
-                      <div className="relative group cursor-pointer">
-                        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border-2 border-emerald-500/20 flex items-center justify-center shadow-[0_0_50px_rgba(16,245,181,0.25)]">
-                          <User className="w-16 h-16 text-emerald-400" />
-                        </div>
-                        <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
-                          <Camera className="w-10 h-10 text-white" />
-                          <span className="text-[10px] text-white font-medium">Изменить</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Status Emoji Picker */}
-                    <div>
-                      <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
-                        Эмодзи статуса
-                      </label>
-                      <div className="flex flex-wrap gap-2 max-h-[120px] overflow-y-auto custom-scrollbar p-2 rounded-xl bg-black/20 border border-white/[0.04]">
-                        {STATUS_EMOJIS.map((emoji) => (
-                          <button
-                            key={emoji}
-                            type="button"
-                            onClick={() => setStatusEmoji(emoji)}
-                            className={`w-10 h-10 rounded-lg border transition-all duration-200 flex items-center justify-center text-lg ${
-                              statusEmoji === emoji
-                                ? 'border-emerald-500 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.2)] scale-110'
-                                : 'border-white/10 hover:border-white/20'
-                            }`}
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Username */}
-                    <div>
-                      <label htmlFor="settings-username" className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
-                        Никнейм
-                      </label>
-                      <input
-                        id="settings-username"
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        className="w-full bg-black/40 border border-white/[0.08] rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all text-sm"
-                      />
-                    </div>
-
-                    {/* Bio */}
-                    <div>
-                      <label htmlFor="settings-bio" className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
-                        О себе
-                      </label>
-                      <textarea
-                        id="settings-bio"
-                        value={bio}
-                        onChange={(e) => setBio(e.target.value)}
-                        rows={3}
-                        className="w-full bg-black/40 border border-white/[0.08] rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all text-sm resize-none"
-                      />
-                    </div>
-
-                    {/* Status */}
-                    <div>
-                      <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
-                        Статус
-                      </label>
-                      <div className="flex gap-3">
-                        {[
-                          { value: 'online', label: 'Online', emoji: '🟢' },
-                          { value: 'away', label: 'Away', emoji: '🟡' },
-                          { value: 'offline', label: 'Offline', emoji: '🔴' },
-                        ].map((opt) => (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            onClick={() => setStatus(opt.value as Profile['status'])}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all flex-1 justify-center ${
-                              status === opt.value
-                                ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
-                                : 'border-white/10 text-gray-400 hover:border-white/20'
-                            }`}
-                          >
-                            <span>{opt.emoji}</span>
-                            {opt.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Tier Badge */}
-                    {profile?.tier && profile.tier !== 'free' && (
-                      <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30">
-                        <Crown className="w-5 h-5 text-amber-400" />
-                        <div className="flex-1">
-                          <p className="text-sm font-semibold text-amber-400">Тариф {profile.tier.toUpperCase()}</p>
-                          <p className="text-[10px] text-gray-500">Назначен администратором</p>
-                        </div>
-                      </div>
-                    )}
-
-                    <button
-                      type="submit"
-                      disabled={isSaving}
-                      className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-black font-medium text-sm hover:from-emerald-400 hover:to-teal-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-[0_4px_20px_rgba(16,185,129,0.2)] flex items-center justify-center gap-2"
-                    >
-                      {isSaving ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Сохранение...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="w-4 h-4" />
-                          Сохранить изменения
-                        </>
-                      )}
-                    </button>
-                  </form>
                 </div>
+
+                {/* Status Emoji Grid */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
+                    Эмодзи статуса
+                  </label>
+                  <div className="flex flex-wrap gap-2 max-h-[120px] overflow-y-auto custom-scrollbar p-3 rounded-xl bg-black/30 border border-white/5">
+                    {STATUS_EMOJIS.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => setStatusEmoji(emoji)}
+                        className={`w-10 h-10 rounded-lg border transition-all duration-200 flex items-center justify-center text-lg ${
+                          statusEmoji === emoji
+                            ? 'border-emerald-500 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.2)] scale-110'
+                            : 'border-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Username Input */}
+                <div>
+                  <label htmlFor="settings-username" className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
+                    Никнейм
+                  </label>
+                  <input
+                    id="settings-username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full bg-black/40 border border-white/[0.08] rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all text-sm"
+                  />
+                </div>
+
+                {/* Bio Input */}
+                <div>
+                  <label htmlFor="settings-bio" className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
+                    О себе
+                  </label>
+                  <textarea
+                    id="settings-bio"
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    rows={3}
+                    className="w-full bg-black/40 border border-white/[0.08] rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all text-sm resize-none"
+                  />
+                </div>
+
+                {/* Status Selection */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
+                    Статус
+                  </label>
+                  <div className="flex gap-3">
+                    {[
+                      { value: 'online', label: 'Online', emoji: '🟢' },
+                      { value: 'away', label: 'Away', emoji: '🟡' },
+                      { value: 'offline', label: 'Offline', emoji: '🔴' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setStatus(opt.value as Profile['status'])}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all flex-1 justify-center ${
+                          status === opt.value
+                            ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
+                            : 'border-white/10 text-gray-400 hover:border-white/20'
+                        }`}
+                      >
+                        <span>{opt.emoji}</span>
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ELITE Tier Badge */}
+                {profile?.tier && profile.tier !== 'free' && (
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+                    <Crown className="w-5 h-5 text-amber-400" />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-amber-400">Тариф {profile.tier.toUpperCase()}</p>
+                      <p className="text-[10px] text-gray-500">Назначен администратором</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Save Button */}
+                <button
+                  type="submit"
+                  onClick={handleSaveProfile}
+                  disabled={isSaving}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-black font-semibold text-sm hover:from-emerald-400 hover:to-teal-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 shadow-[0_4px_20px_rgba(16,185,129,0.3)] flex items-center justify-center gap-2"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Сохранение...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      Сохранить изменения
+                    </>
+                  )}
+                </button>
               </motion.div>
             )}
 
-            {/* Privacy & Security Tab */}
-            {activeTab === 'privacy' && (
+            {activeTab === 'security' && (
               <motion.div
+                key="security"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
                 className="space-y-6"
               >
-                {/* E2EE Key */}
-                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-                  <div className="flex items-center gap-3 mb-6">
+                {/* E2EE Key Section */}
+                <div>
+                  <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
                       <KeyRound className="w-5 h-5 text-cyan-400" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold text-white">Сквозное шифрование (E2EE)</h2>
+                      <h3 className="text-white font-semibold">Сквозное шифрование (E2EE)</h3>
                       <p className="text-[10px] text-gray-500">Ваш секретный ключ AES-256</p>
                     </div>
                   </div>
@@ -407,7 +343,7 @@ export default function SettingsPage() {
                     <span className="text-yellow-400">⚠ Никому не сообщайте этот ключ.</span>
                   </p>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div>
                       <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
                         Публичный ключ
@@ -422,7 +358,6 @@ export default function SettingsPage() {
                         <button
                           onClick={handleCopyKey}
                           className="px-4 py-3 rounded-lg border border-white/10 text-gray-400 hover:border-cyan-500/40 hover:text-cyan-400 transition-all"
-                          title="Скопировать ключ"
                         >
                           {keyCopied ? <CheckCircle className="w-4 h-4 text-cyan-400" /> : <Copy className="w-4 h-4" />}
                         </button>
@@ -440,13 +375,13 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Active Sessions */}
-                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-                  <div className="flex items-center gap-3 mb-6">
+                <div>
+                  <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
                       <Shield className="w-5 h-5 text-violet-400" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold text-white">Активные сессии</h2>
+                      <h3 className="text-white font-semibold">Активные сессии</h3>
                       <p className="text-[10px] text-gray-500">Устройства, где вы авторизованы</p>
                     </div>
                   </div>
@@ -465,7 +400,7 @@ export default function SettingsPage() {
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                             session.active ? 'bg-emerald-500/15' : 'bg-white/5'
                           }`}>
-                            {session.icon === 'mobile' ? (
+                            {session.type === 'mobile' ? (
                               <Smartphone className={`w-6 h-6 ${session.active ? 'text-emerald-400' : 'text-gray-500'}`} />
                             ) : (
                               <Monitor className={`w-6 h-6 ${session.active ? 'text-emerald-400' : 'text-gray-500'}`} />
@@ -494,174 +429,25 @@ export default function SettingsPage() {
                     Завершить другие сессии
                   </button>
                 </div>
-
-                {/* Two-Factor Auth */}
-                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center">
-                      <ShieldCheck className="w-5 h-5 text-yellow-400" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-white">Двухфакторная аутентификация</h2>
-                      <p className="text-[10px] text-gray-500">Дополнительная защита аккаунта</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 rounded-xl border border-white/[0.06] bg-white/[0.01]">
-                    <div>
-                      <p className="text-sm font-medium text-white">2FA</p>
-                      <p className="text-[10px] text-gray-500 mt-0.5">Включите для повышенной безопасности</p>
-                    </div>
-                    <button className="relative w-11 h-6 rounded-full bg-gray-700 transition-colors">
-                      <motion.div
-                        className="absolute top-1 w-4 h-4 rounded-full bg-white shadow"
-                        animate={{ left: 4 }}
-                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                      />
-                    </button>
-                  </div>
-                </div>
               </motion.div>
             )}
 
-            {/* Notifications Tab */}
-            {activeTab === 'notifications' && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
-              >
-                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center">
-                      <Bell className="w-5 h-5 text-yellow-400" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-white">Уведомления и звуки</h2>
-                      <p className="text-[10px] text-gray-500">Настройка push-уведомлений</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    {[
-                      { id: 'messages', label: 'Новые сообщения', desc: 'Уведомления о новых сообщениях в чатах', enabled: notifications.messages },
-                      { id: 'online', label: 'Статус пользователей', desc: 'Когда пользователь выходит в онлайн', enabled: notifications.online },
-                      { id: 'updates', label: 'Обновления приложения', desc: 'Новые версии и функции', enabled: notifications.updates },
-                      { id: 'sounds', label: 'Звуки чата', desc: 'Звуковые уведомления в чатах', enabled: notifications.sounds },
-                    ].map((notif) => (
-                      <div key={notif.id} className="flex items-center justify-between p-4 rounded-xl border border-white/[0.06] bg-white/[0.01]">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-white">{notif.label}</p>
-                          <p className="text-[10px] text-gray-500 mt-0.5">{notif.desc}</p>
-                        </div>
-                        <button
-                          onClick={() => toggleNotification(notif.id as keyof typeof notifications)}
-                          className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
-                            notif.enabled ? 'bg-emerald-500' : 'bg-gray-700'
-                          }`}
-                        >
-                          <motion.div
-                            className="absolute top-1 w-4 h-4 rounded-full bg-white shadow"
-                            animate={{ left: notif.enabled ? 24 : 4 }}
-                            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                          />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Appearance Tab */}
-            {activeTab === 'appearance' && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
-              >
-                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
-                      <Palette className="w-5 h-5 text-violet-400" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-white">Внешний вид</h2>
-                      <p className="text-[10px] text-gray-500">Настройка темы и отображения</p>
-                    </div>
-                  </div>
-
-                  {/* Theme */}
-                  <div className="mb-6">
-                    <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
-                      Тема
-                    </label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {[
-                        { id: 'dark', label: 'Тёмная', icon: '🌙' },
-                        { id: 'light', label: 'Светлая', icon: '☀️' },
-                        { id: 'system', label: 'Системная', icon: '💻' },
-                      ].map((t) => (
-                        <button
-                          key={t.id}
-                          onClick={() => setTheme(t.id as typeof theme)}
-                          className={`p-4 rounded-xl border transition-all duration-200 ${
-                            theme === t.id
-                              ? 'border-emerald-500/40 bg-emerald-500/10'
-                              : 'border-white/10 hover:border-white/20'
-                          }`}
-                        >
-                          <div className="text-2xl mb-2">{t.icon}</div>
-                          <p className="text-xs font-medium text-white">{t.label}</p>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Font Size */}
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
-                      Размер шрифта
-                    </label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {[
-                        { id: 'small', label: 'Маленький', size: 'text-xs' },
-                        { id: 'medium', label: 'Средний', size: 'text-sm' },
-                        { id: 'large', label: 'Большой', size: 'text-base' },
-                      ].map((s) => (
-                        <button
-                          key={s.id}
-                          onClick={() => setFontSize(s.id as typeof fontSize)}
-                          className={`p-4 rounded-xl border transition-all duration-200 ${
-                            fontSize === s.id
-                              ? 'border-emerald-500/40 bg-emerald-500/10'
-                              : 'border-white/10 hover:border-white/20'
-                          }`}
-                        >
-                          <p className={`${s.size} font-medium text-white mb-1`}>АаBbCc</p>
-                          <p className="text-[10px] text-gray-500">{s.label}</p>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Language Tab */}
             {activeTab === 'language' && (
               <motion.div
+                key="language"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
                 className="space-y-6"
               >
-                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                <div>
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
                       <Globe className="w-5 h-5 text-cyan-400" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold text-white">Язык / Language</h2>
+                      <h3 className="text-white font-semibold">Язык / Language</h3>
                       <p className="text-[10px] text-gray-500">Выбор локализации</p>
                     </div>
                   </div>
@@ -706,7 +492,7 @@ export default function SettingsPage() {
                 </div>
               </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </div>
       </div>
     </div>
