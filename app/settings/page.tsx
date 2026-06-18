@@ -5,12 +5,10 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import type { Profile } from '@/lib/supabaseClient';
 import { getEncryptionKey, setEncryptionKey, generateRandomKey } from '@/lib/cryptoUtils';
-import { SettingsLayout } from '@/components/settings/SettingsLayout';
+import { SettingsLayout, type SettingsTab } from '@/components/settings/SettingsLayout';
 import { ProfileSettings } from '@/components/settings/ProfileSettings';
 import { SecuritySettings } from '@/components/settings/SecuritySettings';
 import { LanguageSettings } from '@/components/settings/LanguageSettings';
-
-type SettingsTab = 'profile' | 'security' | 'language';
 
 const SESSIONS = [
   { id: 1, device: 'Windows Desktop', os: 'Windows 11', location: 'Москва, RU', time: 'Сейчас', active: true, type: 'desktop' as const },
@@ -117,7 +115,7 @@ export default function SettingsPage() {
   return (
         <SettingsLayout
           activeTab={activeTab}
-          onTabChange={(tab) => setActiveTab(tab as any)}
+          onTabChange={setActiveTab}
       username={username}
       status={status}
       tier={profile?.tier}

@@ -7,7 +7,7 @@ import { supabase, type Profile } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import { TierBadge } from './TierBadge';
 import { useLanguage, LOCALES } from '@/lib/i18n';
-import { SettingsLayout } from '@/components/settings/SettingsLayout';
+import { SettingsLayout, type SettingsTab } from '@/components/settings/SettingsLayout';
 import { AccountSettings } from '@/components/settings/AccountSettings';
 import { NotificationsSettings } from '@/components/settings/NotificationsSettings';
 import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
@@ -27,7 +27,6 @@ const PRESET_AVATARS = [
   '😀', '😂', '🥰', '😎',
 ];
 
-type Tab = 'profile' | 'account' | 'security' | 'notifications' | 'appearance' | 'language' | 'devices' | 'about';
 
 const tabsList = [
   { value: 'profile' as const, key: 'settings.tab.profile' as const, icon: <UserIcon className="w-4 h-4" /> },
@@ -43,7 +42,7 @@ const tabsList = [
 export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: SettingsModalProps) {
   const router = useRouter();
   const { t, locale, setLocale } = useLanguage();
-  const [activeTab, setActiveTab] = useState<Tab>('profile');
+  const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
 
   const [nickname, setNickname] = useState('');
   const [avatar, setAvatar] = useState<string>('');

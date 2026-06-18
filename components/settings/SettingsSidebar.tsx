@@ -4,8 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { User, Lock, Globe, LogOut, Crown, Bell, Palette, Monitor, Info } from 'lucide-react';
 import { TierBadge } from '@/components/chat/TierBadge';
-
-type SettingsTab = 'profile' | 'account' | 'security' | 'notifications' | 'appearance' | 'language' | 'devices' | 'about';
+import type { SettingsTab } from '@/components/settings/SettingsLayout';
 
 interface SettingsSidebarProps {
   activeTab: SettingsTab;

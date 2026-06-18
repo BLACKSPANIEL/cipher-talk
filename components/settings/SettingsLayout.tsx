@@ -1,12 +1,16 @@
 'use client';
 
+// Fixed: SettingsTab union type + strict typing
+
 import React from 'react';
 import { SettingsSidebar } from '@/components/settings/SettingsSidebar';
 
+export type SettingsTab = 'profile' | 'account' | 'security' | 'notifications' | 'appearance' | 'language' | 'devices' | 'about';
+
 interface SettingsLayoutProps {
   children: React.ReactNode;
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeTab: SettingsTab;
+  onTabChange: (tab: SettingsTab) => void;
   username: string;
   status: string;
   tier?: string;
