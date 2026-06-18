@@ -4,6 +4,7 @@ import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Save, Loader2, Crown, Check, User, X } from 'lucide-react';
 import { TierBadge } from '@/components/chat/TierBadge';
+import { useLanguage } from '@/lib/i18n';
 
 interface ProfileSettingsProps {
   username: string;
@@ -16,10 +17,10 @@ interface ProfileSettingsProps {
 }
 
 const STATUS_OPTIONS = [
-  { value: 'online', label: 'В сети', emoji: '🟢', color: 'emerald', desc: 'Доступен для общения' },
-  { value: 'ingame', label: 'В игре', emoji: '🎮', color: 'violet', desc: 'Играет в игру' },
-  { value: 'dnd', label: 'Не беспокоить', emoji: '🔴', color: 'red', desc: 'Не принимать уведомления' },
-  { value: 'custom', label: 'Кастомный', emoji: '✨', color: 'amber', desc: 'Свой статус' },
+  { value: 'online', labelKey: 'settings.status.online', emoji: '🟢', color: 'emerald', descKey: 'settings.status.online' },
+  { value: 'ingame', labelKey: 'settings.status.ingame', emoji: '🎮', color: 'violet', descKey: 'settings.status.ingame' },
+  { value: 'dnd', labelKey: 'settings.status.dnd', emoji: '🔴', color: 'red', descKey: 'settings.status.dnd' },
+  { value: 'custom', labelKey: 'settings.status.custom', emoji: '✨', color: 'amber', descKey: 'settings.status.custom' },
 ];
 
 const MAX_BIO_LENGTH = 150;
@@ -33,6 +34,7 @@ export function ProfileSettings({
   isSaving,
   saveMessage,
 }: ProfileSettingsProps) {
+  const { t } = useLanguage();
   const [localUsername, setLocalUsername] = useState(username);
   const [localBio, setLocalBio] = useState(bio);
   const [localStatus, setLocalStatus] = useState(status);
@@ -128,7 +130,7 @@ export function ProfileSettings({
           {/* Overlay on hover */}
           <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-1">
             <Camera className="w-10 h-10 text-white" />
-            <span className="text-[10px] text-white font-medium">Загрузить фото</span>
+            <span className="text-[10px] text-white font-medium">{t('settings.upload_photo')}</span>
           </div>
           
           {/* Drag & Drop indicator */}
@@ -136,7 +138,7 @@ export function ProfileSettings({
             <div className="absolute inset-0 rounded-full bg-emerald-500/20 border-2 border-emerald-400 border-dashed flex items-center justify-center">
               <div className="text-center">
                 <Camera className="w-8 h-8 text-emerald-400 mx-auto mb-1" />
-                <p className="text-xs text-emerald-400 font-medium">Отпустите для загрузки</p>
+                <p className="text-xs text-emerald-400 font-medium">{t('settings.upload_photo')}</p>
               </div>
             </div>
           )}
@@ -164,7 +166,7 @@ export function ProfileSettings({
       {/* Status Selection */}
       <div>
         <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
-          Статус
+          {t('settings.status')}
         </label>
         <div className="grid grid-cols-2 gap-2">
           {STATUS_OPTIONS.map((option) => (
@@ -182,8 +184,8 @@ export function ProfileSettings({
             >
               <span className="text-lg">{option.emoji}</span>
               <div className="text-left flex-1">
-                <p className="font-medium">{option.label}</p>
-                <p className="text-[10px] opacity-60">{option.desc}</p>
+                <p className="font-medium">{t(option.labelKey as any)}</p>
+                <p className="text-[10px] opacity-60">{t(option.descKey as any)}</p>
               </div>
               {localStatus === option.value && (
                 <div className={`w-2 h-2 rounded-full ${getStatusColor(option.color)}`} />
@@ -196,7 +198,7 @@ export function ProfileSettings({
       {/* Username Input */}
       <div>
         <label htmlFor="settings-username" className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
-          Никнейм
+          {t('settings.nickname')}
         </label>
         <input
           id="settings-username"
@@ -210,19 +212,19 @@ export function ProfileSettings({
       {/* Bio Input with character limit */}
       <div>
         <label htmlFor="settings-bio" className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
-          О себе
+          {t('settings.bio')}
         </label>
         <textarea
           id="settings-bio"
           value={localBio}
           onChange={(e) => setLocalBio(e.target.value.slice(0, MAX_BIO_LENGTH))}
           rows={3}
-          placeholder="Расскажите о себе..."
+          placeholder={t('settings.bio_placeholder')}
           maxLength={MAX_BIO_LENGTH}
           className="w-full bg-black/40 border border-white/[0.08] rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all text-sm resize-none"
         />
         <div className="flex justify-between mt-1.5">
-          <p className="text-[10px] text-gray-500">Максимум {MAX_BIO_LENGTH} символов</p>
+          <p className="text-[10px] text-gray-500">{t('settings.bio_limit').replace('{max}', String(MAX_BIO_LENGTH))}</p>
           <p className={`text-[10px] ${localBio.length >= MAX_BIO_LENGTH ? 'text-red-400' : 'text-gray-500'}`}>
             {localBio.length}/{MAX_BIO_LENGTH}
           </p>
@@ -235,10 +237,10 @@ export function ProfileSettings({
           <Crown className="w-5 h-5 text-amber-400" />
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold text-amber-400">Тариф {tier.toUpperCase()}</p>
+              <p className="text-sm font-semibold text-amber-400">{t('settings.tier')} {tier.toUpperCase()}</p>
               <TierBadge tier={tier as any} size="sm" />
             </div>
-            <p className="text-[10px] text-gray-500 mt-0.5">Назначен администратором</p>
+            <p className="text-[10px] text-gray-500 mt-0.5">{t('settings.tier_desc')}</p>
           </div>
         </div>
       )}
@@ -269,12 +271,12 @@ export function ProfileSettings({
         {isSaving ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin" />
-            Сохранение...
+            {t('settings.saving')}
           </>
         ) : (
           <>
             <Save className="w-4 h-4" />
-            Сохранить изменения
+            {t('settings.save_changes')}
           </>
         )}
       </button>

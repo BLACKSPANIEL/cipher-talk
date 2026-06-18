@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { User, Lock, Globe, LogOut, Crown, Bell, Palette, Monitor, Info, HardDrive } from 'lucide-react';
 import { TierBadge } from '@/components/chat/TierBadge';
 import type { SettingsTab } from '@/components/settings/SettingsLayout';
+import { useLanguage } from '@/lib/i18n';
 
 interface SettingsSidebarProps {
   activeTab: SettingsTab;
@@ -15,18 +16,6 @@ interface SettingsSidebarProps {
   onLogout: () => void;
 }
 
-const tabs: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
-  { id: 'profile', label: 'Профиль', icon: <User className="w-4 h-4" /> },
-  { id: 'account', label: 'Аккаунт', icon: <User className="w-4 h-4" /> },
-  { id: 'security', label: 'Безопасность', icon: <Lock className="w-4 h-4" /> },
-  { id: 'notifications', label: 'Уведомления', icon: <Bell className="w-4 h-4" /> },
-  { id: 'appearance', label: 'Оформление', icon: <Palette className="w-4 h-4" /> },
-  { id: 'language', label: 'Язык', icon: <Globe className="w-4 h-4" /> },
-  { id: 'devices', label: 'Устройства', icon: <Monitor className="w-4 h-4" /> },
-  { id: 'storage', label: 'Хранилище', icon: <HardDrive className="w-4 h-4" /> },
-  { id: 'about', label: 'О приложении', icon: <Info className="w-4 h-4" /> },
-];
-
 export function SettingsSidebar({
   activeTab,
   onTabChange,
@@ -35,6 +24,20 @@ export function SettingsSidebar({
   tier,
   onLogout,
 }: SettingsSidebarProps) {
+  const { t } = useLanguage();
+
+  const tabs: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
+    { id: 'profile', label: t('settings.tab.profile'), icon: <User className="w-4 h-4" /> },
+    { id: 'account', label: t('settings.tab.account'), icon: <User className="w-4 h-4" /> },
+    { id: 'security', label: t('settings.tab.security'), icon: <Lock className="w-4 h-4" /> },
+    { id: 'notifications', label: t('settings.tab.notifications'), icon: <Bell className="w-4 h-4" /> },
+    { id: 'appearance', label: t('settings.tab.appearance'), icon: <Palette className="w-4 h-4" /> },
+    { id: 'language', label: t('settings.tab.language'), icon: <Globe className="w-4 h-4" /> },
+    { id: 'devices', label: t('settings.tab.devices'), icon: <Monitor className="w-4 h-4" /> },
+    { id: 'storage', label: t('settings.tab.storage'), icon: <HardDrive className="w-4 h-4" /> },
+    { id: 'about', label: t('settings.tab.about'), icon: <Info className="w-4 h-4" /> },
+  ];
+
   return (
     <div className="w-72 border-r border-white/[0.08] bg-black/40 backdrop-blur-3xl p-6 flex flex-col relative overflow-hidden">
       {/* Subtle gradient overlay */}
@@ -100,7 +103,7 @@ export function SettingsSidebar({
         whileTap={{ scale: 0.98 }}
       >
         <LogOut className="w-4 h-4 transition-transform group-hover:scale-110" />
-        <span className="font-medium">Выйти из аккаунта</span>
+        <span className="font-medium">{t('common.logout')}</span>
       </motion.button>
     </div>
   );
