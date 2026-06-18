@@ -214,16 +214,18 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                         <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-2">
                           {t('settings.avatar_presets')}
                         </p>
-                        <div className="grid grid-cols-7 sm:grid-cols-10 gap-1.5 p-2.5 rounded-xl bg-black/30 border border-white/5 max-h-28 md:max-h-36 overflow-y-auto">
+                        <div className="grid grid-cols-8 gap-2 p-3 rounded-xl bg-black/30 border border-white/5 max-h-36 overflow-y-auto justify-items-center">
                           {PRESET_AVATARS.map((emoji, index) => (
                             <button
                               key={`${emoji}-${index}`}
                               onClick={() => setAvatar(emoji)}
-                              className={`text-lg md:text-xl w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center transition active:scale-90 ${
-                                avatar === emoji ? 'bg-emerald-500/20 ring-1 ring-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'hover:bg-white/5'
+                              className={`w-9 h-9 rounded-lg flex items-center justify-center transition active:scale-90 ${
+                                avatar === emoji 
+                                  ? 'bg-emerald-500/20 ring-1 ring-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.3)]' 
+                                  : 'hover:bg-white/5'
                               }`}
                             >
-                              {emoji}
+                              <span className="text-lg">{emoji}</span>
                             </button>
                           ))}
                         </div>

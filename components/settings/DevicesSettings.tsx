@@ -129,37 +129,37 @@ export function DevicesSettings({ devices, onRevoke }: DevicesSettingsProps) {
                   }`}
                   whileHover={{ scale: 1.01 }}
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-center gap-4">
                     <div className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${
                       device.current ? 'bg-emerald-500/15' : 'bg-white/5'
                     }`}>
                       <Icon className={`w-7 h-7 ${device.current ? 'text-emerald-400' : 'text-gray-500'}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-1.5">
                         <p className="text-sm font-medium text-white truncate">{device.name}</p>
                         {device.current && (
-                          <span className="px-2 py-0.5 rounded-full text-[9px] uppercase font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
+                          <span className="px-2 py-0.5 rounded-full text-[9px] uppercase font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 flex-shrink-0">
                             Текущее
                           </span>
                         )}
                       </div>
                       
-                      <div className="space-y-1.5">
+                      <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2 text-[11px] text-gray-400">
-                          <Activity className="w-3 h-3" />
-                          <span>{device.os}</span>
+                          <Activity className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate">{device.os}</span>
                           {device.browser && <span className="text-gray-600">· {device.browser}</span>}
                         </div>
                         
                         <div className="flex items-center gap-2 text-[11px] text-gray-500">
-                          <MapPin className="w-3 h-3" />
-                          <span>{device.location}</span>
+                          <MapPin className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate">{device.location}</span>
                           {device.ip && <span className="text-gray-600 font-mono">({device.ip})</span>}
                         </div>
                         
                         <div className="flex items-center gap-2 text-[11px] text-gray-600">
-                          <Clock className="w-3 h-3" />
+                          <Clock className="w-3 h-3 flex-shrink-0" />
                           <span>Активно {device.lastActive}</span>
                         </div>
                       </div>
@@ -169,7 +169,7 @@ export function DevicesSettings({ devices, onRevoke }: DevicesSettingsProps) {
                       <motion.button
                         onClick={() => handleRevoke(device.id)}
                         disabled={isRevoking}
-                        className="p-2.5 rounded-xl text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50"
+                        className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 flex-shrink-0"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                       >

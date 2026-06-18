@@ -106,7 +106,7 @@ export function ProfileSettings({
       className="space-y-6"
     >
       {/* Avatar Section with Drag & Drop */}
-      <div className="flex justify-center">
+      <div className="flex flex-col items-center justify-center">
         <div
           className={`relative group cursor-pointer transition-all duration-300 ${
             isDragging ? 'scale-105' : ''

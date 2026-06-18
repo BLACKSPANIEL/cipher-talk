@@ -33,7 +33,7 @@ export function SettingsLayout({
 }: SettingsLayoutProps) {
   const containerClasses = isModal
     ? 'h-full md:h-[90vh] w-full md:max-w-5xl md:rounded-2xl rounded-none'
-    : 'min-h-[550px] w-full max-w-4xl';
+    : 'w-full max-w-5xl h-[650px]';
 
   return (
     <div className={isModal ? 'h-full' : 'min-h-screen bg-[#0e0f12] flex items-center justify-center p-4'}>
@@ -68,14 +68,15 @@ export function SettingsLayout({
         />
 
         {/* Right Content Area */}
-        <div className={`flex-1 overflow-y-auto custom-scrollbar ${isModal ? 'p-4 md:p-6' : 'p-6 max-h-[550px]'}`}>
+        <div className={`flex-1 h-full overflow-y-auto custom-scrollbar ${isModal ? 'p-4 md:p-6' : 'p-8'}`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15, ease: 'easeInOut' }}
+              className="h-full"
             >
               {children}
             </motion.div>

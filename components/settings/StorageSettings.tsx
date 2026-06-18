@@ -99,7 +99,7 @@ export function StorageSettings({ onClearCache, onExportData }: StorageSettingsP
         </div>
 
         {/* Storage Categories */}
-        <div className="space-y-3">
+        <div className="flex flex-col gap-4">
           {storageData.categories.map((category, idx) => {
             const Icon = category.icon;
             const colorClass = {
@@ -133,7 +133,7 @@ export function StorageSettings({ onClearCache, onExportData }: StorageSettingsP
                   </div>
                   <span className="text-xs text-gray-400">{formatSize(category.size)}</span>
                 </div>
-                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden ml-11">
+                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                   <motion.div 
                     className={`h-full ${colorClass} rounded-full`}
                     initial={{ width: 0 }}
