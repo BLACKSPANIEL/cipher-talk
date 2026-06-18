@@ -167,6 +167,11 @@ export function ProfileSettings({
         </motion.div>
       )}
 
+      {/* Debug Version Indicator */}
+      <div className="text-emerald-400 text-sm text-center py-2 border border-emerald-500/20 rounded-xl bg-emerald-500/5">
+        ✅ Новая версия настроек (Glassmorphism v2)
+      </div>
+
       {/* Save Button */}
       <button
         type="submit"

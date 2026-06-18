@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import type { Profile } from '@/lib/supabaseClient';
 import { getEncryptionKey, setEncryptionKey, generateRandomKey } from '@/lib/cryptoUtils';
-import { SettingsSidebar } from '@/components/settings/SettingsSidebar';
+import { SettingsLayout } from '@/components/settings/SettingsLayout';
 import { ProfileSettings } from '@/components/settings/ProfileSettings';
 import { SecuritySettings } from '@/components/settings/SecuritySettings';
 import { LanguageSettings } from '@/components/settings/LanguageSettings';
@@ -115,52 +115,42 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0e0f12] flex items-center justify-center p-4">
-      {/* Main Glass Container */}
-      <div className="backdrop-blur-xl bg-[#0e0f12]/90 border border-white/[0.08] shadow-[0_25px_50px_rgba(0,0,0,0.7)] rounded-2xl flex overflow-hidden min-h-[550px] w-full max-w-4xl">
-        
-        {/* Left Sidebar */}
-        <SettingsSidebar
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
+    <SettingsLayout
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      username={username}
+      status={status}
+      tier={profile?.tier}
+      onLogout={handleLogout}
+    >
+      {activeTab === 'profile' && (
+        <ProfileSettings
           username={username}
+          bio={bio}
           status={status}
           tier={profile?.tier}
-          onLogout={handleLogout}
+          onSave={handleSaveProfile}
+          isSaving={isSaving}
+          saveMessage={saveMessage}
         />
+      )}
 
-        {/* Right Content Area */}
-        <div className="flex-1 p-6 overflow-y-auto max-h-[550px] custom-scrollbar">
-          {activeTab === 'profile' && (
-            <ProfileSettings
-              username={username}
-              bio={bio}
-              status={status}
-              tier={profile?.tier}
-              onSave={handleSaveProfile}
-              isSaving={isSaving}
-              saveMessage={saveMessage}
-            />
-          )}
+      {activeTab === 'security' && (
+        <SecuritySettings
+          e2eeKey={e2eeKey}
+          keyCopied={keyCopied}
+          onGenerateNewKey={handleGenerateNewKey}
+          onCopyKey={handleCopyKey}
+          sessions={SESSIONS}
+        />
+      )}
 
-          {activeTab === 'security' && (
-            <SecuritySettings
-              e2eeKey={e2eeKey}
-              keyCopied={keyCopied}
-              onGenerateNewKey={handleGenerateNewKey}
-              onCopyKey={handleCopyKey}
-              sessions={SESSIONS}
-            />
-          )}
-
-          {activeTab === 'language' && (
-            <LanguageSettings
-              selectedLanguage={language}
-              onLanguageChange={setLanguage}
-            />
-          )}
-        </div>
-      </div>
-    </div>
+      {activeTab === 'language' && (
+        <LanguageSettings
+          selectedLanguage={language}
+          onLanguageChange={setLanguage}
+        />
+      )}
+    </SettingsLayout>
   );
 }

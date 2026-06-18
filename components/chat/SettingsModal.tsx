@@ -143,20 +143,25 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
             exit={{ opacity: 0, y: '30%', scale: 0.97 }}
             transition={{ type: 'spring', damping: 30, stiffness: 300, mass: 0.9 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full md:max-w-4xl md:h-[80vh] h-[95vh] md:rounded-2xl rounded-t-2xl border md:border-zinc-800 border-zinc-800/80 bg-zinc-900/95 backdrop-blur-md shadow-glass-lg overflow-hidden flex flex-col md:flex-row"
+            className="relative w-full md:max-w-4xl md:h-[80vh] h-[95vh] md:rounded-2xl rounded-t-2xl border border-white/[0.08] bg-[#0e0f12]/95 backdrop-blur-xl shadow-[0_25px_50px_rgba(0,0,0,0.7)] overflow-hidden flex flex-col md:flex-row"
           >
             {/* Mobile: top bar + tabs */}
             <div className="md:hidden flex-shrink-0">
               <div className="flex items-center justify-between px-4 pt-4 pb-2">
                 <h3 className="font-semibold text-white text-sm tracking-wide">{t('settings.title')}</h3>
-                <button
-                  onClick={onClose}
-                  className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition active:scale-95"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-gray-600 font-mono bg-black/30 px-2 py-1 rounded-lg border border-white/5">
+                    v2.1
+                  </span>
+                  <button
+                    onClick={onClose}
+                    className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition active:scale-95"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-1 px-3 pb-3 border-b border-zinc-800/60 overflow-x-auto">
+              <div className="flex items-center gap-1 px-3 pb-3 border-b border-white/5 overflow-x-auto">
                 {tabsList.map((tab) => {
                   const isActive = activeTab === tab.value;
                   return (
@@ -178,8 +183,8 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
             </div>
 
             {/* Desktop: vertical sidebar */}
-            <div className="hidden md:flex w-56 flex-shrink-0 border-r border-zinc-800/80 bg-zinc-900/50 flex-col">
-              <div className="px-4 pt-5 pb-4 border-b border-zinc-800/60">
+            <div className="hidden md:flex w-56 flex-shrink-0 border-r border-white/[0.05] bg-black/20 backdrop-blur-xl flex-col">
+              <div className="px-4 pt-5 pb-4 border-b border-white/5">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
                     <UserIcon className="w-4 h-4 text-emerald-400" />
@@ -188,7 +193,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                 </div>
                 {profile && (
                   <div className="flex items-center gap-3 mt-2">
-                    <div className="w-10 h-10 rounded-xl bg-zinc-800/60 border border-zinc-700/50 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-black/40 border border-emerald-500/20 flex items-center justify-center overflow-hidden flex-shrink-0">
                       {avatar ? (
                         avatar.startsWith('data:') || avatar.startsWith('http') ? (
                           <img src={avatar} alt="avatar" className="w-full h-full object-cover" />
@@ -196,7 +201,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                           <span className="text-xl">{avatar}</span>
                         )
                       ) : (
-                        <UserIcon className="w-5 h-5 text-zinc-600" />
+                        <UserIcon className="w-5 h-5 text-emerald-400" />
                       )}
                     </div>
                     <div className="min-w-0">
@@ -215,8 +220,8 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                       onClick={() => setActiveTab(tab.value)}
                       className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all ${
                         isTabActive
-                          ? 'text-emerald-300 bg-emerald-500/10 border border-emerald-500/20'
-                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 border border-transparent'
+                          ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20'
+                          : 'text-neutral-300 hover:text-white hover:bg-white/[0.03] border border-transparent'
                       }`}
                     >
                       {tab.icon}
@@ -225,7 +230,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                   );
                 })}
               </nav>
-              <div className="p-3 border-t border-zinc-800/60">
+              <div className="p-3 border-t border-white/5">
                 <button
                   onClick={handleLogout}
                   disabled={isLoggingOut}
@@ -239,11 +244,11 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
 
             {/* Content area */}
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-              <div className="hidden md:flex items-center justify-between px-6 py-3 border-b border-zinc-800/60 flex-shrink-0 bg-zinc-900/30">
+              <div className="hidden md:flex items-center justify-between px-6 py-3 border-b border-white/5 flex-shrink-0 bg-black/20">
                 <h4 className="text-sm font-semibold text-white">{t(`settings.tab.${activeTab}`)}</h4>
                 <button
                   onClick={onClose}
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition"
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -257,7 +262,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                         {t('settings.avatar')}
                       </label>
                       <div className="flex items-start gap-4 md:gap-5">
-                        <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-zinc-800/60 border border-zinc-700/50 flex items-center justify-center overflow-hidden flex-shrink-0">
+                      <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-black/40 border border-emerald-500/20 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-[0_0_30px_rgba(16,245,181,0.15)]">
                           {avatar ? (
                             avatar.startsWith('data:') || avatar.startsWith('http') ? (
                               <img src={avatar} alt="avatar" className="w-full h-full object-cover" />
@@ -265,13 +270,13 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                               <span className="text-4xl md:text-5xl">{avatar}</span>
                             )
                           ) : (
-                            <UserIcon className="w-8 h-8 md:w-10 md:h-10 text-zinc-600" />
+                            <UserIcon className="w-8 h-8 md:w-10 md:h-10 text-emerald-400" />
                           )}
                         </div>
                         <div className="flex-1 space-y-2">
                           <button
                             onClick={() => fileInputRef.current?.click()}
-                            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 md:px-4 md:py-2.5 rounded-xl border border-zinc-700/50 bg-zinc-800/40 text-zinc-200 hover:bg-zinc-800/70 hover:border-zinc-600 transition text-sm active:scale-[0.98]"
+                            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 md:px-4 md:py-2.5 rounded-xl border border-white/10 bg-black/40 text-white hover:bg-white/5 hover:border-emerald-500/30 transition text-sm active:scale-[0.98]"
                           >
                             <Camera className="w-4 h-4" />
                             {t('settings.upload_photo')}
@@ -293,18 +298,18 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                           )}
                         </div>
                       </div>
-                      <div className="mt-4">
-                        <p className="text-[10px] uppercase tracking-wider text-zinc-600 mb-2">
-                          {t('settings.avatar_presets')}
-                        </p>
-                        <div className="grid grid-cols-7 sm:grid-cols-10 gap-1.5 p-2.5 rounded-xl bg-zinc-800/30 border border-zinc-800/50 max-h-28 md:max-h-36 overflow-y-auto">
+                        <div className="mt-4">
+                          <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-2">
+                            {t('settings.avatar_presets')}
+                          </p>
+                          <div className="grid grid-cols-7 sm:grid-cols-10 gap-1.5 p-2.5 rounded-xl bg-black/30 border border-white/5 max-h-28 md:max-h-36 overflow-y-auto">
                           {PRESET_AVATARS.map((emoji, index) => (
                             <button
                               key={`${emoji}-${index}`}
                               onClick={() => setAvatar(emoji)}
-                              className={`text-lg md:text-xl w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center transition active:scale-90 ${
-                                avatar === emoji ? 'bg-neon-green/20 ring-1 ring-neon-green/50' : 'hover:bg-zinc-700/50'
-                              }`}
+                                className={`text-lg md:text-xl w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center transition active:scale-90 ${
+                                  avatar === emoji ? 'bg-emerald-500/20 ring-1 ring-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'hover:bg-white/5'
+                                }`}
                             >
                               {emoji}
                             </button>
@@ -314,7 +319,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                     </div>
 
                     <div>
-                      <label className="block text-xs uppercase tracking-wider text-zinc-500 mb-2">
+                      <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">
                         {t('settings.nickname')}
                       </label>
                       <input
@@ -322,7 +327,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                         value={nickname}
                         onChange={(e) => setNickname(e.target.value)}
                         placeholder={t('settings.nickname_placeholder')}
-                        className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-3.5 py-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-emerald-500/50 focus:bg-zinc-800/80 transition"
+                        className="w-full bg-black/40 border border-white/[0.08] rounded-xl px-3.5 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition"
                       />
                     </div>
 
@@ -331,7 +336,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                         <label className="block text-xs uppercase tracking-wider text-zinc-500 mb-2">
                           {t('settings.tier')}
                         </label>
-                        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-800/40 border border-zinc-800/60">
+                        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-black/30 border border-amber-500/20">
                           <TierBadge tier={profile.tier ?? 'free'} size="md" />
                           <span className="text-xs text-zinc-500">{t('settings.tier_desc')}</span>
                         </div>
@@ -347,7 +352,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                     <button
                       onClick={handleSave}
                       disabled={isSaving}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/25 hover:border-emerald-500/60 transition-all text-sm font-medium disabled:opacity-50 active:scale-[0.98]"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-black font-semibold text-sm hover:from-emerald-400 hover:to-teal-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_4px_30px_rgba(16,185,129,0.4)] active:scale-[0.98]"
                     >
                       {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : null}
                       {isSaving ? t('common.saving') : saved ? t('common.saved') : t('common.save_changes')}
@@ -357,7 +362,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
 
                 {activeTab === 'security' && (
                   <div className="space-y-5 md:space-y-6">
-                    <div className="px-4 md:px-5 py-5 rounded-2xl bg-zinc-800/40 border border-zinc-800/60">
+                    <div className="px-4 md:px-5 py-5 rounded-2xl bg-black/30 border border-cyan-500/20">
                       <div className="flex items-center gap-2 mb-2">
                         <Lock className="w-4 h-4 text-emerald-400" />
                         <h4 className="text-sm font-semibold text-white">E2EE End-to-End Encryption</h4>
@@ -365,16 +370,16 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                       <p className="text-xs text-zinc-400 leading-relaxed">{t('settings.security_desc')}</p>
                     </div>
 
-                    <div className="rounded-2xl bg-zinc-800/40 border border-zinc-800/60 overflow-hidden">
-                      <div className="px-4 md:px-5 py-4 border-b border-zinc-800/60">
+                    <div className="rounded-2xl bg-black/30 border border-white/5 overflow-hidden">
+                      <div className="px-4 md:px-5 py-4 border-b border-white/5">
                         <div className="flex items-center gap-2">
                           <Monitor className="w-4 h-4 text-neon-green" />
                           <h4 className="text-sm font-semibold text-white">{t('settings.active_sessions')}</h4>
                         </div>
                         <p className="text-[10px] text-zinc-500 mt-1">{t('settings.sessions_desc')}</p>
                       </div>
-                      <div className="p-4 md:p-5 space-y-3">
-                        <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                        <div className="p-4 md:p-5 space-y-3">
+                          <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
                           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
                             {isMobileDevice ? (
                               <Smartphone className="w-5 h-5 text-emerald-400" />
@@ -434,7 +439,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
 
                 {activeTab === 'language' && (
                   <div className="space-y-5">
-                    <p className="text-xs text-zinc-400 leading-relaxed">{t('settings.language_desc')}</p>
+                    <p className="text-xs text-gray-400 leading-relaxed">{t('settings.language_desc')}</p>
                     <div className="grid grid-cols-1 gap-2">
                       {LOCALES.map((loc) => {
                         const isActive = locale === loc.value;
@@ -444,8 +449,8 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                             onClick={() => setLocale(loc.value)}
                             className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl border transition-all text-left active:scale-[0.98] ${
                               isActive
-                                ? 'border-emerald-500/50 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.20)]'
-                                : 'border-zinc-800 bg-zinc-800/40 hover:border-zinc-700 hover:bg-zinc-800/60'
+                                ? 'border-emerald-500/40 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
+                                : 'border-white/[0.06] bg-black/20 hover:border-white/10 hover:bg-white/[0.02]'
                             }`}
                           >
                             <span className="text-2xl md:text-3xl">{loc.flag}</span>
@@ -453,7 +458,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                               <p className={`text-sm font-medium ${isActive ? 'text-emerald-300' : 'text-white'}`}>
                                 {loc.label}
                               </p>
-                              <p className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">{loc.value}</p>
+                              <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">{loc.value}</p>
                             </div>
                             {isActive && <Check className="w-5 h-5 text-emerald-400" />}
                           </button>
