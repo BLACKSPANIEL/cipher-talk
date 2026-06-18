@@ -3,12 +3,10 @@
 import React from 'react';
 import { SettingsSidebar } from '@/components/settings/SettingsSidebar';
 
-type SettingsTab = 'profile' | 'security' | 'language';
-
 interface SettingsLayoutProps {
   children: React.ReactNode;
-  activeTab: SettingsTab;
-  onTabChange: (tab: SettingsTab) => void;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
   username: string;
   status: string;
   tier?: string;

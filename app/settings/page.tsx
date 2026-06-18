@@ -115,9 +115,9 @@ export default function SettingsPage() {
   }
 
   return (
-    <SettingsLayout
-      activeTab={activeTab}
-      onTabChange={setActiveTab}
+        <SettingsLayout
+          activeTab={activeTab}
+          onTabChange={(tab) => setActiveTab(tab as any)}
       username={username}
       status={status}
       tier={profile?.tier}

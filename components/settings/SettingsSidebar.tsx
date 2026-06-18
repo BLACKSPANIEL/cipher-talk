@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { User, Lock, Globe, LogOut, Crown } from 'lucide-react';
+import { User, Lock, Globe, LogOut, Crown, Bell, Palette, Monitor, Info } from 'lucide-react';
 import { TierBadge } from '@/components/chat/TierBadge';
 
-type SettingsTab = 'profile' | 'security' | 'language';
+type SettingsTab = 'profile' | 'account' | 'security' | 'notifications' | 'appearance' | 'language' | 'devices' | 'about';
 
 interface SettingsSidebarProps {
   activeTab: SettingsTab;
@@ -18,8 +18,13 @@ interface SettingsSidebarProps {
 
 const tabs: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
   { id: 'profile', label: 'Профиль', icon: <User className="w-4 h-4" /> },
+  { id: 'account', label: 'Аккаунт', icon: <User className="w-4 h-4" /> },
   { id: 'security', label: 'Безопасность', icon: <Lock className="w-4 h-4" /> },
-  { id: 'language', label: 'Язык / Language', icon: <Globe className="w-4 h-4" /> },
+  { id: 'notifications', label: 'Уведомления', icon: <Bell className="w-4 h-4" /> },
+  { id: 'appearance', label: 'Оформление', icon: <Palette className="w-4 h-4" /> },
+  { id: 'language', label: 'Язык', icon: <Globe className="w-4 h-4" /> },
+  { id: 'devices', label: 'Устройства', icon: <Monitor className="w-4 h-4" /> },
+  { id: 'about', label: 'О приложении', icon: <Info className="w-4 h-4" /> },
 ];
 
 export function SettingsSidebar({

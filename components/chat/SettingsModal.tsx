@@ -2,12 +2,17 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User as UserIcon, LogOut, Camera, Loader2, Check, Shield, Globe, Lock, Monitor, Smartphone, Trash2, Settings } from 'lucide-react';
+import { X, User as UserIcon, LogOut, Camera, Loader2, Check, Shield, Globe, Lock, Monitor, Smartphone, Trash2, Settings, Bell, Palette, Info } from 'lucide-react';
 import { supabase, type Profile } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import { TierBadge } from './TierBadge';
 import { useLanguage, LOCALES } from '@/lib/i18n';
 import { SettingsLayout } from '@/components/settings/SettingsLayout';
+import { AccountSettings } from '@/components/settings/AccountSettings';
+import { NotificationsSettings } from '@/components/settings/NotificationsSettings';
+import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
+import { DevicesSettings } from '@/components/settings/DevicesSettings';
+import { AboutSettings } from '@/components/settings/AboutSettings';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -22,12 +27,17 @@ const PRESET_AVATARS = [
   '😀', '😂', '🥰', '😎',
 ];
 
-type Tab = 'profile' | 'security' | 'language';
+type Tab = 'profile' | 'account' | 'security' | 'notifications' | 'appearance' | 'language' | 'devices' | 'about';
 
 const tabsList = [
   { value: 'profile' as const, key: 'settings.tab.profile' as const, icon: <UserIcon className="w-4 h-4" /> },
+  { value: 'account' as const, key: 'settings.tab.account' as const, icon: <UserIcon className="w-4 h-4" /> },
   { value: 'security' as const, key: 'settings.tab.security' as const, icon: <Shield className="w-4 h-4" /> },
+  { value: 'notifications' as const, key: 'settings.tab.notifications' as const, icon: <Bell className="w-4 h-4" /> },
+  { value: 'appearance' as const, key: 'settings.tab.appearance' as const, icon: <Palette className="w-4 h-4" /> },
   { value: 'language' as const, key: 'settings.tab.language' as const, icon: <Globe className="w-4 h-4" /> },
+  { value: 'devices' as const, key: 'settings.tab.devices' as const, icon: <Monitor className="w-4 h-4" /> },
+  { value: 'about' as const, key: 'settings.tab.about' as const, icon: <Info className="w-4 h-4" /> },
 ];
 
 export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: SettingsModalProps) {
@@ -148,7 +158,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
           >
             <SettingsLayout
               activeTab={activeTab}
-              onTabChange={setActiveTab}
+              onTabChange={(tab) => setActiveTab(tab as any)}
               username={profile?.username || ''}
               status="online"
               tier={profile?.tier}
@@ -339,6 +349,41 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                   </div>
                 )}
 
+                {activeTab === 'account' && (
+                  <AccountSettings
+                    username={profile?.username || ''}
+                    email={(profile as { email?: string } | null)?.email || ''}
+                    onUpdate={async (field, value) => {
+                      if (!profile) return;
+                      await supabase.from('profiles').update({ [field]: value }).eq('id', profile.id);
+                      if (field === 'username' && onProfileUpdated && profile) {
+                        onProfileUpdated({ ...profile, username: value as string });
+                      }
+                    }}
+                  />
+                )}
+
+                {activeTab === 'notifications' && (
+                  <NotificationsSettings
+                    settings={{
+                      pushNotifications: true,
+                      soundEnabled: true,
+                      messagePreview: true,
+                      emailNotifications: false,
+                    }}
+                    onUpdate={(key, value) => console.log('Update notification:', key, value)}
+                  />
+                )}
+
+                {activeTab === 'appearance' && (
+                  <AppearanceSettings
+                    theme="dark"
+                    glassIntensity={20}
+                    accentColor="emerald"
+                    onUpdate={(key, value) => console.log('Update appearance:', key, value)}
+                  />
+                )}
+
                 {activeTab === 'language' && (
                   <div className="space-y-5">
                     <p className="text-xs text-gray-400 leading-relaxed">{t('settings.language_desc')}</p>
@@ -369,6 +414,19 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                     </div>
                   </div>
                 )}
+
+                {activeTab === 'devices' && (
+                  <DevicesSettings
+                    devices={[
+                      { id: 1, name: 'Windows Desktop', type: 'desktop', os: 'Windows 11', location: 'Москва, RU', lastActive: 'сейчас', current: true },
+                      { id: 2, name: 'Chrome Browser', type: 'desktop', os: 'Windows 11', location: 'Москва, RU', lastActive: '2 часа назад', current: false },
+                      { id: 3, name: 'iPhone 15 Pro', type: 'mobile', os: 'iOS 17', location: 'Санкт-Петербург, RU', lastActive: '1 день назад', current: false },
+                    ]}
+                    onRevoke={(id) => console.log('Revoke device:', id)}
+                  />
+                )}
+
+                {activeTab === 'about' && <AboutSettings />}
 
                 <div className="h-6 md:hidden" />
               </div>
