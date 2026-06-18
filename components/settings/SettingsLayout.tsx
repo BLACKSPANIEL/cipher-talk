@@ -5,7 +5,7 @@
 import React from 'react';
 import { SettingsSidebar } from '@/components/settings/SettingsSidebar';
 
-export type SettingsTab = 'profile' | 'account' | 'security' | 'notifications' | 'appearance' | 'language' | 'devices' | 'about';
+export type SettingsTab = 'profile' | 'account' | 'security' | 'notifications' | 'appearance' | 'language' | 'devices' | 'storage' | 'about';
 
 interface SettingsLayoutProps {
   children: React.ReactNode;

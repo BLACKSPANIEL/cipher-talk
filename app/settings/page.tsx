@@ -22,7 +22,7 @@ export default function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
-  const [status, setStatus] = useState<Profile['status']>('online');
+  const [status, setStatus] = useState<string>('online');
   const [e2eeKey, setE2eeKey] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -59,7 +59,7 @@ export default function SettingsPage() {
     loadProfile();
   }, [router]);
 
-  const handleSaveProfile = async (newUsername: string, newBio: string, newStatus: Profile['status']) => {
+  const handleSaveProfile = async (newUsername: string, newBio: string, newStatus: string) => {
     setSaveMessage(null);
 
     if (!profile || !newUsername.trim()) return;

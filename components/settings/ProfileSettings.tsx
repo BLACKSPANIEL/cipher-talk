@@ -1,21 +1,26 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Camera, Save, Loader2, Crown, Check } from 'lucide-react';
+import { Camera, Save, Loader2, Crown, Check, User } from 'lucide-react';
 import { TierBadge } from '@/components/chat/TierBadge';
 
 interface ProfileSettingsProps {
   username: string;
   bio: string;
-  status: 'online' | 'offline' | 'away';
+  status: string;
   tier?: string;
-  onSave: (username: string, bio: string, status: 'online' | 'offline' | 'away') => Promise<void>;
+  onSave: (username: string, bio: string, status: string) => Promise<void>;
   isSaving: boolean;
   saveMessage: { type: 'success' | 'error'; text: string } | null;
 }
 
-const STATUS_EMOJIS = ['🟢', '🟡', '🔴', '🌙', '⚡', '🔥', '💤', '🎮'];
+const STATUS_OPTIONS = [
+  { value: 'online' as const, label: 'В сети', emoji: '🟢', desc: 'Доступен для общения' },
+  { value: 'ingame' as const, label: 'В игре', emoji: '🎮', desc: 'Играет в игру' },
+  { value: 'dnd' as const, label: 'Не беспокоить', emoji: '🔴', desc: 'Не принимать уведомления' },
+  { value: 'custom' as const, label: 'Кастомный', emoji: '✨', desc: 'Свой статус' },
+];
 
 export function ProfileSettings({
   username,
@@ -29,12 +34,33 @@ export function ProfileSettings({
   const [localUsername, setLocalUsername] = useState(username);
   const [localBio, setLocalBio] = useState(bio);
   const [localStatus, setLocalStatus] = useState(status);
-  const [statusEmoji, setStatusEmoji] = useState('🟢');
+  const [customStatus, setCustomStatus] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await onSave(localUsername, localBio, localStatus);
   };
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      // Handle file upload
+      console.log('Dropped file:', file.name);
+    }
+  }, []);
 
   return (
     <motion.div
@@ -44,37 +70,57 @@ export function ProfileSettings({
       transition={{ duration: 0.2 }}
       className="space-y-6"
     >
-      {/* Avatar Section */}
+      {/* Avatar Section with Drag & Drop */}
       <div className="flex justify-center">
-        <div className="relative group cursor-pointer">
-          <div className="w-32 h-32 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border-2 border-emerald-500/20 flex items-center justify-center shadow-[0_0_50px_rgba(16,245,181,0.25)] transition-all duration-300 group-hover:shadow-[0_0_70px_rgba(16,245,181,0.35)] group-hover:border-emerald-500/40">
+        <div
+          className={`relative group cursor-pointer transition-all duration-300 ${
+            isDragging ? 'scale-105' : ''
+          }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <div className={`w-32 h-32 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border-2 transition-all duration-300 flex items-center justify-center shadow-[0_0_50px_rgba(16,245,181,0.25)] ${
+            isDragging 
+              ? 'border-emerald-400 shadow-[0_0_70px_rgba(16,245,181,0.4)]' 
+              : 'border-emerald-500/20 hover:border-emerald-500/40'
+          }`}>
             <span className="text-5xl">🎮</span>
           </div>
           <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-1">
             <Camera className="w-10 h-10 text-white" />
             <span className="text-[10px] text-white font-medium">Загрузить фото</span>
           </div>
+          {isDragging && (
+            <div className="absolute inset-0 rounded-full bg-emerald-500/20 border-2 border-emerald-400 border-dashed flex items-center justify-center">
+              <p className="text-xs text-emerald-400 font-medium">Отпустите для загрузки</p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Status Emoji Grid */}
+      {/* Status Selection */}
       <div>
         <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
-          Эмодзи статуса
+          Статус
         </label>
-        <div className="flex flex-wrap gap-2 max-h-[120px] overflow-y-auto custom-scrollbar p-3 rounded-xl bg-black/30 border border-white/5">
-          {STATUS_EMOJIS.map((emoji) => (
+        <div className="grid grid-cols-2 gap-2">
+          {STATUS_OPTIONS.map((option) => (
             <button
-              key={emoji}
+              key={option.value}
               type="button"
-              onClick={() => setStatusEmoji(emoji)}
-              className={`w-10 h-10 rounded-lg border transition-all duration-200 flex items-center justify-center text-lg ${
-                statusEmoji === emoji
-                  ? 'border-emerald-500 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.2)] scale-110'
-                  : 'border-white/10 hover:border-white/20 hover:scale-105'
+              onClick={() => setLocalStatus(option.value)}
+              className={`flex items-center gap-3 p-3 rounded-xl border text-sm transition-all duration-200 ${
+                localStatus === option.value
+                  ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
+                  : 'border-white/10 text-gray-400 hover:border-white/20 hover:bg-white/[0.02]'
               }`}
             >
-              {emoji}
+              <span className="text-lg">{option.emoji}</span>
+              <div className="text-left">
+                <p className="font-medium">{option.label}</p>
+                <p className="text-[10px] opacity-60">{option.desc}</p>
+              </div>
             </button>
           ))}
         </div>
@@ -107,34 +153,6 @@ export function ProfileSettings({
           placeholder="Расскажите о себе..."
           className="w-full bg-black/40 border border-white/[0.08] rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all text-sm resize-none"
         />
-      </div>
-
-      {/* Status Selection */}
-      <div>
-        <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
-          Статус
-        </label>
-        <div className="flex gap-3">
-          {[
-            { value: 'online' as const, label: 'В сети', emoji: '🟢' },
-            { value: 'away' as const, label: 'Отошёл', emoji: '🟡' },
-            { value: 'offline' as const, label: 'Не в сети', emoji: '🔴' },
-          ].map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setLocalStatus(opt.value)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all flex-1 justify-center ${
-                localStatus === opt.value
-                  ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
-                  : 'border-white/10 text-gray-400 hover:border-white/20'
-              }`}
-            >
-              <span>{opt.emoji}</span>
-              {opt.label}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* ELITE Tier Badge */}

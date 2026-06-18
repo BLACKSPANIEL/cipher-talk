@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Palette, Sun, Moon, Sliders, Sparkles } from 'lucide-react';
+import { Palette, Sun, Moon, Sliders, Sparkles, Check } from 'lucide-react';
 
 interface AppearanceSettingsProps {
   theme: 'dark' | 'light';
@@ -20,6 +20,13 @@ const ACCENT_COLORS = [
 ];
 
 export function AppearanceSettings({ theme, glassIntensity, accentColor, onUpdate }: AppearanceSettingsProps) {
+  const [selectedColor, setSelectedColor] = useState(accentColor);
+
+  const handleColorSelect = (colorId: string) => {
+    setSelectedColor(colorId);
+    onUpdate('accentColor', colorId);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -132,7 +139,7 @@ export function AppearanceSettings({ theme, glassIntensity, accentColor, onUpdat
         </div>
       </div>
 
-      {/* Accent Color */}
+      {/* Accent Color Picker */}
       <div className="p-6 rounded-2xl bg-black/30 border border-white/5">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
@@ -148,25 +155,89 @@ export function AppearanceSettings({ theme, glassIntensity, accentColor, onUpdat
           {ACCENT_COLORS.map((color) => (
             <button
               key={color.id}
-              onClick={() => onUpdate('accentColor', color.id)}
+              onClick={() => handleColorSelect(color.id)}
               className={`relative p-3 rounded-xl border transition-all duration-200 ${
-                accentColor === color.id
+                selectedColor === color.id
                   ? 'border-emerald-500/50 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
                   : 'border-white/10 bg-black/40 hover:border-white/20'
               }`}
             >
               <div className="flex flex-col items-center gap-2">
                 <div className={`w-10 h-10 rounded-full ${color.color} ${
-                  accentColor === color.id ? 'ring-2 ring-white/30 ring-offset-2 ring-offset-black' : ''
+                  selectedColor === color.id ? 'ring-2 ring-white/30 ring-offset-2 ring-offset-black' : ''
                 }`} />
                 <span className={`text-[10px] font-medium ${
-                  accentColor === color.id ? 'text-emerald-400' : 'text-gray-400'
+                  selectedColor === color.id ? 'text-emerald-400' : 'text-gray-400'
                 }`}>
                   {color.label}
                 </span>
               </div>
+              {selectedColor === color.id && (
+                <div className="absolute top-1 right-1">
+                  <Check className="w-3 h-3 text-emerald-400" />
+                </div>
+              )}
             </button>
           ))}
+        </div>
+
+        {/* Hex Color Input */}
+        <div className="mt-4 pt-4 border-t border-white/5">
+          <label className="block text-xs text-gray-400 mb-2">Или введите HEX-код</label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={selectedColor}
+              onChange={(e) => handleColorSelect(e.target.value)}
+              placeholder="#00FF9F"
+              className="flex-1 bg-black/40 border border-white/[0.08] rounded-lg px-4 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-emerald-500/50"
+            />
+            <button
+              onClick={() => onUpdate('accentColor', selectedColor)}
+              className="px-4 py-2.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30 transition-all text-sm"
+            >
+              Применить
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Live Preview */}
+      <div className="p-6 rounded-2xl bg-black/30 border border-white/5">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-amber-400" />
+          </div>
+          <div>
+            <h3 className="text-white font-semibold">Предпросмотр</h3>
+            <p className="text-[10px] text-gray-500">Как будет выглядеть интерфейс</p>
+          </div>
+        </div>
+
+        {/* Mini Chat Preview */}
+        <div className="p-4 rounded-xl bg-black/40 border border-white/[0.08] backdrop-blur-xl">
+          <div className="flex items-center gap-2 mb-3 pb-3 border-b border-white/5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+              <span className="text-sm">💬</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-xs font-medium text-white">Чат</p>
+              <p className="text-[10px] text-gray-500">В сети</p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex-shrink-0" />
+              <div className="flex-1 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                <p className="text-[10px] text-emerald-400">Привет! Как дела?</p>
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <div className="p-2 rounded-lg bg-white/5 border border-white/10">
+                <p className="text-[10px] text-gray-300">Отлично, работаю над проектом!</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </motion.div>

@@ -12,6 +12,7 @@ import { AccountSettings } from '@/components/settings/AccountSettings';
 import { NotificationsSettings } from '@/components/settings/NotificationsSettings';
 import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
 import { DevicesSettings } from '@/components/settings/DevicesSettings';
+import { StorageSettings } from '@/components/settings/StorageSettings';
 import { AboutSettings } from '@/components/settings/AboutSettings';
 
 interface SettingsModalProps {
@@ -422,6 +423,13 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                       { id: 3, name: 'iPhone 15 Pro', type: 'mobile', os: 'iOS 17', location: 'Санкт-Петербург, RU', lastActive: '1 день назад', current: false },
                     ]}
                     onRevoke={(id) => console.log('Revoke device:', id)}
+                  />
+                )}
+
+                {activeTab === 'storage' && (
+                  <StorageSettings
+                    onClearCache={() => console.log('Clear cache')}
+                    onExportData={() => console.log('Export data')}
                   />
                 )}
 
