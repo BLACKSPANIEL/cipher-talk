@@ -377,9 +377,6 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
 
                 {activeTab === 'appearance' && (
                   <AppearanceSettings
-                    theme="dark"
-                    glassIntensity={20}
-                    accentColor="emerald"
                     onUpdate={(key, value) => console.log('Update appearance:', key, value)}
                   />
                 )}

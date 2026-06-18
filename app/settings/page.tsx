@@ -9,6 +9,8 @@ import { SettingsLayout, type SettingsTab } from '@/components/settings/Settings
 import { ProfileSettings } from '@/components/settings/ProfileSettings';
 import { SecuritySettings } from '@/components/settings/SecuritySettings';
 import { LanguageSettings } from '@/components/settings/LanguageSettings';
+import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
+import { useSettingsStore } from '@/stores/useSettingsStore';
 
 const SESSIONS = [
   { id: 1, device: 'Windows Desktop', os: 'Windows 11', location: 'Москва, RU', time: 'Сейчас', active: true, type: 'desktop' as const },
@@ -30,6 +32,7 @@ export default function SettingsPage() {
   const [keyCopied, setKeyCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [language, setLanguage] = useState('ru');
+  const { theme, accentColor, glassIntensity, setTheme, setAccentColor, setGlassIntensity } = useSettingsStore();
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -147,6 +150,16 @@ export default function SettingsPage() {
         <LanguageSettings
           selectedLanguage={language}
           onLanguageChange={setLanguage}
+        />
+      )}
+
+      {activeTab === 'appearance' && (
+        <AppearanceSettings
+          onUpdate={(key: string, value: string | number) => {
+            if (key === 'theme') setTheme(value as 'dark' | 'light' | 'system');
+            if (key === 'accentColor') setAccentColor(value as string);
+            if (key === 'glassIntensity') setGlassIntensity(value as number);
+          }}
         />
       )}
     </SettingsLayout>

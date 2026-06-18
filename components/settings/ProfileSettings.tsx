@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import { Camera, Save, Loader2, Crown, Check, User } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Camera, Save, Loader2, Crown, Check, User, X } from 'lucide-react';
 import { TierBadge } from '@/components/chat/TierBadge';
 
 interface ProfileSettingsProps {
@@ -16,11 +16,13 @@ interface ProfileSettingsProps {
 }
 
 const STATUS_OPTIONS = [
-  { value: 'online' as const, label: 'В сети', emoji: '🟢', desc: 'Доступен для общения' },
-  { value: 'ingame' as const, label: 'В игре', emoji: '🎮', desc: 'Играет в игру' },
-  { value: 'dnd' as const, label: 'Не беспокоить', emoji: '🔴', desc: 'Не принимать уведомления' },
-  { value: 'custom' as const, label: 'Кастомный', emoji: '✨', desc: 'Свой статус' },
+  { value: 'online', label: 'В сети', emoji: '🟢', color: 'emerald', desc: 'Доступен для общения' },
+  { value: 'ingame', label: 'В игре', emoji: '🎮', color: 'violet', desc: 'Играет в игру' },
+  { value: 'dnd', label: 'Не беспокоить', emoji: '🔴', color: 'red', desc: 'Не принимать уведомления' },
+  { value: 'custom', label: 'Кастомный', emoji: '✨', color: 'amber', desc: 'Свой статус' },
 ];
+
+const MAX_BIO_LENGTH = 150;
 
 export function ProfileSettings({
   username,
@@ -36,6 +38,7 @@ export function ProfileSettings({
   const [localStatus, setLocalStatus] = useState(status);
   const [customStatus, setCustomStatus] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,10 +60,40 @@ export function ProfileSettings({
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) {
-      // Handle file upload
-      console.log('Dropped file:', file.name);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setAvatarPreview(result);
+      };
+      reader.readAsDataURL(file);
     }
   }, []);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setAvatarPreview(result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearAvatar = () => {
+    setAvatarPreview(null);
+  };
+
+  const getStatusColor = (colorName: string) => {
+    const colors: Record<string, string> = {
+      emerald: 'bg-emerald-500',
+      violet: 'bg-violet-500',
+      red: 'bg-red-500',
+      amber: 'bg-amber-500',
+    };
+    return colors[colorName] || 'bg-gray-500';
+  };
 
   return (
     <motion.div
@@ -82,20 +115,49 @@ export function ProfileSettings({
         >
           <div className={`w-32 h-32 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border-2 transition-all duration-300 flex items-center justify-center shadow-[0_0_50px_rgba(16,245,181,0.25)] ${
             isDragging 
-              ? 'border-emerald-400 shadow-[0_0_70px_rgba(16,245,181,0.4)]' 
+              ? 'border-emerald-400 shadow-[0_0_70px_rgba(16,245,181,0.4)] scale-105' 
               : 'border-emerald-500/20 hover:border-emerald-500/40'
           }`}>
-            <span className="text-5xl">🎮</span>
+            {avatarPreview ? (
+              <img src={avatarPreview} alt="Avatar preview" className="w-full h-full rounded-full object-cover" />
+            ) : (
+              <span className="text-5xl">🎮</span>
+            )}
           </div>
+          
+          {/* Overlay on hover */}
           <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-1">
             <Camera className="w-10 h-10 text-white" />
             <span className="text-[10px] text-white font-medium">Загрузить фото</span>
           </div>
+          
+          {/* Drag & Drop indicator */}
           {isDragging && (
             <div className="absolute inset-0 rounded-full bg-emerald-500/20 border-2 border-emerald-400 border-dashed flex items-center justify-center">
-              <p className="text-xs text-emerald-400 font-medium">Отпустите для загрузки</p>
+              <div className="text-center">
+                <Camera className="w-8 h-8 text-emerald-400 mx-auto mb-1" />
+                <p className="text-xs text-emerald-400 font-medium">Отпустите для загрузки</p>
+              </div>
             </div>
           )}
+
+          {/* Clear button */}
+          {avatarPreview && (
+            <button
+              onClick={clearAvatar}
+              className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition-colors shadow-lg"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            className="hidden"
+            id="avatar-upload"
+          />
         </div>
       </div>
 
@@ -106,22 +168,27 @@ export function ProfileSettings({
         </label>
         <div className="grid grid-cols-2 gap-2">
           {STATUS_OPTIONS.map((option) => (
-            <button
+            <motion.button
               key={option.value}
               type="button"
               onClick={() => setLocalStatus(option.value)}
               className={`flex items-center gap-3 p-3 rounded-xl border text-sm transition-all duration-200 ${
                 localStatus === option.value
-                  ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
+                  ? `border-${option.color}-500/40 bg-${option.color}-500/10 text-${option.color}-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]`
                   : 'border-white/10 text-gray-400 hover:border-white/20 hover:bg-white/[0.02]'
               }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <span className="text-lg">{option.emoji}</span>
-              <div className="text-left">
+              <div className="text-left flex-1">
                 <p className="font-medium">{option.label}</p>
                 <p className="text-[10px] opacity-60">{option.desc}</p>
               </div>
-            </button>
+              {localStatus === option.value && (
+                <div className={`w-2 h-2 rounded-full ${getStatusColor(option.color)}`} />
+              )}
+            </motion.button>
           ))}
         </div>
       </div>
@@ -140,7 +207,7 @@ export function ProfileSettings({
         />
       </div>
 
-      {/* Bio Input */}
+      {/* Bio Input with character limit */}
       <div>
         <label htmlFor="settings-bio" className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
           О себе
@@ -148,11 +215,18 @@ export function ProfileSettings({
         <textarea
           id="settings-bio"
           value={localBio}
-          onChange={(e) => setLocalBio(e.target.value)}
+          onChange={(e) => setLocalBio(e.target.value.slice(0, MAX_BIO_LENGTH))}
           rows={3}
           placeholder="Расскажите о себе..."
+          maxLength={MAX_BIO_LENGTH}
           className="w-full bg-black/40 border border-white/[0.08] rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all text-sm resize-none"
         />
+        <div className="flex justify-between mt-1.5">
+          <p className="text-[10px] text-gray-500">Максимум {MAX_BIO_LENGTH} символов</p>
+          <p className={`text-[10px] ${localBio.length >= MAX_BIO_LENGTH ? 'text-red-400' : 'text-gray-500'}`}>
+            {localBio.length}/{MAX_BIO_LENGTH}
+          </p>
+        </div>
       </div>
 
       {/* ELITE Tier Badge */}
@@ -184,11 +258,6 @@ export function ProfileSettings({
           {saveMessage.text}
         </motion.div>
       )}
-
-      {/* Debug Version Indicator */}
-      <div className="text-emerald-400 text-sm text-center py-2 border border-emerald-500/20 rounded-xl bg-emerald-500/5">
-        ✅ Новая версия настроек (Glassmorphism v2)
-      </div>
 
       {/* Save Button */}
       <button
