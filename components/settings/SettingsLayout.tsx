@@ -3,6 +3,7 @@
 // Fixed: SettingsTab union type + strict typing
 
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { SettingsSidebar } from '@/components/settings/SettingsSidebar';
 
 export type SettingsTab = 'profile' | 'account' | 'security' | 'notifications' | 'appearance' | 'language' | 'devices' | 'storage' | 'about';
@@ -68,7 +69,17 @@ export function SettingsLayout({
 
         {/* Right Content Area */}
         <div className={`flex-1 overflow-y-auto custom-scrollbar ${isModal ? 'p-4 md:p-6' : 'p-6 max-h-[550px]'}`}>
-          {children}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>

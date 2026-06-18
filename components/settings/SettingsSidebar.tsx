@@ -70,8 +70,8 @@ export function SettingsSidebar({
             onClick={() => onTabChange(tab.id)}
             className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition-all duration-200 relative group ${
               activeTab === tab.id
-                ? 'bg-emerald-500/15 text-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.2)]'
-                : 'hover:bg-white/[0.05] text-neutral-300'
+                ? 'bg-emerald-500/15 text-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.2)] border-l-2 border-emerald-500'
+                : 'hover:bg-white/[0.05] text-neutral-300 border-l-2 border-transparent'
             }`}
             whileHover={{ scale: 1.02, x: 4 }}
             whileTap={{ scale: 0.98 }}
