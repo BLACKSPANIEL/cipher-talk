@@ -10,6 +10,7 @@ setlocal enabledelayedexpansion
 REM ── Step 1: Build Next.js static export ──
 echo [1/3] Building Next.js static export...
 cd /d "%~dp0.."
+set NEXT_OUTPUT=export
 call npm run build
 if %errorlevel% neq 0 (
     echo ❌ Next.js build failed!

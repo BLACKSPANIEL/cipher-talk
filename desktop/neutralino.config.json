@@ -46,7 +46,7 @@
     "binaryVersion": "5.6.0",
     "clientVersion": "5.6.0",
     "frontendLibrary": {
-      "patchFile": "../index.html",
+      "patchFile": "index.html",
       "devUrl": "http://localhost:3000/login",
       "projectPath": "../",
       "initCommand": "",
