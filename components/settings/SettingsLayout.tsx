@@ -1,7 +1,5 @@
 'use client';
 
-// Fixed: SettingsTab union type + strict typing
-
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SettingsSidebar } from '@/components/settings/SettingsSidebar';
@@ -32,8 +30,8 @@ export function SettingsLayout({
   onClose,
 }: SettingsLayoutProps) {
   const containerClasses = isModal
-    ? 'h-full md:h-[90vh] w-full md:max-w-5xl md:rounded-2xl rounded-none'
-    : 'w-full max-w-5xl h-[650px]';
+    ? 'h-full md:h-[90vh] w-full md:max-w-6xl md:rounded-2xl rounded-none'
+    : 'w-full max-w-6xl h-[700px]';
 
   return (
     <div className={isModal ? 'h-full' : 'min-h-screen bg-[#0e0f12] flex items-center justify-center p-4'}>
@@ -67,8 +65,8 @@ export function SettingsLayout({
           onLogout={onLogout}
         />
 
-        {/* Right Content Area — scrollbar прижат к правому краю */}
-        <div className={`flex-1 h-full overflow-y-auto custom-scrollbar pr-4 ${isModal ? 'p-4 md:p-6' : 'py-6 pl-6'}`}>
+        {/* Right Content Area — скроллбар прижат к правому краю */}
+        <div className="flex-1 h-full overflow-y-auto custom-scrollbar pr-2 pl-8 py-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -78,8 +76,7 @@ export function SettingsLayout({
               transition={{ duration: 0.15, ease: 'easeInOut' }}
               className="w-full h-full"
             >
-              {/* Внутренний контейнер — все отступы здесь, а не на родителе */}
-              <div className="w-full flex flex-col gap-6">
+              <div className="w-full flex flex-col gap-8">
                 {children}
               </div>
             </motion.div>

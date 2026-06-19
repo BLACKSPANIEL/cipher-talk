@@ -70,20 +70,17 @@ export function SettingsSidebar({
             onClick={() => onTabChange(tab.id)}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative group min-h-[48px] ${
               activeTab === tab.id
-                ? 'bg-emerald-500/15 text-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.2)] border-l-2 border-emerald-500'
-                : 'hover:bg-white/[0.05] text-neutral-300 border-l-2 border-transparent'
+                ? 'text-emerald-400 bg-gradient-to-r from-emerald-500/10 to-transparent border-l-4 border-emerald-500'
+                : 'hover:bg-white/[0.05] text-neutral-300 border-l-4 border-transparent'
             }`}
             whileHover={{ scale: 1.02, x: 4 }}
             whileTap={{ scale: 0.98 }}
           >
-            {/* Active indicator with enhanced glow */}
+            {/* Active indicator — мягкая полоса с градиентом */}
             {activeTab === tab.id && (
               <motion.div
                 layoutId="activeTab"
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 bg-emerald-400 rounded-r-full"
-                style={{ 
-                  boxShadow: '0 0 20px rgba(16,245,181,1), 0 0 40px rgba(16,245,181,0.6), 0 0 60px rgba(16,245,181,0.3)' 
-                }}
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-[4px] h-8 bg-gradient-to-b from-emerald-400 to-cyan-400 rounded-r-full"
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               />
             )}

@@ -24,15 +24,15 @@ export function AccountSettings({ username, email, onUpdate }: AccountSettingsPr
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="space-y-6"
+      className="w-full flex flex-col gap-8"
     >
       {/* Account Info Card */}
-      <div className="p-6 rounded-2xl bg-black/30 border border-white/5">
-        <div className="flex items-center gap-3 mb-6">
+      <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-6 backdrop-blur-md">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
             <User className="w-5 h-5 text-emerald-400" />
           </div>
@@ -42,42 +42,40 @@ export function AccountSettings({ username, email, onUpdate }: AccountSettingsPr
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4 w-full">
           {/* Username */}
-          <div>
+          <div className="w-full">
             <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">
               Имя пользователя
             </label>
-            <div className="flex items-center gap-3">
-              <div className="flex-1 bg-black/40 border border-white/[0.08] rounded-lg px-4 py-3 text-white text-sm">
-                {username}
-              </div>
+            <div className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm">
+              {username}
             </div>
           </div>
 
           {/* Email */}
-          <div>
+          <div className="w-full">
             <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">
               Email адрес
             </label>
             {isEditing ? (
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full">
                 <input
                   type="email"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
-                  className="flex-1 bg-black/40 border border-white/[0.08] rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-500/50"
+                  className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-500/50"
                 />
                 <button
                   onClick={handleSaveEmail}
                   disabled={isSaving}
-                  className="px-4 py-3 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30 transition-all text-sm"
+                  className="px-5 py-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30 transition-all text-sm"
                 >
                   {isSaving ? '...' : 'Сохранить'}
                 </button>
               </div>
             ) : (
-              <div className="flex items-center justify-between bg-black/40 border border-white/[0.08] rounded-lg px-4 py-3">
+              <div className="flex items-center justify-between w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-gray-500" />
                   <span className="text-white text-sm">{email}</span>
@@ -94,9 +92,9 @@ export function AccountSettings({ username, email, onUpdate }: AccountSettingsPr
         </div>
       </div>
 
-      {/* Security Info */}
-      <div className="p-6 rounded-2xl bg-black/30 border border-white/5">
-        <div className="flex items-center gap-3 mb-4">
+      {/* Security Card */}
+      <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-6 backdrop-blur-md">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
             <Shield className="w-5 h-5 text-cyan-400" />
           </div>
@@ -106,8 +104,8 @@ export function AccountSettings({ username, email, onUpdate }: AccountSettingsPr
           </div>
         </div>
 
-        <div className="space-y-3">
-          <button className="w-full flex items-center justify-between p-4 rounded-xl bg-black/40 border border-white/[0.08] hover:border-emerald-500/30 transition-all group">
+        <div className="flex flex-col gap-3 w-full">
+          <button className="flex items-center justify-between w-full p-4 rounded-xl bg-black/40 border border-white/[0.08] hover:border-emerald-500/30 transition-all group">
             <div className="flex items-center gap-3">
               <Key className="w-5 h-5 text-gray-500 group-hover:text-emerald-400 transition-colors" />
               <div className="text-left">
@@ -118,7 +116,7 @@ export function AccountSettings({ username, email, onUpdate }: AccountSettingsPr
             <span className="text-xs text-gray-500">Отключено</span>
           </button>
 
-          <button className="w-full flex items-center justify-between p-4 rounded-xl bg-black/40 border border-white/[0.08] hover:border-red-500/30 transition-all group">
+          <button className="flex items-center justify-between w-full p-4 rounded-xl bg-black/40 border border-white/[0.08] hover:border-red-500/30 transition-all group">
             <div className="flex items-center gap-3">
               <Trash2 className="w-5 h-5 text-gray-500 group-hover:text-red-400 transition-colors" />
               <div className="text-left">

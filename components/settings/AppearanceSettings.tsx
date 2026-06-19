@@ -31,7 +31,6 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     setSystemPrefersDark(mediaQuery.matches);
-    
     const handler = (e: MediaQueryListEvent) => setSystemPrefersDark(e.matches);
     mediaQuery.addEventListener('change', handler);
     return () => mediaQuery.removeEventListener('change', handler);
@@ -69,15 +68,15 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="space-y-6"
+      className="w-full flex flex-col gap-8"
     >
-      {/* Theme Selection */}
-      <div className="p-6 rounded-2xl bg-black/30 border border-white/5 backdrop-blur-xl">
-        <div className="flex items-center justify-between mb-6">
+      {/* Theme Selection Card */}
+      <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-6 backdrop-blur-md">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
               <Palette className="w-5 h-5 text-emerald-400" />
@@ -87,8 +86,6 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
               <p className="text-[10px] text-gray-500">Выберите светлую или тёмную тему</p>
             </div>
           </div>
-          
-          {/* Current theme indicator */}
           <div className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
             currentTheme === 'dark' 
               ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400' 
@@ -101,7 +98,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
         <div className="grid grid-cols-3 gap-4 w-full">
           <button
             onClick={() => { setTheme('dark'); onUpdate('theme', 'dark'); }}
-            className={`p-4 rounded-xl border transition-all duration-200 ${
+            className={`p-5 rounded-xl border transition-all duration-200 w-full ${
               theme === 'dark'
                 ? 'border-emerald-500/50 bg-emerald-500/10 shadow-[0_0_30px_rgba(16,185,129,0.3)]'
                 : 'border-white/10 bg-black/40 hover:border-white/20'
@@ -114,9 +111,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
                 <Moon className={`w-6 h-6 ${theme === 'dark' ? 'text-emerald-400' : 'text-gray-500'}`} />
               </div>
               <div className="text-center">
-                <p className={`text-sm font-medium ${theme === 'dark' ? 'text-emerald-400' : 'text-white'}`}>
-                  Тёмная
-                </p>
+                <p className={`text-sm font-medium ${theme === 'dark' ? 'text-emerald-400' : 'text-white'}`}>Тёмная</p>
                 <p className="text-[10px] text-gray-500">Рекомендуется</p>
               </div>
             </div>
@@ -124,7 +119,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
 
           <button
             onClick={() => { setTheme('light'); onUpdate('theme', 'light'); }}
-            className={`p-4 rounded-xl border transition-all duration-200 ${
+            className={`p-5 rounded-xl border transition-all duration-200 w-full ${
               theme === 'light'
                 ? 'border-emerald-500/50 bg-emerald-500/10 shadow-[0_0_30px_rgba(16,185,129,0.3)]'
                 : 'border-white/10 bg-black/40 hover:border-white/20'
@@ -137,9 +132,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
                 <Sun className={`w-6 h-6 ${theme === 'light' ? 'text-emerald-400' : 'text-gray-500'}`} />
               </div>
               <div className="text-center">
-                <p className={`text-sm font-medium ${theme === 'light' ? 'text-emerald-400' : 'text-white'}`}>
-                  Светлая
-                </p>
+                <p className={`text-sm font-medium ${theme === 'light' ? 'text-emerald-400' : 'text-white'}`}>Светлая</p>
                 <p className="text-[10px] text-gray-500">Чистая</p>
               </div>
             </div>
@@ -147,7 +140,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
 
           <button
             onClick={() => { setTheme('system'); onUpdate('theme', 'system'); }}
-            className={`p-4 rounded-xl border transition-all duration-200 ${
+            className={`p-5 rounded-xl border transition-all duration-200 w-full ${
               theme === 'system'
                 ? 'border-emerald-500/50 bg-emerald-500/10 shadow-[0_0_30px_rgba(16,185,129,0.3)]'
                 : 'border-white/10 bg-black/40 hover:border-white/20'
@@ -160,9 +153,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
                 <span className="text-2xl">{systemPrefersDark ? '🌙' : '☀️'}</span>
               </div>
               <div className="text-center">
-                <p className={`text-sm font-medium ${theme === 'system' ? 'text-emerald-400' : 'text-white'}`}>
-                  Система
-                </p>
+                <p className={`text-sm font-medium ${theme === 'system' ? 'text-emerald-400' : 'text-white'}`}>Система</p>
                 <p className="text-[10px] text-gray-500">Авто</p>
               </div>
             </div>
@@ -170,9 +161,9 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
         </div>
       </div>
 
-      {/* Glass Intensity Slider */}
-      <div className="p-6 rounded-2xl bg-black/30 border border-white/5 backdrop-blur-xl">
-        <div className="flex items-center justify-between mb-6">
+      {/* Glass Intensity Card */}
+      <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-6 backdrop-blur-md">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
               <Sliders className="w-5 h-5 text-cyan-400" />
@@ -182,36 +173,31 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
               <p className="text-[10px] text-gray-500">Настройте эффект размытия фона</p>
             </div>
           </div>
-          
-          <div className="text-right">
-            <p className="text-2xl font-bold text-cyan-400">{glassIntensity}px</p>
-          </div>
+          <p className="text-2xl font-bold text-cyan-400">{glassIntensity}px</p>
         </div>
 
-        <div className="space-y-4">
-          <div className="px-2">
-            <input
-              type="range"
-              min="0"
-              max="40"
-              value={glassIntensity}
-              onChange={(e) => { setGlassIntensity(parseInt(e.target.value)); onUpdate('glassIntensity', parseInt(e.target.value)); }}
-              className="w-full h-2 bg-white/10 rounded-full appearance-none cursor-pointer accent-cyan-400"
-              style={{
-                background: `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${(glassIntensity / 40) * 100}%, rgba(255,255,255,0.1) ${(glassIntensity / 40) * 100}%, rgba(255,255,255,0.1) 100%)`
-              }}
-            />
-            <div className="flex justify-between mt-2">
-              <span className="text-[10px] text-gray-600">0px</span>
-              <span className="text-[10px] text-gray-600">40px</span>
-            </div>
+        <div className="w-full">
+          <input
+            type="range"
+            min="0"
+            max="40"
+            value={glassIntensity}
+            onChange={(e) => { setGlassIntensity(parseInt(e.target.value)); onUpdate('glassIntensity', parseInt(e.target.value)); }}
+            className="w-full h-2 bg-white/10 rounded-full appearance-none cursor-pointer accent-cyan-400"
+            style={{
+              background: `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${(glassIntensity / 40) * 100}%, rgba(255,255,255,0.1) ${(glassIntensity / 40) * 100}%, rgba(255,255,255,0.1) 100%)`
+            }}
+          />
+          <div className="flex justify-between mt-2">
+            <span className="text-[10px] text-gray-600">0px</span>
+            <span className="text-[10px] text-gray-600">40px</span>
           </div>
         </div>
       </div>
 
-      {/* Accent Color Picker */}
-      <div className="p-6 rounded-2xl bg-black/30 border border-white/5 backdrop-blur-xl">
-        <div className="flex items-center gap-3 mb-6">
+      {/* Accent Color Card */}
+      <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-6 backdrop-blur-md">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-violet-400" />
           </div>
@@ -221,12 +207,12 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-5 gap-3">
+        <div className="grid grid-cols-5 gap-4 w-full">
           {ACCENT_COLORS.map((color) => (
             <button
               key={color.id}
               onClick={() => handleColorSelect(color.id)}
-              className={`relative p-3 rounded-xl border transition-all duration-200 ${
+              className={`relative p-4 rounded-xl border transition-all duration-200 w-full ${
                 selectedColor === color.id
                   ? 'border-emerald-500/50 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.4)]'
                   : 'border-white/10 bg-black/40 hover:border-white/20'
@@ -254,16 +240,16 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
           ))}
         </div>
 
-        {/* Hex Color Input */}
-        <div className="mt-4 pt-4 border-t border-white/5">
+        {/* Hex Input */}
+        <div className="pt-4 border-t border-white/5 w-full">
           <label className="block text-xs text-gray-400 mb-2">Или введите HEX-код</label>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full">
             <input
               type="text"
               value={customHex || (selectedColor.startsWith('#') ? selectedColor : '')}
               onChange={(e) => handleHexInput(e.target.value)}
               placeholder="#00FF9F"
-              className="flex-1 bg-black/40 border border-white/[0.08] rounded-lg px-4 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-emerald-500/50"
+              className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-mono focus:outline-none focus:border-emerald-500/50"
             />
             <button
               onClick={() => {
@@ -271,7 +257,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
                   onUpdate('accentColor', customHex);
                 }
               }}
-              className="px-4 py-2.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30 transition-all text-sm"
+              className="px-5 py-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30 transition-all text-sm"
             >
               Применить
             </button>
@@ -279,9 +265,9 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
         </div>
       </div>
 
-      {/* Live Preview */}
-      <div className="p-6 rounded-2xl bg-black/30 border border-white/5 backdrop-blur-xl">
-        <div className="flex items-center gap-3 mb-6">
+      {/* Live Preview Card */}
+      <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-6 backdrop-blur-md">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
             <Eye className="w-5 h-5 text-amber-400" />
           </div>
@@ -291,18 +277,12 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
           </div>
         </div>
 
-        {/* Mini Chat Preview with dynamic accent color */}
         <div 
-          className="p-4 rounded-xl bg-black/40 border border-white/[0.08] backdrop-blur-xl"
-          style={{ 
-            boxShadow: `0 0 30px ${accentGlow}15, inset 0 1px 0 rgba(255,255,255,0.05)` 
-          }}
+          className="p-5 rounded-xl bg-black/40 border border-white/[0.08] backdrop-blur-xl w-full"
+          style={{ boxShadow: `0 0 30px ${accentGlow}15, inset 0 1px 0 rgba(255,255,255,0.05)` }}
         >
           <div className="flex items-center gap-2 mb-3 pb-3 border-b border-white/5">
-            <div 
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: `${accentGlow}20` }}
-            >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${accentGlow}20` }}>
               <span className="text-sm">💬</span>
             </div>
             <div className="flex-1">
@@ -312,17 +292,8 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
           </div>
           <div className="space-y-2">
             <div className="flex gap-2">
-              <div 
-                className="w-6 h-6 rounded-full flex-shrink-0"
-                style={{ backgroundColor: `${accentGlow}30` }}
-              />
-              <div 
-                className="flex-1 p-2 rounded-lg border"
-                style={{ 
-                  backgroundColor: `${accentGlow}15`,
-                  borderColor: `${accentGlow}30`
-                }}
-              >
+              <div className="w-6 h-6 rounded-full flex-shrink-0" style={{ backgroundColor: `${accentGlow}30` }} />
+              <div className="flex-1 p-2 rounded-lg border" style={{ backgroundColor: `${accentGlow}15`, borderColor: `${accentGlow}30` }}>
                 <p className="text-[10px]" style={{ color: accentGlow }}>Привет! Как дела?</p>
               </div>
             </div>
@@ -338,7 +309,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
       {/* Reset Button */}
       <button
         onClick={resetSettings}
-        className="w-full py-3 rounded-xl border border-white/10 text-gray-400 hover:text-white hover:border-white/20 hover:bg-white/5 transition-all duration-200 flex items-center justify-center gap-2"
+        className="w-full py-3.5 rounded-xl border border-white/10 text-gray-400 hover:text-white hover:border-white/20 hover:bg-white/5 transition-all duration-200 flex items-center justify-center gap-2"
       >
         <RotateCcw className="w-4 h-4" />
         Сбросить настройки по умолчанию
