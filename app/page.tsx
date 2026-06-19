@@ -16,7 +16,7 @@ import { Navbar } from '@/components/Navbar';
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 const APP_VERSION = '0.1.0';
-const GITHUB_RELEASES_URL = 'https://github.com/BLACKSPANIEL/cipher-talk/releases/latest';
+const GITHUB_RELEASES_URL = '/cipher-talk-setup.exe';
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    UTILITY: Detect Neutralino / Tauri runtime
@@ -287,8 +287,7 @@ function HeroSection() {
                     </Link>
                     <a
                       href={GITHUB_RELEASES_URL}
-                      target="_blank"
-                      rel="noreferrer"
+                      download="CipherTalk-Setup.exe"
                       className="group inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-semibold text-sm hover:scale-[1.02] transition-all duration-300 shadow-[0_0_25px_rgba(16,185,129,0.3)] hover:shadow-[0_0_40px_rgba(16,185,129,0.5)] active:scale-[0.97]"
                     >
                       <Download className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
@@ -824,8 +823,7 @@ function DownloadSection() {
                 <FadeSection key={p.name} delay={i * 0.1}>
                   <a
                     href={p.url}
-                    target="_blank"
-                    rel="noreferrer"
+                    download={p.primary ? 'CipherTalk-Setup.exe' : undefined}
                     className={`group block relative rounded-2xl p-6 border transition-all duration-300 h-full ${
                       p.primary
                         ? 'border-emerald-500/30 bg-gradient-to-b from-emerald-500/[0.06]'
