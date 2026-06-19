@@ -98,7 +98,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-4 w-full">
           <button
             onClick={() => { setTheme('dark'); onUpdate('theme', 'dark'); }}
             className={`p-4 rounded-xl border transition-all duration-200 ${

@@ -63,12 +63,12 @@ export function SettingsSidebar({
       </div>
 
       {/* Navigation Tabs */}
-      <nav className="flex-1 space-y-1.5 relative">
+      <nav className="flex-1 space-y-1 relative">
         {tabs.map((tab) => (
           <motion.button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition-all duration-200 relative group ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative group min-h-[48px] ${
               activeTab === tab.id
                 ? 'bg-emerald-500/15 text-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.2)] border-l-2 border-emerald-500'
                 : 'hover:bg-white/[0.05] text-neutral-300 border-l-2 border-transparent'
@@ -87,10 +87,10 @@ export function SettingsSidebar({
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               />
             )}
-            <span className={`transition-all duration-200 ${activeTab === tab.id ? 'scale-110' : 'group-hover:scale-110'}`}>
+            <span className="flex-shrink-0 transition-all duration-200">
               {tab.icon}
             </span>
-            <span className="text-sm font-medium">{tab.label}</span>
+            <span className="text-sm font-medium whitespace-nowrap">{tab.label}</span>
           </motion.button>
         ))}
       </nav>

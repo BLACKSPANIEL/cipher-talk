@@ -67,8 +67,8 @@ export function SettingsLayout({
           onLogout={onLogout}
         />
 
-        {/* Right Content Area */}
-        <div className={`flex-1 h-full overflow-y-auto custom-scrollbar ${isModal ? 'p-4 md:p-6' : 'p-8'}`}>
+        {/* Right Content Area — scrollbar прижат к правому краю */}
+        <div className={`flex-1 h-full overflow-y-auto custom-scrollbar pr-4 ${isModal ? 'p-4 md:p-6' : 'py-6 pl-6'}`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -76,9 +76,12 @@ export function SettingsLayout({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15, ease: 'easeInOut' }}
-              className="h-full"
+              className="w-full h-full"
             >
-              {children}
+              {/* Внутренний контейнер — все отступы здесь, а не на родителе */}
+              <div className="w-full flex flex-col gap-6">
+                {children}
+              </div>
             </motion.div>
           </AnimatePresence>
         </div>
