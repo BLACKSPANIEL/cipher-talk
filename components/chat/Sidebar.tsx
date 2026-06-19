@@ -132,7 +132,7 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
   const isOnline = currentProfile?.status === 'online';
 
   return (
-    <div className="flex flex-col h-full bg-transparent relative min-h-0">
+    <div className="flex flex-col h-full bg-neutral-950/40 border-r border-white/5 backdrop-blur-xl relative min-h-0">
       {/* Ambient glow */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-16 -left-16 w-[220px] h-[220px] rounded-full bg-emerald-400/[0.06] blur-3xl" />

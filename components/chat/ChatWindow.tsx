@@ -188,60 +188,72 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Floating Glassmorphism Input Area */}
-      <div className="px-2 md:px-8 pb-2 md:pb-5 pt-2 md:pt-3 flex-shrink-0">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-end gap-2 rounded-2xl px-3 py-2.5 backdrop-blur-xl border border-white/10 shadow-2xl" style={{ background: 'rgba(255,255,255,0.03)' }}>
-            {/* Attachment button */}
-            <button className="flex items-center justify-center w-9 h-9 rounded-xl text-zinc-500 hover:text-emerald-400 hover:bg-white/5 transition-all duration-200 flex-shrink-0">
-              <Paperclip className="w-4 h-4" />
-            </button>
+      {/* Floating Glassmorphism Input — capsule style */}
+      <div className="w-full px-2 md:px-8 pb-2 md:pb-5 pt-2 md:pt-3 flex-shrink-0">
+        <div className="flex items-end gap-2 bg-black/40 border border-white/10 rounded-full px-6 py-3 w-full backdrop-blur-xl shadow-2xl">
+          {/* Attachment button */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="flex items-center justify-center w-9 h-9 rounded-full text-zinc-500 hover:text-emerald-400 hover:bg-white/5 transition-all duration-200 flex-shrink-0"
+          >
+            <Paperclip className="w-4 h-4" />
+          </motion.button>
 
-            {/* Cipher selector */}
-            <div className="relative">
-              <button onClick={() => setShowCipherMenu(!showCipherMenu)} className={`flex items-center gap-1.5 px-2.5 py-2 rounded-xl border transition-all duration-200 text-xs ${cipher === 'none' ? 'border-white/10 text-zinc-400 hover:border-white/20 hover:text-zinc-200' : 'border-emerald-500/30 text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10'}`}>
-                <Lock className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{activeCipherLabel}</span>
-                <ChevronDown className="w-3 h-3" />
-              </button>
-              {showCipherMenu && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setShowCipherMenu(false)} />
-                  <div className="absolute bottom-full mb-2 left-0 z-20 w-44 rounded-xl border border-white/10 bg-[#0a0f17]/95 backdrop-blur-2xl shadow-2xl overflow-hidden">
-                    {CIPHER_OPTIONS.map((opt) => (
-                      <button key={opt.value} onClick={() => { setCipher(opt.value); setShowCipherMenu(false); }} className={`w-full text-left px-4 py-2.5 text-sm transition flex items-center gap-2 ${cipher === opt.value ? 'text-emerald-400 bg-emerald-500/10' : 'text-zinc-300 hover:bg-white/5'}`}>
-                        <Lock className={`w-3.5 h-3.5 ${opt.value === 'none' ? 'opacity-30' : 'text-emerald-400'}`} />
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Text input */}
-            <div className="flex-1 relative">
-              <textarea
-                value={inputText}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
-                placeholder={t('chat.input_placeholder')}
-                rows={1}
-                className="w-full bg-transparent border-none rounded-xl px-2 py-2 text-white placeholder-zinc-500 focus:outline-none resize-none text-sm max-h-32"
-                style={{ minHeight: '36px' }}
-              />
-            </div>
-
-            {/* Send button */}
-            <button
-              onClick={handleSend}
-              disabled={!inputText.trim()}
-              className="group/send flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-black hover:from-emerald-400 hover:to-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 flex-shrink-0"
-              style={{ boxShadow: '0 0 20px rgba(16,245,181,0.3)' }}
+          {/* Cipher selector */}
+          <div className="relative">
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowCipherMenu(!showCipherMenu)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all duration-200 text-xs ${
+                cipher === 'none' 
+                  ? 'border-white/10 text-zinc-400 hover:border-white/20 hover:text-zinc-200' 
+                  : 'border-emerald-500/30 text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10'
+              }`}
             >
-              <Send className="w-4 h-4 transition-transform group-hover/send:translate-x-0.5 group-hover/send:-translate-y-0.5" />
-            </button>
+              <Lock className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{activeCipherLabel}</span>
+              <ChevronDown className="w-3 h-3" />
+            </motion.button>
+            {showCipherMenu && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowCipherMenu(false)} />
+                <div className="absolute bottom-full mb-2 left-0 z-20 w-44 rounded-xl border border-white/10 bg-[#0a0f17]/95 backdrop-blur-2xl shadow-2xl overflow-hidden">
+                  {CIPHER_OPTIONS.map((opt) => (
+                    <button key={opt.value} onClick={() => { setCipher(opt.value); setShowCipherMenu(false); }} className={`w-full text-left px-4 py-2.5 text-sm transition flex items-center gap-2 ${cipher === opt.value ? 'text-emerald-400 bg-emerald-500/10' : 'text-zinc-300 hover:bg-white/5'}`}>
+                      <Lock className={`w-3.5 h-3.5 ${opt.value === 'none' ? 'opacity-30' : 'text-emerald-400'}`} />
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
+
+          {/* Text input */}
+          <div className="flex-1 relative">
+            <textarea
+              value={inputText}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder={t('chat.input_placeholder')}
+              rows={1}
+              className="w-full bg-transparent border-none rounded-full px-2 py-1.5 text-white placeholder-zinc-500 focus:outline-none resize-none text-sm max-h-32"
+              style={{ minHeight: '32px' }}
+            />
+          </div>
+
+          {/* Send button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handleSend}
+            disabled={!inputText.trim()}
+            className="group/send flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-black hover:from-emerald-400 hover:to-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 flex-shrink-0"
+            style={{ boxShadow: '0 0 20px rgba(16,245,181,0.3)' }}
+          >
+            <Send className="w-4 h-4 transition-transform group-hover/send:translate-x-0.5 group-hover/send:-translate-y-0.5" />
+          </motion.button>
         </div>
       </div>
     </div>

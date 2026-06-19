@@ -261,45 +261,45 @@ function HeroSection() {
                 : 'Защищённый мессенджер с сквозным шифрованием. Работает везде — в браузере, на Windows, macOS и Linux.'}
             </motion.p>
 
-            {/* ── CTA Buttons ── */}
-            <motion.div
-              className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              {isDesktop ? (
-                <Link
-                  href="/chat"
-                  className="group inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-emerald-500 text-black font-bold text-sm hover:bg-emerald-400 transition-all duration-300 shadow-[0_0_30px_rgba(16,245,181,0.3)] hover:shadow-[0_0_60px_rgba(16,245,181,0.45)] active:scale-[0.97]"
-                >
-                  <MessageSquare className="w-4 h-4 group-hover:rotate-6 transition-transform" />
-                  Открыть чат
-                </Link>
-              ) : (
-                <>
+              {/* ── CTA Buttons ── */}
+              <motion.div
+                className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                {isDesktop ? (
                   <Link
                     href="/chat"
                     className="group inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-emerald-500 text-black font-bold text-sm hover:bg-emerald-400 transition-all duration-300 shadow-[0_0_30px_rgba(16,245,181,0.3)] hover:shadow-[0_0_60px_rgba(16,245,181,0.45)] active:scale-[0.97]"
                   >
                     <MessageSquare className="w-4 h-4 group-hover:rotate-6 transition-transform" />
-                    Открыть веб-версию
+                    Открыть чат
                   </Link>
-                  <a
-                    href={GITHUB_RELEASES_URL}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 text-emerald-400 font-semibold text-sm hover:bg-emerald-500/10 hover:border-emerald-500/50 transition-all duration-300 active:scale-[0.97] backdrop-blur-sm"
-                  >
-                    <Download className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
-                    Скачать .exe
-                    <span className="px-1.5 py-0.5 rounded-md text-[9px] font-mono bg-emerald-500/10 text-emerald-400/70 border border-emerald-500/20">
-                      v{APP_VERSION}
-                    </span>
-                  </a>
-                </>
-              )}
-            </motion.div>
+                ) : (
+                  <>
+                    <Link
+                      href="/chat"
+                      className="group inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-emerald-500 text-black font-bold text-sm hover:bg-emerald-400 transition-all duration-300 shadow-[0_0_30px_rgba(16,245,181,0.3)] hover:shadow-[0_0_60px_rgba(16,245,181,0.45)] active:scale-[0.97]"
+                    >
+                      <MessageSquare className="w-4 h-4 group-hover:rotate-6 transition-transform" />
+                      Открыть веб-версию
+                    </Link>
+                    <a
+                      href={GITHUB_RELEASES_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-semibold text-sm hover:scale-[1.02] transition-all duration-300 shadow-[0_0_25px_rgba(16,185,129,0.3)] hover:shadow-[0_0_40px_rgba(16,185,129,0.5)] active:scale-[0.97]"
+                    >
+                      <Download className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
+                      Скачать для Windows (.exe)
+                      <span className="px-1.5 py-0.5 rounded-md text-[9px] font-mono bg-black/20 text-black/70">
+                        v{APP_VERSION}
+                      </span>
+                    </a>
+                  </>
+                )}
+              </motion.div>
 
             {/* ── Trust Badges ── */}
             <motion.div

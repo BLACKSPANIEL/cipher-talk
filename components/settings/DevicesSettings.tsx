@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Monitor, Smartphone, Tablet, Trash2, Shield, Clock, MapPin, Activity, AlertTriangle } from 'lucide-react';
+import { useDeviceInfo, formatTimeSince } from '@/lib/hooks/useDeviceInfo';
 
 interface Device {
   id: number;
@@ -21,10 +22,27 @@ interface DevicesSettingsProps {
   onRevoke: (deviceId: number) => Promise<void>;
 }
 
-export function DevicesSettings({ devices, onRevoke }: DevicesSettingsProps) {
+export function DevicesSettings({ devices: initialDevices, onRevoke }: DevicesSettingsProps) {
+  const deviceInfo = useDeviceInfo();
   const [showRevokeAllModal, setShowRevokeAllModal] = useState(false);
   const [revokingIds, setRevokingIds] = useState<Set<number>>(new Set());
-  const [devicesState, setDevicesState] = useState<Device[]>(devices);
+  const [devicesState, setDevicesState] = useState<Device[]>(() => {
+    // Build current device from real userAgent
+    const currentDevice: Device = {
+      id: 0,
+      name: deviceInfo.deviceType === 'mobile' ? 'Мобильное устройство' 
+           : deviceInfo.deviceType === 'tablet' ? 'Планшет' 
+           : `${deviceInfo.os} ${deviceInfo.osVersion}`,
+      type: deviceInfo.deviceType,
+      os: `${deviceInfo.os} ${deviceInfo.osVersion}`,
+      browser: deviceInfo.browser,
+      location: deviceInfo.location,
+      ip: deviceInfo.ip,
+      lastActive: 'сейчас',
+      current: true,
+    };
+    return [currentDevice, ...initialDevices.filter(d => !d.current)];
+  });
 
   const getDeviceIcon = (type: Device['type']) => {
     switch (type) {
@@ -87,15 +105,15 @@ export function DevicesSettings({ devices, onRevoke }: DevicesSettingsProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="space-y-6"
+      className="w-full flex flex-col gap-8"
     >
-      {/* Active Sessions */}
-      <div className="p-6 rounded-2xl bg-black/30 border border-white/5 backdrop-blur-xl">
-        <div className="flex items-center gap-3 mb-6">
+      {/* Active Sessions Card */}
+      <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-6 backdrop-blur-md">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
             <Monitor className="w-5 h-5 text-emerald-400" />
           </div>
@@ -106,7 +124,7 @@ export function DevicesSettings({ devices, onRevoke }: DevicesSettingsProps) {
         </div>
 
         <motion.div 
-          className="space-y-3"
+          className="flex flex-col gap-3 w-full"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -122,14 +140,14 @@ export function DevicesSettings({ devices, onRevoke }: DevicesSettingsProps) {
                   layout
                   variants={itemVariants}
                   exit="exit"
-                  className={`p-5 rounded-xl border transition-all ${
+                  className={`w-full p-5 rounded-xl border transition-all ${
                     device.current
                       ? 'border-emerald-500/30 bg-emerald-500/5'
                       : 'border-white/[0.08] bg-black/40 hover:border-white/10'
                   }`}
                   whileHover={{ scale: 1.01 }}
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 w-full">
                     <div className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${
                       device.current ? 'bg-emerald-500/15' : 'bg-white/5'
                     }`}>
@@ -188,8 +206,8 @@ export function DevicesSettings({ devices, onRevoke }: DevicesSettingsProps) {
         </motion.div>
       </div>
 
-      {/* Security Notice */}
-      <div className="p-6 rounded-2xl bg-black/30 border border-cyan-500/20 backdrop-blur-xl">
+      {/* Security Notice Card */}
+      <div className="w-full bg-white/[0.02] border border-cyan-500/20 rounded-2xl p-6 flex flex-col gap-4 backdrop-blur-md">
         <div className="flex items-start gap-4">
           <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0">
             <Shield className="w-5 h-5 text-cyan-400" />

@@ -110,10 +110,10 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
         <div
           className={`relative rounded-2xl px-3.5 py-2 backdrop-blur-sm ${
             isMine
-              ? `bg-emerald-600/20 border border-emerald-500/30 text-emerald-50 rounded-br-sm ${
+              ? `bg-emerald-500/10 border border-emerald-500/20 text-white rounded-2xl rounded-tr-none shadow-[0_0_15px_rgba(16,185,129,0.05)] ${
                   isError ? 'border-red-500/50' : ''
                 }`
-              : 'bg-white/5 border border-white/10 text-neutral-200 rounded-bl-sm'
+              : 'bg-white/[0.03] border border-white/[0.07] text-neutral-200 rounded-2xl rounded-tl-none'
           }`}
         >
           {isMine && message.isE2ee && (

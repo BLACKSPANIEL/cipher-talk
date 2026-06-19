@@ -1,34 +1,38 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HardDrive, Trash2, Download, FileJson, Image, MessageSquare, Info, BarChart3, X } from 'lucide-react';
+import { useStorageInfo } from '@/lib/hooks/useStorageInfo';
 
 interface StorageSettingsProps {
   onClearCache: () => Promise<void>;
   onExportData: () => Promise<void>;
 }
 
-interface StorageCategory {
-  icon: React.ElementType;
-  label: string;
-  size: number;
-  color: string;
-  percent: number;
-}
+const CATEGORIES = [
+  { key: 'messages' as const, icon: MessageSquare, label: 'Сообщения', color: 'emerald' as const },
+  { key: 'media' as const, icon: Image, label: 'Изображения и видео', color: 'cyan' as const },
+  { key: 'cache' as const, icon: FileJson, label: 'Кэш и временные файлы', color: 'violet' as const },
+  { key: 'other' as const, icon: BarChart3, label: 'Прочие данные', color: 'amber' as const },
+];
 
-export function StorageSettings({ onClearCache, onExportData }: StorageSettingsProps) {
-  const [storageData, setStorageData] = useState({
-    total: 10 * 1024 * 1024 * 1024, // 10 GB
-    used: 4.7 * 1024 * 1024 * 1024, // 4.7 GB
-    categories: [
-      { icon: MessageSquare, label: 'Сообщения', size: 2.4 * 1024 * 1024 * 1024, color: 'emerald', percent: 51 },
-      { icon: Image, label: 'Изображения и видео', size: 1.8 * 1024 * 1024 * 1024, color: 'cyan', percent: 38 },
-      { icon: FileJson, label: 'Кэш и временные файлы', size: 456 * 1024 * 1024, color: 'violet', percent: 10 },
-      { icon: BarChart3, label: 'Прочие данные', size: 44 * 1024 * 1024, color: 'amber', percent: 1 },
-    ],
-  });
-  const [isClearing, setIsClearing] = useState(false);
+const COLOR_MAP: Record<string, string> = {
+  emerald: 'bg-emerald-500',
+  cyan: 'bg-cyan-500',
+  violet: 'bg-violet-500',
+  amber: 'bg-amber-500',
+};
+
+const ICON_COLOR_MAP: Record<string, string> = {
+  emerald: 'text-emerald-400',
+  cyan: 'text-cyan-400',
+  violet: 'text-violet-400',
+  amber: 'text-amber-400',
+};
+
+export function StorageSettings({ onClearCache: onClearCacheExternal, onExportData }: StorageSettingsProps) {
+  const { storage, clearCache: hookClearCache, isClearing } = useStorageInfo();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const formatSize = (bytes: number) => {
@@ -37,39 +41,38 @@ export function StorageSettings({ onClearCache, onExportData }: StorageSettingsP
     return `${(bytes / 1024).toFixed(0)} KB`;
   };
 
-  const usedPercent = (storageData.used / storageData.total) * 100;
+  const usedPercent = storage.used > 0 ? (storage.used / storage.total) * 100 : 0;
 
   const handleClearCache = async () => {
-    setIsClearing(true);
     setShowClearConfirm(false);
-    
-    // Simulate cache clearing animation
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Update storage data to reflect cleared cache
-    setStorageData(prev => ({
-      ...prev,
-      used: prev.used - prev.categories[2].size,
-      categories: prev.categories.map((cat, idx) => 
-        idx === 2 ? { ...cat, size: 0, percent: 0 } : cat
-      ),
-    }));
-    
-    await onClearCache();
-    setIsClearing(false);
+    await hookClearCache();
+    await onClearCacheExternal();
   };
+
+  const getCategorySizes = () => {
+    const c = storage.categories;
+    const used = storage.used || 1;
+    return [
+      { size: c.messages, percent: (c.messages / used) * 100 },
+      { size: c.media, percent: (c.media / used) * 100 },
+      { size: c.cache, percent: (c.cache / used) * 100 },
+      { size: c.other, percent: (c.other / used) * 100 },
+    ];
+  };
+
+  const categorySizes = getCategorySizes();
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="space-y-6"
+      className="w-full flex flex-col gap-8"
     >
-      {/* Storage Overview */}
-      <div className="p-6 rounded-2xl bg-black/30 border border-white/5 backdrop-blur-xl">
-        <div className="flex items-center gap-3 mb-6">
+      {/* Storage Overview Card */}
+      <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-6 backdrop-blur-md">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
             <HardDrive className="w-5 h-5 text-emerald-400" />
           </div>
@@ -80,15 +83,15 @@ export function StorageSettings({ onClearCache, onExportData }: StorageSettingsP
         </div>
 
         {/* Storage Bar */}
-        <div className="mb-6">
+        <div className="w-full">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <span className="text-sm text-white font-medium">{formatSize(storageData.used)}</span>
-              <span className="text-xs text-gray-500 ml-2">из {formatSize(storageData.total)}</span>
+              <span className="text-sm text-white font-medium">{formatSize(storage.used)}</span>
+              <span className="text-xs text-gray-500 ml-2">из {formatSize(storage.total)}</span>
             </div>
             <span className="text-sm text-emerald-400 font-semibold">{usedPercent.toFixed(0)}%</span>
           </div>
-          <div className="h-3 bg-white/5 rounded-full overflow-hidden">
+          <div className="h-3 bg-white/5 rounded-full overflow-hidden w-full">
             <motion.div 
               className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full"
               initial={{ width: 0 }}
@@ -99,45 +102,33 @@ export function StorageSettings({ onClearCache, onExportData }: StorageSettingsP
         </div>
 
         {/* Storage Categories */}
-        <div className="flex flex-col gap-4">
-          {storageData.categories.map((category, idx) => {
-            const Icon = category.icon;
-            const colorClass = {
-              emerald: 'bg-emerald-500',
-              cyan: 'bg-cyan-500',
-              violet: 'bg-violet-500',
-              amber: 'bg-amber-500',
-            }[category.color] || 'bg-gray-500';
-            
-            const iconColorClass = {
-              emerald: 'text-emerald-400',
-              cyan: 'text-cyan-400',
-              violet: 'text-violet-400',
-              amber: 'text-amber-400',
-            }[category.color] || 'text-gray-400';
+        <div className="flex flex-col gap-4 w-full">
+          {CATEGORIES.map((cat, idx) => {
+            const Icon = cat.icon;
+            const sizeData = categorySizes[idx];
 
             return (
               <motion.div 
-                key={category.label} 
-                className="space-y-2"
+                key={cat.key} 
+                className="w-full"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1, duration: 0.3 }}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between w-full mb-2">
                   <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg bg-${category.color}-500/10 flex items-center justify-center`}>
-                      <Icon className={`w-4 h-4 ${iconColorClass}`} />
+                    <div className={`w-8 h-8 rounded-lg bg-${cat.color}-500/10 flex items-center justify-center`}>
+                      <Icon className={`w-4 h-4 ${ICON_COLOR_MAP[cat.color]}`} />
                     </div>
-                    <span className="text-sm text-white">{category.label}</span>
+                    <span className="text-sm text-white">{cat.label}</span>
                   </div>
-                  <span className="text-xs text-gray-400">{formatSize(category.size)}</span>
+                  <span className="text-xs text-gray-400">{formatSize(sizeData.size)}</span>
                 </div>
-                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden w-full">
                   <motion.div 
-                    className={`h-full ${colorClass} rounded-full`}
+                    className={`h-full ${COLOR_MAP[cat.color]} rounded-full`}
                     initial={{ width: 0 }}
-                    animate={{ width: `${category.percent}%` }}
+                    animate={{ width: `${Math.max(sizeData.percent, 0.5)}%` }}
                     transition={{ duration: 0.8, delay: 0.2 + idx * 0.1, ease: 'easeOut' }}
                   />
                 </div>
@@ -147,9 +138,9 @@ export function StorageSettings({ onClearCache, onExportData }: StorageSettingsP
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="p-6 rounded-2xl bg-black/30 border border-white/5 backdrop-blur-xl">
-        <div className="flex items-center gap-3 mb-6">
+      {/* Actions Card */}
+      <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-6 backdrop-blur-md">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
             <Info className="w-5 h-5 text-cyan-400" />
           </div>
@@ -159,7 +150,7 @@ export function StorageSettings({ onClearCache, onExportData }: StorageSettingsP
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3 w-full">
           <motion.button
             onClick={() => setShowClearConfirm(true)}
             disabled={isClearing}
@@ -173,7 +164,7 @@ export function StorageSettings({ onClearCache, onExportData }: StorageSettingsP
             <div className="text-left flex-1">
               <p className="text-sm font-medium text-white">Очистить кэш</p>
               <p className="text-[10px] text-gray-500">
-                {isClearing ? 'Очистка...' : `Освободить ~${formatSize(storageData.categories[2].size)}`}
+                {isClearing ? 'Очистка...' : `Освободить ~${formatSize(storage.categories.cache)}`}
               </p>
             </div>
           </motion.button>
@@ -189,7 +180,7 @@ export function StorageSettings({ onClearCache, onExportData }: StorageSettingsP
             </div>
             <div className="text-left flex-1">
               <p className="text-sm font-medium text-white">Экспорт данных</p>
-              <p className="text-[10px] text-gray-500">Скачать архив ({formatSize(storageData.used)})</p>
+              <p className="text-[10px] text-gray-500">Скачать архив ({formatSize(storage.used)})</p>
             </div>
           </motion.button>
         </div>
@@ -222,7 +213,7 @@ export function StorageSettings({ onClearCache, onExportData }: StorageSettingsP
                 </button>
               </div>
               <p className="text-sm text-gray-300 mb-6">
-                Вы уверены, что хотите очистить кэш? Это освободит ~{formatSize(storageData.categories[2].size)}.
+                Вы уверены, что хотите очистить кэш? Это освободит ~{formatSize(storage.categories.cache)}.
               </p>
               <div className="flex gap-3">
                 <button
