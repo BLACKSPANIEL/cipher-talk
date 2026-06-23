@@ -16,7 +16,7 @@ import { Navbar } from '@/components/Navbar';
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 const APP_VERSION = '0.1.0';
-const GITHUB_RELEASES_URL = 'https://github.com/BLACKSPANIEL/cipher-talk/releases/download/v0.1.0/CipherTalk-win_x64.exe';
+const GITHUB_RELEASES_URL = 'https://github.com/BLACKSPANIEL/cipher-talk/releases/latest';
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    UTILITY: Detect Neutralino / Tauri runtime
@@ -290,7 +290,7 @@ function HeroSection() {
                     Открыть веб-версию
                   </Link>
                   <a
-                    href={GITHUB_RELEASES_URL}
+                    href="https://github.com/BLACKSPANIEL/cipher-talk/releases/latest"
                     target="_blank"
                     rel="noreferrer"
                     className="group inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-bold text-base hover:scale-[1.02] transition-all duration-300 shadow-[0_0_30px_rgba(16,185,129,0.35)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)] active:scale-[0.97]"
@@ -780,9 +780,9 @@ function DownloadSection() {
   const isDesktop = isDesktopApp();
 
   const platforms = [
-    { icon: <WindowsIcon className="w-6 h-6" />, name: 'Windows', format: '.exe', desc: 'NSIS-установщик + портативная версия.', url: GITHUB_RELEASES_URL, primary: true },
-    { icon: <AppleIcon className="w-6 h-6" />, name: 'macOS', format: '.dmg', desc: 'Universal для Intel и Apple Silicon.', url: GITHUB_RELEASES_URL, primary: false },
-    { icon: <Command className="w-6 h-6" />, name: 'Linux', format: '.AppImage', desc: 'AppImage + .deb для Ubuntu/Debian.', url: GITHUB_RELEASES_URL, primary: false },
+    { icon: <WindowsIcon className="w-6 h-6" />, name: 'Windows', format: '.exe', desc: 'Windows 10/11 (x64)', url: 'https://github.com/BLACKSPANIEL/cipher-talk/releases/latest', primary: true },
+    { icon: <AppleIcon className="w-6 h-6" />, name: 'macOS', format: '.dmg', desc: 'Intel & Apple Silicon', url: 'https://github.com/BLACKSPANIEL/cipher-talk/releases/latest', primary: false },
+    { icon: <Command className="w-6 h-6" />, name: 'Linux', format: '.AppImage', desc: 'Ubuntu, Debian, Fedora', url: 'https://github.com/BLACKSPANIEL/cipher-talk/releases/latest', primary: false },
   ];
 
   return (
@@ -809,7 +809,7 @@ function DownloadSection() {
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2">Cipher Talk Desktop</h3>
                 <p className="text-sm text-zinc-500 mb-8">
-                  v{APP_VERSION} · Neutralino.js · Всего ~5 MB
+                  v{APP_VERSION} · Tauri · ~8 MB
                 </p>
                 <Link
                   href="/chat"
@@ -826,37 +826,58 @@ function DownloadSection() {
             <div className="grid sm:grid-cols-3 gap-5 max-w-5xl mx-auto">
               {platforms.map((p, i) => (
                 <FadeSection key={p.name} delay={i * 0.1}>
-                  <a
-                    href={p.url}
-                    className={`group block relative rounded-3xl p-7 border transition-all duration-300 h-full ${
-                      p.primary
-                        ? 'border-emerald-500/30 bg-gradient-to-b from-emerald-500/[0.08]'
-                        : 'border-white/[0.06] bg-white/[0.02] hover:border-emerald-500/20'
-                    }`}
-                    style={{ boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)' }}
-                  >
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                        p.primary ? 'bg-emerald-500/15 ring-1 ring-emerald-500/30' : 'bg-white/[0.05] ring-1 ring-white/[0.08]'
+                  {p.url ? (
+                    <a
+                      href={p.url}
+                      className={`group block relative rounded-3xl p-7 border transition-all duration-300 h-full ${
+                        p.primary
+                          ? 'border-emerald-500/30 bg-gradient-to-b from-emerald-500/[0.08]'
+                          : 'border-white/[0.06] bg-white/[0.02] hover:border-emerald-500/20'
+                      }`}
+                      style={{ boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)' }}
+                    >
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                          p.primary ? 'bg-emerald-500/15 ring-1 ring-emerald-500/30' : 'bg-white/[0.05] ring-1 ring-white/[0.08]'
+                        }`}>
+                          <span className={p.primary ? 'text-emerald-400' : 'text-zinc-400'}>{p.icon}</span>
+                        </div>
+                        <div>
+                          <h3 className="text-white font-bold text-base">{p.name}</h3>
+                          <p className="text-[11px] text-zinc-500 font-mono font-medium">{p.format}</p>
+                        </div>
+                      </div>
+                      <p className="text-zinc-400 text-sm leading-relaxed mb-6">{p.desc}</p>
+                      <div className={`inline-flex items-center justify-center gap-2.5 px-5 py-3 rounded-2xl text-sm font-bold transition-all w-full ${
+                        p.primary
+                          ? 'bg-emerald-500 text-black hover:bg-emerald-400 shadow-[0_0_25px_rgba(16,245,181,0.2)] group-hover:shadow-[0_0_40px_rgba(16,245,181,0.35)]'
+                          : 'border border-emerald-500/30 bg-emerald-500/5 text-emerald-400 group-hover:bg-emerald-500/10 group-hover:border-emerald-500/50'
                       }`}>
-                        <span className={p.primary ? 'text-emerald-400' : 'text-zinc-400'}>{p.icon}</span>
+                        <Download className="w-4 h-4" />
+                        Скачать
+                        <ExternalLink className="w-3.5 h-3.5 opacity-50" />
                       </div>
-                      <div>
-                        <h3 className="text-white font-bold text-base">{p.name}</h3>
-                        <p className="text-[11px] text-zinc-500 font-mono font-medium">{p.format}</p>
+                    </a>
+                  ) : (
+                    <div className={`rounded-3xl p-7 border border-white/[0.06] bg-white/[0.02] h-full opacity-60`}
+                      style={{ boxShadow: '0 12px 40px rgba(0,0,0,0.3)' }}
+                    >
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/[0.05] ring-1 ring-white/[0.08]">
+                          <span className="text-zinc-400">{p.icon}</span>
+                        </div>
+                        <div>
+                          <h3 className="text-white font-bold text-base">{p.name}</h3>
+                          <p className="text-[11px] text-zinc-500 font-mono font-medium">{p.format}</p>
+                        </div>
+                      </div>
+                      <p className="text-zinc-400 text-sm leading-relaxed mb-6">{p.desc}</p>
+                      <div className="inline-flex items-center justify-center gap-2.5 px-5 py-3 rounded-2xl text-sm font-bold border border-zinc-700 text-zinc-500 w-full">
+                        <Download className="w-4 h-4" />
+                        Скоро
                       </div>
                     </div>
-                    <p className="text-zinc-400 text-sm leading-relaxed mb-6">{p.desc}</p>
-                    <div className={`inline-flex items-center justify-center gap-2.5 px-5 py-3 rounded-2xl text-sm font-bold transition-all w-full ${
-                      p.primary
-                        ? 'bg-emerald-500 text-black hover:bg-emerald-400 shadow-[0_0_25px_rgba(16,245,181,0.2)] group-hover:shadow-[0_0_40px_rgba(16,245,181,0.35)]'
-                        : 'border border-emerald-500/30 bg-emerald-500/5 text-emerald-400 group-hover:bg-emerald-500/10 group-hover:border-emerald-500/50'
-                    }`}>
-                      <Download className="w-4 h-4" />
-                      Скачать
-                      <ExternalLink className="w-3.5 h-3.5 opacity-50" />
-                    </div>
-                  </a>
+                  )}
                 </FadeSection>
               ))}
             </div>
@@ -865,12 +886,12 @@ function DownloadSection() {
                 <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.03]">
                   <Code2 className="w-5 h-5 text-emerald-400" />
                   <p className="text-sm text-zinc-400">
-                    Сборка на <span className="text-zinc-300 font-bold">Neutralino.js</span> —
-                    самый лёгкий Desktop-рантайм. Без Electron, Node.js или Rust.
+                    Сборка на <span className="text-zinc-300 font-bold">Tauri</span> —
+                    быстрый и безопасный Desktop-рантайм.
                     {' '}
-                    <a href={GITHUB_RELEASES_URL} target="_blank" rel="noreferrer"
+                    <a href="https://github.com/BLACKSPANIEL/cipher-talk/releases" target="_blank" rel="noreferrer"
                       className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2 font-medium">
-                      GitHub Releases
+                      Все релизы
                     </a>
                   </p>
                 </div>
@@ -891,7 +912,7 @@ function TestimonialsSection() {
   const testimonials = [
     { text: 'Наконец-то мессенджер, который реально заботится о приватности. E2EE из коробки, никаких компромиссов.', author: 'Алексей К.', role: 'Security Engineer' },
     { text: 'Дизайн на уровне премиум-продуктов. Тёмная тема, неоновые акценты, плавные анимации — глаз радуется.', author: 'Мария С.', role: 'UI/UX Designer' },
-    { text: 'Desktop-версия на Neutralino — прорыв. Всего 5 MB, а работает как нативный софт. Без тормозов Electron.', author: 'Дмитрий И.', role: 'Fullstack Developer' },
+    { text: 'Desktop-версия на Tauri — прорыв. Всего 8 MB, а работает как нативный софт. Без тормозов Electron.', author: 'Дмитрий И.', role: 'Fullstack Developer' },
   ];
 
   return (
@@ -960,7 +981,7 @@ function Footer() {
             <button onClick={() => document.querySelector('#download')?.scrollIntoView({ behavior: 'smooth' })}
               className="hover:text-emerald-400 transition-colors cursor-pointer font-medium">Скачать</button>
             <Link href="/chat" className="hover:text-emerald-400 transition-colors font-medium">Мессенджер</Link>
-            <a href={GITHUB_RELEASES_URL} target="_blank" rel="noreferrer"
+            <a href="https://github.com/BLACKSPANIEL/cipher-talk" target="_blank" rel="noreferrer"
               className="flex items-center gap-2 hover:text-emerald-400 transition-colors font-medium">
               <Github className="w-4 h-4" /> GitHub
             </a>
