@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Palette, Sun, Moon, Sliders, Sparkles, Check, Eye, RotateCcw } from 'lucide-react';
+import { Palette, Sun, Moon, Sliders, Sparkles, Check, Eye, RotateCcw, ToggleLeft, Droplets, Zap, Layout } from 'lucide-react';
 import { useSettingsStore, getThemeClass } from '@/stores/useSettingsStore';
 
 interface AppearanceSettingsProps {
-  onUpdate: (key: string, value: string | number) => void;
+  onUpdate: (key: string, value: string | number | boolean) => void;
 }
 
 const ACCENT_COLORS = [
@@ -22,11 +22,51 @@ const ACCENT_COLORS = [
   { id: 'teal', color: 'bg-teal-400', label: 'Teal', hex: '#2dd4bf' },
 ];
 
+function ToggleSwitch({ enabled, onChange, label, description, icon }: {
+  enabled: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+  description: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between p-4 rounded-2xl bg-black/30 border border-white/5 hover:border-white/10 transition-all">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-white/[0.04] flex items-center justify-center text-zinc-400">
+          {icon}
+        </div>
+        <div>
+          <p className="text-sm text-white font-semibold">{label}</p>
+          <p className="text-[10px] text-gray-500">{description}</p>
+        </div>
+      </div>
+      <motion.button
+        onClick={() => onChange(!enabled)}
+        className={`w-12 h-7 rounded-full p-1 transition-all duration-300 ${
+          enabled ? 'bg-emerald-500' : 'bg-white/10'
+        }`}
+        whileTap={{ scale: 0.95 }}
+      >
+        <motion.div
+          className={`w-5 h-5 rounded-full bg-white shadow-lg ${
+            enabled ? 'translate-x-5' : 'translate-x-0'
+          }`}
+          animate={{ x: enabled ? 20 : 0 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        />
+      </motion.button>
+    </div>
+  );
+}
+
 export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
   const { theme, accentColor, glassIntensity, setTheme, setAccentColor, setGlassIntensity, resetSettings } = useSettingsStore();
   const [selectedColor, setSelectedColor] = useState(accentColor);
   const [customHex, setCustomHex] = useState('');
   const [systemPrefersDark, setSystemPrefersDark] = useState(true);
+  const [glassmorphicBackdrop, setGlassmorphicBackdrop] = useState(true);
+  const [neonGlow, setNeonGlow] = useState(true);
+  const [compactMode, setCompactMode] = useState(false);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -74,7 +114,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="w-full flex flex-col gap-10"
     >
-      {/* Theme Selection Card — Premium */}
+      {/* Theme Selection Card */}
       <div className="w-full bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] rounded-3xl p-8 backdrop-blur-xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
@@ -134,7 +174,46 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
         </div>
       </div>
 
-      {/* Glass Intensity Card — Premium */}
+      {/* Visual Toggles Card */}
+      <div className="w-full bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] rounded-3xl p-8 backdrop-blur-xl"
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
+      >
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 border border-amber-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(251,191,36,0.15)]">
+            <ToggleLeft className="w-6 h-6 text-amber-400" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-white tracking-tight">Настройки интерфейса</h3>
+            <p className="text-xs text-gray-500 mt-1">Управление визуальными эффектами</p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <ToggleSwitch
+            enabled={glassmorphicBackdrop}
+            onChange={(v) => { setGlassmorphicBackdrop(v); onUpdate('glassmorphicBackdrop', v); }}
+            label="Размытие заднего плана (Glassmorphic Backdrop)"
+            description="Эффект стекла и размытия фона"
+            icon={<Droplets className="w-5 h-5" />}
+          />
+          <ToggleSwitch
+            enabled={neonGlow}
+            onChange={(v) => { setNeonGlow(v); onUpdate('neonGlow', v); }}
+            label="Неоновое свечение элементов"
+            description="Glow-эффекты вокруг активных элементов"
+            icon={<Zap className="w-5 h-5" />}
+          />
+          <ToggleSwitch
+            enabled={compactMode}
+            onChange={(v) => { setCompactMode(v); onUpdate('compactMode', v); }}
+            label="Компактный режим отображения чата"
+            description="Уменьшенные отступы и более плотный интерфейс"
+            icon={<Layout className="w-5 h-5" />}
+          />
+        </div>
+      </div>
+
+      {/* Glass Intensity Card */}
       <div className="w-full bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] rounded-3xl p-8 backdrop-blur-xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
@@ -175,7 +254,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
         </div>
       </div>
 
-      {/* Accent Color Card — Premium */}
+      {/* Accent Color Card */}
       <div className="w-full bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] rounded-3xl p-8 backdrop-blur-xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
@@ -230,8 +309,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
           ))}
         </div>
 
-        {/* Hex Input */}
-        <div className="pt-6 border-t border-white/5 w-full">
+        <div className="pt-6 border-t border-white/5 mt-6 w-full">
           <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Или введите HEX-код</label>
           <div className="flex gap-3 w-full">
             <div className="flex-1 relative">
@@ -259,7 +337,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
         </div>
       </div>
 
-      {/* Live Preview Card — Premium */}
+      {/* Live Preview Card */}
       <div className="w-full bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] rounded-3xl p-8 backdrop-blur-xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
@@ -302,7 +380,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
         </div>
       </div>
 
-      {/* Reset Button — Premium */}
+      {/* Reset Button */}
       <motion.button
         onClick={resetSettings}
         className="w-full py-4 rounded-2xl border border-white/10 text-gray-400 hover:text-white hover:border-white/20 hover:bg-white/5 transition-all duration-200 flex items-center justify-center gap-2.5 font-medium"

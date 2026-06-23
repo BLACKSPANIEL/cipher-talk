@@ -162,7 +162,7 @@ export default function SettingsPage() {
 
       {activeTab === 'appearance' && (
         <AppearanceSettings
-          onUpdate={(key: string, value: string | number) => {
+          onUpdate={(key: string, value: string | number | boolean) => {
             if (key === 'theme') setTheme(value as 'dark' | 'light' | 'system');
             if (key === 'accentColor') setAccentColor(value as string);
             if (key === 'glassIntensity') setGlassIntensity(value as number);

@@ -20,6 +20,9 @@ export const LOCALES: Locale[] = [
   { value: 'es', label: 'Español', flag: '🇪🇸', nativeName: 'Español' },
   { value: 'uk', label: 'Українська', flag: '🇺🇦', nativeName: 'Українська' },
   { value: 'tr', label: 'Türkçe', flag: '🇹🇷', nativeName: 'Türkçe' },
+  { value: 'la', label: 'Lingua Latina', flag: '🏛️', nativeName: 'Lingua Latina' },
+  { value: 'ja', label: '日本語', flag: '🇯🇵', nativeName: '日本語' },
+  { value: 'tt', label: 'Татарча', flag: '🇷🇺', nativeName: 'Татарча' },
 ];
 
 interface LanguageSettingsProps {
