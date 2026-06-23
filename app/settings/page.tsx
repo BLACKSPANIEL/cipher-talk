@@ -132,13 +132,13 @@ export default function SettingsPage() {
     >
       {activeTab === 'profile' && (
         <ProfileSettings
-          username={username}
-          bio={bio}
-          status={status}
-          tier={profile?.tier}
-          onSave={handleSaveProfile}
-          isSaving={isSaving}
-          saveMessage={saveMessage}
+          profile={profile}
+          onProfileUpdated={(updated) => {
+            setProfile(updated);
+            setUsername(updated.username);
+            setBio(updated.bio || '');
+            setStatus(updated.status);
+          }}
         />
       )}
 
