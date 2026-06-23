@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { LanguageProvider } from '@/lib/i18n';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { AppPreloader } from '@/components/ui/AppPreloader';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -92,9 +93,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="font-sans text-white">
-        <LanguageProvider>
-          <ThemeProvider>{children}</ThemeProvider>
-        </LanguageProvider>
+        <AppPreloader>
+          <LanguageProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </LanguageProvider>
+        </AppPreloader>
       </body>
     </html>
   );
