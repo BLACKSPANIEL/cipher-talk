@@ -36,7 +36,11 @@ export function SettingsLayout({
         initial={{ opacity: 0, scale: 0.98, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className={`backdrop-blur-2xl bg-[#0a0f17]/95 border border-white/[0.08] shadow-[0_25px_60px_rgba(0,0,0,0.8),0_0_80px_rgba(16,245,181,0.08)] rounded-3xl flex overflow-hidden ${isModal ? 'h-full md:h-[90vh] w-full md:max-w-6xl md:rounded-3xl rounded-none' : 'w-full max-w-6xl h-[750px]'} relative`}
+        className={`backdrop-blur-2xl bg-[#0a0f17]/95 border border-white/[0.08] shadow-[0_25px_60px_rgba(0,0,0,0.8),0_0_80px_rgba(16,245,181,0.08)] rounded-3xl flex overflow-hidden relative ${
+          isModal
+            ? 'h-[80vh] min-h-[600px] w-full max-w-5xl md:rounded-3xl rounded-none'
+            : 'w-full max-w-6xl h-[750px]'
+        }`}
       >
         {/* Premium inner glow effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.03] via-transparent to-cyan-500/[0.02] pointer-events-none" />
@@ -58,7 +62,7 @@ export function SettingsLayout({
           </motion.span>
         </div>
 
-        {/* Close button for modal */}
+        {/* Close button for modal — top right corner */}
         {isModal && onClose && (
           <motion.button
             initial={{ opacity: 0, scale: 0.8 }}
@@ -66,38 +70,43 @@ export function SettingsLayout({
             whileHover={{ scale: 1.05, borderColor: 'rgba(16,245,181,0.3)' }}
             whileTap={{ scale: 0.95 }}
             onClick={onClose}
-            className="absolute top-5 left-5 z-20 p-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-all border border-transparent hover:border-emerald-500/20"
+            className="absolute top-4 right-4 z-50 p-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-all border border-transparent hover:border-emerald-500/20"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
           </motion.button>
         )}
 
-        {/* Left Sidebar */}
-        <SettingsSidebar
-          activeTab={activeTab}
-          onTabChange={onTabChange}
-          username={username}
-          status={status}
-          tier={tier}
-          onLogout={onLogout}
-        />
+        {/* Two-panel layout: Sidebar + Content */}
+        <div className="flex flex-row h-full w-full">
+          {/* Left Sidebar — fixed width */}
+          <div className="w-[280px] flex-shrink-0 h-full border-r border-white/5">
+            <SettingsSidebar
+              activeTab={activeTab}
+              onTabChange={onTabChange}
+              username={username}
+              status={status}
+              tier={tier}
+              onLogout={onLogout}
+            />
+          </div>
 
-        {/* Right Content Area */}
-        <div className="flex-1 h-full overflow-y-auto custom-scrollbar pr-4 pl-2 py-10 relative z-10">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="w-full h-full"
-            >
-              <div className="w-full flex flex-col gap-10">
-                {children}
-              </div>
-            </motion.div>
-          </AnimatePresence>
+          {/* Right Content Area — fills remaining space with independent scroll */}
+          <div className="flex-1 h-full overflow-y-auto custom-scrollbar p-8 relative z-10">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="w-full"
+              >
+                <div className="w-full flex flex-col gap-10">
+                  {children}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
       </motion.div>
     </div>
