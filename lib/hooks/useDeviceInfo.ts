@@ -92,9 +92,15 @@ export function useDeviceInfo(): DeviceInfo {
       ip: '',
     });
 
-    // Try to get location from IP (free API)
-    fetch('https://ipapi.co/json/')
-      .then(res => res.json())
+    // Try to get location from IP (free API) with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1500);
+
+    fetch('https://ipapi.co/json/', { signal: controller.signal })
+      .then(res => {
+        clearTimeout(timeoutId);
+        return res.json();
+      })
       .then(data => {
         if (data.city && data.country_name) {
           setInfo(prev => ({
@@ -105,6 +111,7 @@ export function useDeviceInfo(): DeviceInfo {
         }
       })
       .catch(() => {
+        clearTimeout(timeoutId);
         // Fallback: use timezone
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         if (timezone) {
