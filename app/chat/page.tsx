@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar, type ChatRoom } from '@/components/chat/Sidebar';
@@ -38,15 +38,16 @@ async function enrichMessagesWithProfiles(
     }
   }
 
-  return rows.map((row) => {
+  const results: Message[] = [];
+  for (const row of rows) {
     const username = profilesCache.get(row.sender_id) || 'Unknown';
     const avatar = avatarsCache.get(row.sender_id) || null;
-    const aesDecrypted = decryptMessage(row.text);
+    const aesDecrypted = await decryptMessage(row.text);
     const wasAesEncrypted = aesDecrypted !== row.text && aesDecrypted.length > 0;
     const hasVisibleCipher = row.cipher_type === 'caesar' || row.cipher_type === 'base64';
     const decrypted = hasVisibleCipher ? aesDecrypted : aesDecrypted;
 
-    return {
+    results.push({
       id: row.id,
       text: decrypted,
       senderId: row.sender_id,
@@ -60,8 +61,9 @@ async function enrichMessagesWithProfiles(
       originalText: hasVisibleCipher ? decrypted : undefined,
       isE2ee: wasAesEncrypted,
       status: 'sent' as const,
-    };
-  });
+    });
+  }
+  return results;
 }
 
 function decryptVisibleLayer(text: string, cipherType: string): string {
@@ -202,17 +204,16 @@ export default function ChatPage() {
   const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  /** Mobile: when a room is selected, hide sidebar and show only chat */
   const [mobileShowChat, setMobileShowChat] = useState(false);
-  /** Mobile: bottom nav active view */
   const [mobileActiveView, setMobileActiveView] = useState<'chats' | 'settings'>('chats');
+  const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
 
   const subscriptionRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const presenceRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const activeRoom = rooms.find((r) => r.id === activeRoomId) ?? null;
 
-  // Auto-switch to chat on mobile when room is selected
   const handleSelectRoom = useCallback((id: string) => {
     setActiveRoomId(id);
     setMobileShowChat(true);
@@ -277,7 +278,7 @@ export default function ChatPage() {
     return () => { cancelled = true; };
   }, [activeRoomId, currentUserId]);
 
-  // Realtime subscription
+  // Realtime subscription with read receipts
   useEffect(() => {
     if (subscriptionRef.current) {
       supabase.removeChannel(subscriptionRef.current);
@@ -295,7 +296,17 @@ export default function ChatPage() {
           const newMessage = enriched[0];
           if (!newMessage) return;
 
+          // Auto-mark as delivered
           newMessage.status = 'delivered';
+
+          // If message is from other user, mark as read immediately
+          if (payload.new.sender_id !== currentUserId) {
+            await supabase
+              .from('messages')
+              .update({ read_at: new Date().toISOString() })
+              .eq('id', payload.new.id);
+            newMessage.status = 'read';
+          }
 
           setMessages((prev) => {
             if (prev.some((m) => m.id === newMessage.id)) return prev;
@@ -313,6 +324,14 @@ export default function ChatPage() {
           setRooms((prev) => prev.map((r) => r.id === activeRoomId ? { ...r, lastMessage: payload.new.text } : r));
         }
       )
+      .on('broadcast', { event: 'typing' }, (payload) => {
+        const senderId = payload.payload?.userId;
+        if (senderId && senderId === currentUserId) return;
+        
+        // Store typing user in a ref or state
+        const username = payload.payload?.username || '...';
+        // This will be handled by ChatWindow's typing logic
+      })
       .subscribe();
 
     subscriptionRef.current = channel;
@@ -324,14 +343,46 @@ export default function ChatPage() {
     };
   }, [activeRoomId, currentUserId]);
 
-  // Presence (online tracking)
+  // Presence (online tracking) with online users list
   useEffect(() => {
     if (!currentUserId) return;
-    const channel = supabase.channel('online-users', { config: { presence: { key: currentUserId } } });
-    channel.subscribe();
+    
+    const channel = supabase.channel('online-users', { 
+      config: { presence: { key: currentUserId } } 
+    });
+    
+    channel.on('presence', { event: 'sync' }, () => {
+      const state = channel.presenceState();
+      const online = new Set<string>();
+      
+      Object.keys(state).forEach((userId) => {
+        const presence = state[userId] as any[];
+        if (presence && presence.length > 0 && presence[0].online_at) {
+          online.add(userId);
+        }
+      });
+      
+      setOnlineUsers(online);
+    });
+    
+    channel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await channel.track({ 
+          user_id: currentUserId, 
+          online_at: new Date().toISOString(),
+          username: currentProfile?.username 
+        });
+      }
+    });
+    
     presenceRef.current = channel;
-    return () => { if (presenceRef.current) supabase.removeChannel(presenceRef.current); };
-  }, [currentUserId]);
+    return () => { 
+      if (presenceRef.current) {
+        supabase.removeChannel(presenceRef.current);
+        presenceRef.current = null;
+      }
+    };
+  }, [currentUserId, currentProfile]);
 
   const handleStartChat = useCallback(
     async (otherUser: { id: string; username: string; avatar_url?: string | null }) => {

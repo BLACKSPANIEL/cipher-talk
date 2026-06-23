@@ -4,7 +4,7 @@ import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import type { Profile } from '@/lib/supabaseClient';
-import { getEncryptionKey, setEncryptionKey, generateRandomKey } from '@/lib/cryptoUtils';
+import { getAesKey, generateRandomAesKey, clearKeys } from '@/lib/cryptoUtils';
 import { SettingsLayout, type SettingsTab } from '@/components/settings/SettingsLayout';
 import { ProfileSettings } from '@/components/settings/ProfileSettings';
 import { SecuritySettings } from '@/components/settings/SecuritySettings';
@@ -25,7 +25,7 @@ export default function SettingsPage() {
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [status, setStatus] = useState<string>('online');
-  const [e2eeKey, setE2eeKey] = useState('');
+  const [e2eeKey, setE2eeKey] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -55,7 +55,10 @@ export default function SettingsPage() {
         setBio(data.bio || '');
       }
 
-      setE2eeKey(getEncryptionKey());
+      const key = await getAesKey();
+      const exported = await crypto.subtle.exportKey('raw', key);
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(exported)));
+      setE2eeKey(base64);
       setIsLoading(false);
     };
 
@@ -88,16 +91,19 @@ export default function SettingsPage() {
     setTimeout(() => setSaveMessage(null), 3000);
   };
 
-  const handleGenerateNewKey = () => {
-    const newKey = generateRandomKey();
-    setEncryptionKey(newKey);
-    setE2eeKey(newKey);
+  const handleGenerateNewKey = async () => {
+    const newKey = generateRandomAesKey();
+    const key = await crypto.subtle.importKey('raw', new Uint8Array(newKey.match(/.{2}/g)!.map((b) => parseInt(b, 16))), { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+    const exported = await crypto.subtle.exportKey('raw', key);
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(exported)));
+    localStorage.setItem('cipher-talk-e2ee-key', base64);
+    setE2eeKey(base64);
     setSaveMessage({ type: 'success', text: 'Новый ключ E2EE сгенерирован' });
     setTimeout(() => setSaveMessage(null), 4000);
   };
 
-  const handleCopyKey = () => {
-    navigator.clipboard.writeText(e2eeKey);
+  const handleCopyKey = async () => {
+    await navigator.clipboard.writeText(e2eeKey);
     setKeyCopied(true);
     setTimeout(() => setKeyCopied(false), 2000);
   };

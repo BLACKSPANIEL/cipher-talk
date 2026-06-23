@@ -33,14 +33,14 @@ function getRoomInitial(name: string): string {
 function Avatar({ avatar, name, size = 'md', showStatus = false, status }: { avatar?: string | null; name: string; size?: 'sm' | 'md'; showStatus?: boolean; status?: string }) {
   const isImage = avatar && (avatar.startsWith('data:') || avatar.startsWith('http'));
   const isEmoji = avatar && !isImage;
-  const sizeClass = size === 'sm' ? 'w-9 h-9 text-sm' : 'w-10 h-10 text-base';
+  const sizeClass = size === 'sm' ? 'w-10 h-10 text-sm' : 'w-11 h-11 text-base';
   
   const statusDot = showStatus && status === 'online' ? (
-    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#0b0c10]" style={{ boxShadow: '0 0 8px rgba(16,245,181,0.6)' }} />
+    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#0b0c10]" style={{ boxShadow: '0 0 10px rgba(16,245,181,0.7)' }} />
   ) : showStatus && status === 'away' ? (
-    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-amber-400 border-2 border-[#0b0c10]" />
+    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-amber-400 border-2 border-[#0b0c10]" />
   ) : showStatus ? (
-    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-zinc-600 border-2 border-[#0b0c10]" />
+    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-zinc-600 border-2 border-[#0b0c10]" />
   ) : null;
 
   if (isImage) return (
@@ -51,13 +51,13 @@ function Avatar({ avatar, name, size = 'md', showStatus = false, status }: { ava
   );
   if (isEmoji) return (
     <div className={`${sizeClass} rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0 relative ring-1 ring-emerald-500/20`}>
-      <span className="text-base leading-none">{avatar}</span>
+      <span className="text-lg leading-none">{avatar}</span>
       {statusDot}
     </div>
   );
   return (
     <div className={`${sizeClass} rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 flex items-center justify-center flex-shrink-0 relative ring-1 ring-emerald-500/25`}>
-      <span className="font-bold text-emerald-300 text-xs">{getRoomInitial(name)}</span>
+      <span className="font-bold text-emerald-300 text-sm">{getRoomInitial(name)}</span>
       {statusDot}
     </div>
   );
@@ -79,7 +79,7 @@ function EmptyChatsState({ onOpenSearch }: { onOpenSearch: () => void }) {
       className="flex flex-col items-center text-center px-4 pt-8 pb-4"
     >
       {/* Neon icon cluster */}
-      <div className="relative mb-4">
+      <div className="relative mb-5">
         <motion.div
           className="absolute inset-0 -m-4 rounded-full bg-emerald-400/20 blur-2xl"
           animate={{ opacity: [0.35, 0.65, 0.35], scale: [0.92, 1.08, 0.92] }}
@@ -92,35 +92,35 @@ function EmptyChatsState({ onOpenSearch }: { onOpenSearch: () => void }) {
           transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
         />
         <div
-          className="relative w-14 h-14 rounded-2xl flex items-center justify-center"
+          className="relative w-16 h-16 rounded-2xl flex items-center justify-center"
           style={{
             background: 'linear-gradient(145deg, rgba(16,185,129,0.18), rgba(6,78,59,0.35))',
             boxShadow: '0 0 32px rgba(16,245,181,0.45), 0 0 64px rgba(0,255,102,0.15), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 0 24px rgba(16,245,181,0.08)',
             border: '1px solid rgba(16,245,181,0.35)',
           }}
         >
-          <MessageSquare className="w-6 h-6 text-emerald-300" style={{ filter: 'drop-shadow(0 0 10px rgba(16,245,181,0.9)) drop-shadow(0 0 20px rgba(0,255,102,0.5))' }} />
+          <MessageSquare className="w-7 h-7 text-emerald-300" style={{ filter: 'drop-shadow(0 0 10px rgba(16,245,181,0.9)) drop-shadow(0 0 20px rgba(0,255,102,0.5))' }} />
         </div>
       </div>
 
-      <p className="text-sm font-semibold text-white tracking-tight">
+      <p className="text-sm font-bold text-white tracking-tight">
         {t('sidebar.no_chats')}
       </p>
-      <p className="mt-1.5 text-[11px] text-zinc-400 leading-relaxed max-w-[200px]">
+      <p className="mt-2 text-[11px] text-zinc-400 leading-relaxed max-w-[200px]">
         {t('sidebar.no_chats_hint')}
       </p>
 
       <motion.button
         onClick={onOpenSearch}
         whileTap={{ scale: 0.97 }}
-        className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-[11px] font-medium text-emerald-300/90"
+        className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] font-bold text-emerald-300/90"
         style={{
           background: 'rgba(16,185,129,0.08)',
           border: '1px solid rgba(16,245,181,0.2)',
           boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
         }}
       >
-        <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+        <Sparkles className="w-4 h-4 text-emerald-400" />
         <span>{t('sidebar.new_chat')}</span>
       </motion.button>
     </motion.div>
@@ -132,20 +132,20 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
   const isOnline = currentProfile?.status === 'online';
 
   return (
-    <div className="flex flex-col h-full bg-neutral-950/40 border-r border-white/5 backdrop-blur-xl relative min-h-0">
+    <div className="flex flex-col h-full bg-neutral-950/40 border-r border-white/5 backdrop-blur-3xl relative min-h-0">
       {/* Ambient glow */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-16 -left-16 w-[220px] h-[220px] rounded-full bg-emerald-400/[0.06] blur-3xl" />
-        <div className="absolute top-1/3 -right-12 w-[160px] h-[160px] rounded-full bg-cyan-400/[0.04] blur-3xl" />
+        <div className="absolute -top-16 -left-16 w-[240px] h-[240px] rounded-full bg-emerald-400/[0.06] blur-3xl" />
+        <div className="absolute top-1/3 -right-12 w-[180px] h-[180px] rounded-full bg-cyan-400/[0.04] blur-3xl" />
       </div>
 
       {/* Header */}
       <div className="relative z-10 px-3 pt-[max(0.625rem,env(safe-area-inset-top))] pb-2 md:px-4 md:pt-4 md:pb-2.5 border-b border-white/[0.06]">
         <div className="flex items-center justify-between mb-2.5">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <motion.div
               whileTap={{ scale: 0.95 }}
-              className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center ring-1 ring-emerald-500/30"
+              className="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center ring-1 ring-emerald-500/30"
               style={{ boxShadow: '0 0 20px rgba(16,245,181,0.25), inset 0 1px 0 rgba(255,255,255,0.08)' }}
             >
               <Shield className="w-4 h-4 text-emerald-400" style={{ filter: 'drop-shadow(0 0 6px rgba(16,245,181,0.7))' }} />
@@ -158,7 +158,7 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
           <motion.button
             whileTap={{ scale: 0.92 }}
             onClick={onOpenSettings}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-500 hover:text-emerald-400 hover:bg-white/[0.04] transition-colors"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-500 hover:text-emerald-400 hover:bg-white/[0.04] transition-colors"
             aria-label="Settings"
           >
             <Settings className="w-4 h-4" />
@@ -191,7 +191,7 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
               exit={{ opacity: 0 }}
               className="flex items-center justify-center py-8"
             >
-              <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+              <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
             </motion.div>
           ) : rooms.length === 0 ? (
             <EmptyChatsState key="empty" onOpenSearch={onOpenSearch} />
@@ -224,15 +224,15 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
                   <Avatar avatar={room.otherUserAvatar} name={room.name} showStatus={!!room.otherUserId} status={room.otherUserId ? 'online' : undefined} />
                   <div className="flex-1 min-w-0 text-left">
                     <div className="flex items-center justify-between gap-1">
-                      <span className={`text-[13px] font-medium truncate ${isActive ? 'text-white' : 'text-zinc-100'}`}>{room.name}</span>
-                      {room.isEncrypted && <Shield className="w-3 h-3 text-emerald-500/60 flex-shrink-0" />}
+                      <span className={`text-[13px] font-semibold truncate ${isActive ? 'text-white' : 'text-zinc-100'}`}>{room.name}</span>
+                      {room.isEncrypted && <Shield className="w-3.5 h-3.5 text-emerald-500/60 flex-shrink-0" />}
                     </div>
                     {room.lastMessage && (
-                      <p className="text-[10px] text-zinc-500 mt-px truncate leading-snug">{room.lastMessage}</p>
+                      <p className="text-[10px] text-zinc-500 mt-px truncate leading-snug font-medium">{room.lastMessage}</p>
                     )}
                   </div>
                   {room.unread && room.unread > 0 && (
-                    <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-emerald-400 text-[#0b0c10] text-[9px] font-bold">
+                    <span className="inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full bg-emerald-400 text-[#0b0c10] text-[9px] font-bold">
                       {room.unread}
                     </span>
                   )}
@@ -275,7 +275,7 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
 
             <div className="flex-1 min-w-0 text-left">
               <div className="flex items-center gap-1.5">
-                <p className="text-[13px] font-semibold text-white truncate leading-tight">{currentProfile.username}</p>
+                <p className="text-[13px] font-bold text-white truncate leading-tight">{currentProfile.username}</p>
                 {currentProfile.tier && currentProfile.tier !== 'free' && <TierBadge tier={currentProfile.tier} size="sm" />}
               </div>
               <p className={`text-[10px] capitalize leading-tight mt-px ${isOnline ? 'text-emerald-400/90' : 'text-zinc-500'}`}>
@@ -283,13 +283,13 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
               </p>
             </div>
 
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-500 group-hover:text-emerald-400 group-hover:bg-white/[0.04] transition-colors">
-              <User className="w-3.5 h-3.5" />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 group-hover:text-emerald-400 group-hover:bg-white/[0.04] transition-colors">
+              <User className="w-4 h-4" />
             </div>
           </motion.button>
         ) : (
           <div className="flex items-center justify-center py-2.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-            <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+            <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
           </div>
         )}
       </div>
