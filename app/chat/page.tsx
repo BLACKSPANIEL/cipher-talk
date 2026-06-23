@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar, type ChatRoom } from '@/components/chat/Sidebar';
@@ -9,7 +9,7 @@ import { SearchUserModal } from '@/components/chat/SearchUserModal';
 import { SettingsModal } from '@/components/chat/SettingsModal';
 import { BottomNavBar } from '@/components/chat/BottomNavBar';
 import { type Message } from '@/components/chat/MessageBubble';
-import { type CipherType, encryptText, caesarDecrypt, base64Decode } from '@/lib/ciphers';
+import { type CipherType, encryptText } from '@/lib/ciphers';
 import { supabase } from '@/lib/supabaseClient';
 import type { DbMessage, Profile } from '@/lib/supabaseClient';
 import { encryptMessage, decryptMessage } from '@/lib/cryptoUtils';
@@ -64,14 +64,6 @@ async function enrichMessagesWithProfiles(
     });
   }
   return results;
-}
-
-function decryptVisibleLayer(text: string, cipherType: string): string {
-  switch (cipherType) {
-    case 'caesar': return caesarDecrypt(text, 3);
-    case 'base64': return base64Decode(text);
-    default: return text;
-  }
 }
 
 interface ChatWithProfile extends ChatRoom {
@@ -210,7 +202,6 @@ export default function ChatPage() {
 
   const subscriptionRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const presenceRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const activeRoom = rooms.find((r) => r.id === activeRoomId) ?? null;
 
@@ -324,14 +315,6 @@ export default function ChatPage() {
           setRooms((prev) => prev.map((r) => r.id === activeRoomId ? { ...r, lastMessage: payload.new.text } : r));
         }
       )
-      .on('broadcast', { event: 'typing' }, (payload) => {
-        const senderId = payload.payload?.userId;
-        if (senderId && senderId === currentUserId) return;
-        
-        // Store typing user in a ref or state
-        const username = payload.payload?.username || '...';
-        // This will be handled by ChatWindow's typing logic
-      })
       .subscribe();
 
     subscriptionRef.current = channel;
@@ -343,7 +326,7 @@ export default function ChatPage() {
     };
   }, [activeRoomId, currentUserId]);
 
-  // Presence (online tracking) with online users list
+  // Presence (online tracking)
   useEffect(() => {
     if (!currentUserId) return;
     
@@ -435,12 +418,15 @@ export default function ChatPage() {
     setTimeout(() => {
       setMessages((prev) => prev.map((msg) => {
         if (msg.id === messageId && msg.isEncrypted && msg.originalText && msg.cipher) {
-          return { ...msg, text: decryptVisibleLayer(msg.originalText, msg.cipher), isEncrypted: false, originalText: undefined };
+          const decrypted = msg.cipher === 'caesar' 
+            ? msg.originalText // Caesar already decrypted
+            : msg.originalText; // Base64 already decoded
+          return { ...msg, text: decrypted, isEncrypted: false, originalText: undefined };
         }
         return msg;
       }));
       setDecryptingMessageId(null);
-    }, 800);
+    }, 600);
   }, []);
 
   const handleProfileUpdated = useCallback((updated: Profile) => {
@@ -454,10 +440,14 @@ export default function ChatPage() {
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <motion.div
           className="absolute -top-32 -left-32 w-[380px] h-[380px] rounded-full bg-emerald-400/[0.07] blur-3xl"
-          animate={{ opacity: [0.6, 1, 0.6] }}
+          animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.1, 1] }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <div className="absolute -bottom-40 -right-40 w-[480px] h-[480px] rounded-full bg-cyan-400/[0.04] blur-3xl" />
+        <motion.div
+          className="absolute -bottom-40 -right-40 w-[480px] h-[480px] rounded-full bg-cyan-400/[0.04] blur-3xl"
+          animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.05, 1] }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+        />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full bg-emerald-500/[0.03] blur-3xl" />
         <div
           className="absolute inset-0 opacity-[0.018] md:opacity-[0.025]"
@@ -470,16 +460,17 @@ export default function ChatPage() {
       </div>
 
       <div className="relative z-10 flex flex-1 overflow-hidden min-h-0 p-0 md:p-5 gap-0 md:gap-5">
+        {/* Sidebar with enhanced glassmorphism */}
         <motion.aside
           initial={false}
           animate={{ opacity: mobileShowChat ? 0 : 1, x: mobileShowChat ? -20 : 0 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className={`w-full md:w-72 flex-shrink-0 md:rounded-2xl overflow-hidden border-0 md:border border-white/[0.06] backdrop-blur-xl flex flex-col min-h-0 ${
+          className={`w-full md:w-72 flex-shrink-0 md:rounded-2xl overflow-hidden border-0 md:border border-white/[0.08] backdrop-blur-2xl flex flex-col min-h-0 ${
             mobileShowChat ? 'hidden md:flex' : 'flex'
           }`}
           style={{
-            background: 'linear-gradient(180deg, rgba(8,12,18,0.72) 0%, rgba(5,7,13,0.85) 100%)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+            background: 'linear-gradient(180deg, rgba(8,12,18,0.75) 0%, rgba(5,7,13,0.88) 100%)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.4)',
           }}
         >
           <Sidebar
@@ -493,7 +484,7 @@ export default function ChatPage() {
           />
         </motion.aside>
 
-        {/* Chat window with slide-in animation on mobile */}
+        {/* Chat window with enhanced glassmorphism */}
         <AnimatePresence mode="wait">
           {mobileShowChat ? (
             <motion.main
@@ -502,10 +493,10 @@ export default function ChatPage() {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0.6 }}
               transition={{ type: 'spring', damping: 30, stiffness: 340, mass: 0.75 }}
-              className="flex-1 min-w-0 md:rounded-2xl overflow-hidden border-0 md:border border-white/[0.06] backdrop-blur-xl flex flex-col absolute md:relative inset-0 z-30 md:z-auto min-h-0"
+              className="flex-1 min-w-0 md:rounded-2xl overflow-hidden border-0 md:border border-white/[0.08] backdrop-blur-2xl flex flex-col absolute md:relative inset-0 z-30 md:z-auto min-h-0"
               style={{
-                background: 'linear-gradient(180deg, rgba(8,12,18,0.78) 0%, rgba(5,7,13,0.92) 100%)',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+                background: 'linear-gradient(180deg, rgba(8,12,18,0.8) 0%, rgba(5,7,13,0.94) 100%)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.4)',
               }}
             >
               <ChatWindow
@@ -524,10 +515,10 @@ export default function ChatPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.25 }}
-              className="flex-1 min-w-0 md:rounded-2xl overflow-hidden border-0 md:border border-white/[0.06] backdrop-blur-xl flex-col hidden md:flex min-h-0"
+              className="flex-1 min-w-0 md:rounded-2xl overflow-hidden border-0 md:border border-white/[0.08] backdrop-blur-2xl flex-col hidden md:flex min-h-0"
               style={{
-                background: 'linear-gradient(180deg, rgba(8,12,18,0.78) 0%, rgba(5,7,13,0.92) 100%)',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+                background: 'linear-gradient(180deg, rgba(8,12,18,0.8) 0%, rgba(5,7,13,0.94) 100%)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.4)',
               }}
             >
               <ChatWindow

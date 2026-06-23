@@ -48,6 +48,10 @@ export interface Profile {
   status: 'online' | 'offline' | 'away';
   created_at: string;
   avatar_url?: string | null;
+  /** Отображаемое имя пользователя */
+  display_name?: string | null;
+  /** Описание профиля */
+  bio?: string | null;
   /** Tier подписки: free / pro / elite. Только для чтения для самого пользователя. */
   tier?: 'free' | 'pro' | 'elite';
   /** Role-Based Access Control: owner | admin | moderator | user */

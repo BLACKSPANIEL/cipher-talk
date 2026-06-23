@@ -171,8 +171,16 @@ function HeroSection() {
       {/* ── Premium Background ── */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Main neon orbs */}
-        <div className="absolute top-1/4 -left-32 w-[800px] h-[800px] rounded-full bg-emerald-400/[0.06] blur-[180px]" />
-        <div className="absolute bottom-1/4 -right-32 w-[700px] h-[700px] rounded-full bg-cyan-400/[0.05] blur-[160px]" />
+        <motion.div
+          className="absolute top-1/4 -left-32 w-[800px] h-[800px] rounded-full bg-emerald-400/[0.06] blur-[180px]"
+          animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.1, 1] }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute bottom-1/4 -right-32 w-[700px] h-[700px] rounded-full bg-cyan-400/[0.05] blur-[160px]"
+          animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.05, 1] }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+        />
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-violet-500/[0.04] blur-[140px]" />
 
         {/* Subtle grid */}
@@ -362,13 +370,15 @@ function HeroSection() {
               <div className="absolute -inset-8 bg-cyan-400/[0.03] blur-3xl rounded-full" />
 
               {/* Mac-style Window Frame */}
-              <div
+              <motion.div
                 className="relative rounded-3xl overflow-hidden border border-white/[0.08] backdrop-blur-2xl"
                 style={{
                   background: 'linear-gradient(180deg, rgba(14,20,28,0.96) 0%, rgba(8,12,18,0.98) 100%)',
                   boxShadow:
                     '0 -20px 80px rgba(0,0,0,0.6), 0 0 100px rgba(16,245,181,0.08), inset 0 1px 0 rgba(255,255,255,0.05)',
                 }}
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
               >
                 {/* ── Window Title Bar ── */}
                 <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06]">
@@ -542,7 +552,7 @@ function HeroSection() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* ── Floating Badges ── */}
               <motion.div
@@ -773,7 +783,7 @@ function StatsBanner() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   5. DOWNLOAD SECTION
+   5. DOWNLOAD SECTION — Premium Enhanced
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function DownloadSection() {
@@ -787,7 +797,12 @@ function DownloadSection() {
 
   return (
     <section id="download" className="relative py-24 md:py-32">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Background glow */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-emerald-500/[0.03] blur-[120px] rounded-full" />
+      </div>
+
+      <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
         <FadeSection>
           <SectionHeader
             badge={isDesktop ? 'Уже установлено!' : 'Скачать'}
@@ -827,7 +842,7 @@ function DownloadSection() {
               {platforms.map((p, i) => (
                 <FadeSection key={p.name} delay={i * 0.1}>
                   {p.url ? (
-                    <a
+                    <motion.a
                       href={p.url}
                       className={`group block relative rounded-3xl p-7 border transition-all duration-300 h-full ${
                         p.primary
@@ -835,6 +850,8 @@ function DownloadSection() {
                           : 'border-white/[0.06] bg-white/[0.02] hover:border-emerald-500/20'
                       }`}
                       style={{ boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)' }}
+                      whileHover={{ y: -4, scale: 1.02 }}
+                      transition={{ duration: 0.3, ease: 'easeOut' }}
                     >
                       <div className="flex items-center gap-4 mb-4">
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
@@ -857,7 +874,7 @@ function DownloadSection() {
                         Скачать
                         <ExternalLink className="w-3.5 h-3.5 opacity-50" />
                       </div>
-                    </a>
+                    </motion.a>
                   ) : (
                     <div className={`rounded-3xl p-7 border border-white/[0.06] bg-white/[0.02] h-full opacity-60`}
                       style={{ boxShadow: '0 12px 40px rgba(0,0,0,0.3)' }}

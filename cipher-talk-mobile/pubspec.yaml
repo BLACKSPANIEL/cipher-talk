@@ -1,0 +1,57 @@
+name: cipher_talk
+description: Cipher Talk Mobile — E2EE messenger with premium design
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Supabase
+  supabase_flutter: ^2.0.0
+
+  # Storage
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.2
+
+  # Crypto
+  crypto: ^3.0.3
+  pointycastle: ^3.7.4
+
+  # UI
+  flutter_animate: ^4.3.0
+  lucide_icons: ^0.3.0
+  google_fonts: ^6.1.0
+
+  # State management
+  flutter_riverpod: ^2.4.9
+
+  # Utils
+  intl: ^0.19.0
+  uuid: ^4.3.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
