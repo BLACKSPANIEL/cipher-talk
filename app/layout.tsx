@@ -55,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 try {
                   var settings = JSON.parse(localStorage.getItem('cipher-talk-settings') || '{}');
                   var state = settings.state || {};
+                  var theme = state.theme || 'dark';
                   var accentColor = state.accentColor || 'emerald';
                   var glassIntensity = state.glassIntensity || 20;
                   
@@ -77,6 +78,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   d.style.setProperty('--accent-rgb', hex.replace('#', '').match(/.{2}/g).map(function(c) { return parseInt(c, 16); }).join(','));
                   d.style.setProperty('--accent-color-name', accentColor);
                   d.style.setProperty('--bg-blur', glassIntensity + 'px');
+                  
+                  // Apply light theme class
+                  if (theme === 'light') {
+                    d.classList.add('light');
+                  } else {
+                    d.classList.remove('light');
+                  }
                 } catch(e) {}
               })();
             `,

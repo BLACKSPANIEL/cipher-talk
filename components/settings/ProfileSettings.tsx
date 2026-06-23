@@ -87,53 +87,84 @@ export function ProfileSettings({
     setAvatarPreview(null);
   };
 
+  const getStatusColorClasses = (color: string, isSelected: boolean) => {
+    const colorMap: Record<string, { border: string; bg: string; text: string; dot: string }> = {
+      emerald: {
+        border: isSelected ? 'border-emerald-500/50' : 'border-white/10',
+        bg: isSelected ? 'bg-emerald-500/10' : 'bg-black/40',
+        text: isSelected ? 'text-emerald-400' : 'text-gray-400',
+        dot: 'bg-emerald-500',
+      },
+      violet: {
+        border: isSelected ? 'border-violet-500/50' : 'border-white/10',
+        bg: isSelected ? 'bg-violet-500/10' : 'bg-black/40',
+        text: isSelected ? 'text-violet-400' : 'text-gray-400',
+        dot: 'bg-violet-500',
+      },
+      red: {
+        border: isSelected ? 'border-red-500/50' : 'border-white/10',
+        bg: isSelected ? 'bg-red-500/10' : 'bg-black/40',
+        text: isSelected ? 'text-red-400' : 'text-gray-400',
+        dot: 'bg-red-500',
+      },
+      amber: {
+        border: isSelected ? 'border-amber-500/50' : 'border-white/10',
+        bg: isSelected ? 'bg-amber-500/10' : 'bg-black/40',
+        text: isSelected ? 'text-amber-400' : 'text-gray-400',
+        dot: 'bg-amber-500',
+      },
+    };
+    return colorMap[color] || colorMap.emerald;
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      className="w-full flex flex-col gap-8"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="w-full flex flex-col gap-10"
     >
       {/* Profile Card — двухколоночный */}
-      <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-6 backdrop-blur-md">
+      <div className="w-full bg-white/[0.03] border border-white/[0.08] rounded-3xl p-8 flex flex-col gap-8 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <User className="w-5 h-5 text-emerald-400" />
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(16,245,181,0.15)]">
+            <User className="w-6 h-6 text-emerald-400" />
           </div>
           <div>
-            <h3 className="text-white font-semibold">Профиль</h3>
-            <p className="text-[10px] text-gray-500">Ваше публичное представление</p>
+            <h3 className="text-xl font-bold text-white tracking-tight">Профиль</h3>
+            <p className="text-xs text-gray-500 mt-0.5">Ваше публичное представление в сети</p>
           </div>
         </div>
 
         {/* Two-column layout: avatar (left 1/3) + fields (right 2/3) */}
-        <div className="grid grid-cols-3 gap-6 w-full">
+        <div className="grid grid-cols-3 gap-8 w-full items-start">
           {/* Left: Avatar */}
-          <div className="flex flex-col items-center gap-4">
-            <div
+          <div className="flex flex-col items-center gap-5">
+            <motion.div
               className={`relative group cursor-pointer transition-all duration-300 ${isDragging ? 'scale-105' : ''}`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
+              whileHover={{ scale: 1.02 }}
             >
-              <div className={`w-36 h-36 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border-2 transition-all duration-300 flex items-center justify-center shadow-[0_0_50px_rgba(16,245,181,0.25)] ${
+              <div className={`w-40 h-40 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border-2 transition-all duration-300 flex items-center justify-center shadow-[0_0_60px_rgba(16,245,181,0.25)] ${
                 isDragging 
-                  ? 'border-emerald-400 shadow-[0_0_70px_rgba(16,245,181,0.4)]' 
-                  : 'border-emerald-500/20 hover:border-emerald-500/40'
+                  ? 'border-emerald-400 shadow-[0_0_80px_rgba(16,245,181,0.4)] scale-105' 
+                  : 'border-emerald-500/30 hover:border-emerald-500/50 hover:shadow-[0_0_70px_rgba(16,245,181,0.35)]'
               }`}>
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Avatar preview" className="w-full h-full rounded-full object-cover" />
                 ) : (
-                  <span className="text-6xl">🎮</span>
+                  <span className="text-7xl">🎮</span>
                 )}
               </div>
               
               {/* Overlay on hover */}
-              <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-1">
-                <Camera className="w-10 h-10 text-white" />
-                <span className="text-[10px] text-white font-medium">{t('settings.upload_photo')}</span>
+              <div className="absolute inset-0 rounded-full bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-2 backdrop-blur-sm">
+                <Camera className="w-12 h-12 text-white" />
+                <span className="text-xs text-white font-medium">{t('settings.upload_photo')}</span>
               </div>
 
               <input
@@ -143,14 +174,17 @@ export function ProfileSettings({
                 className="hidden"
                 id="avatar-upload"
               />
-            </div>
+            </motion.div>
             {avatarPreview && (
-              <button
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 onClick={clearAvatar}
-                className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-red-500/10"
               >
+                <X className="w-3 h-3" />
                 Удалить фото
-              </button>
+              </motion.button>
             )}
           </div>
 
@@ -158,7 +192,7 @@ export function ProfileSettings({
           <div className="col-span-2 flex flex-col gap-6">
             {/* Username */}
             <div>
-              <label htmlFor="settings-username" className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
+              <label htmlFor="settings-username" className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                 {t('settings.nickname')}
               </label>
               <input
@@ -166,13 +200,13 @@ export function ProfileSettings({
                 type="text"
                 value={localUsername}
                 onChange={(e) => setLocalUsername(e.target.value)}
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all text-sm"
+                className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
               />
             </div>
 
             {/* Bio */}
             <div>
-              <label htmlFor="settings-bio" className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
+              <label htmlFor="settings-bio" className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                 {t('settings.bio')}
               </label>
               <textarea
@@ -182,11 +216,11 @@ export function ProfileSettings({
                 rows={3}
                 placeholder={t('settings.bio_placeholder')}
                 maxLength={MAX_BIO_LENGTH}
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all text-sm resize-none"
+                className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm resize-none"
               />
-              <div className="flex justify-between mt-1.5">
+              <div className="flex justify-between mt-2.5">
                 <p className="text-[10px] text-gray-500">{t('settings.bio_limit').replace('{max}', String(MAX_BIO_LENGTH))}</p>
-                <p className={`text-[10px] ${localBio.length >= MAX_BIO_LENGTH ? 'text-red-400' : 'text-gray-500'}`}>
+                <p className={`text-[10px] font-medium ${localBio.length >= MAX_BIO_LENGTH ? 'text-red-400' : 'text-gray-500'}`}>
                   {localBio.length}/{MAX_BIO_LENGTH}
                 </p>
               </div>
@@ -196,105 +230,122 @@ export function ProfileSettings({
 
         {/* Emoji Grid — на всю ширину карточки */}
         <div className="w-full">
-          <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
             {t('settings.avatar_presets')}
           </p>
-          <div className="grid grid-cols-10 gap-3 w-full p-3 rounded-xl bg-black/30 border border-white/5">
+          <div className="grid grid-cols-10 gap-2.5 w-full p-4 rounded-2xl bg-black/30 border border-white/5">
             {['🧑','👨','👩','🧑‍💻','🧑‍🚀','🧑‍🎨','🦊','🐱','🐶','🐼','🦁','🐯','🐺','🦄','🐲','🤖','👾','🎮','🎲','💎','🔥','⚡','🌙','☀️','🍀','🎯','🚀','🛸','👻','🎭','🃏','😀','😂','🥰','😎'].map((emoji, index) => (
-              <button
+              <motion.button
                 key={`${emoji}-${index}`}
                 onClick={() => setAvatarPreview(emoji)}
-                className="w-full aspect-square rounded-lg flex items-center justify-center text-lg hover:bg-white/5 transition active:scale-90"
+                className="w-full aspect-square rounded-xl flex items-center justify-center text-xl hover:bg-white/5 transition active:scale-90"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
               >
                 {emoji}
-              </button>
+              </motion.button>
             ))}
           </div>
         </div>
       </div>
 
       {/* Status + Tier + Save Card */}
-      <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-6 backdrop-blur-md">
+      <div className="w-full bg-white/[0.03] border border-white/[0.08] rounded-3xl p-8 flex flex-col gap-8 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
         {/* Status Selection */}
         <div>
-          <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
+          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
             {t('settings.status')}
           </label>
           <div className="grid grid-cols-2 gap-3 w-full">
-            {STATUS_OPTIONS.map((option) => (
-              <motion.button
-                key={option.value}
-                type="button"
-                onClick={() => setLocalStatus(option.value)}
-                className={`flex items-center gap-3 p-4 rounded-xl border text-sm transition-all duration-200 ${
-                  localStatus === option.value
-                    ? `border-${option.color}-500/40 bg-${option.color}-500/10 text-${option.color}-400`
-                    : 'border-white/10 text-gray-400 hover:border-white/20'
-                }`}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span className="text-lg">{option.emoji}</span>
-                <div className="text-left flex-1">
-                  <p className="font-medium">{t(option.labelKey as any)}</p>
-                </div>
-                {localStatus === option.value && (
-                  <div className={`w-2 h-2 rounded-full bg-${option.color}-500`} />
-                )}
-              </motion.button>
-            ))}
+            {STATUS_OPTIONS.map((option) => {
+              const colorClasses = getStatusColorClasses(option.color, localStatus === option.value);
+              return (
+                <motion.button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setLocalStatus(option.value)}
+                  className={`flex items-center gap-3.5 p-4 rounded-2xl border text-sm transition-all duration-200 ${colorClasses.border} ${colorClasses.bg} ${colorClasses.text}`}
+                  whileHover={{ scale: 1.01, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span className="text-2xl">{option.emoji}</span>
+                  <div className="text-left flex-1">
+                    <p className="font-semibold">{t(option.labelKey as any)}</p>
+                  </div>
+                  {localStatus === option.value && (
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className={`w-2.5 h-2.5 rounded-full ${colorClasses.dot} shadow-[0_0_10px_currentColor]`}
+                    />
+                  )}
+                </motion.button>
+              );
+            })}
           </div>
         </div>
 
         {/* ELITE Tier Badge */}
         {tier && tier !== 'free' && (
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
-            <Crown className="w-5 h-5 text-amber-400" />
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 shadow-[0_0_30px_rgba(251,191,36,0.15)]"
+          >
+            <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
+              <Crown className="w-6 h-6 text-amber-400" />
+            </div>
             <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-semibold text-amber-400">{t('settings.tier')} {tier.toUpperCase()}</p>
+              <div className="flex items-center gap-3">
+                <p className="text-sm font-bold text-amber-400">{t('settings.tier')} {tier.toUpperCase()}</p>
                 <TierBadge tier={tier as any} size="sm" />
               </div>
-              <p className="text-[10px] text-gray-500 mt-0.5">{t('settings.tier_desc')}</p>
+              <p className="text-[10px] text-gray-500 mt-1">{t('settings.tier_desc')}</p>
             </div>
-          </div>
-        )}
-
-        {/* Save Message */}
-        {saveMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`p-3 rounded-xl text-sm flex items-center gap-2 ${
-              saveMessage.type === 'success'
-                ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                : 'bg-red-500/10 border border-red-500/20 text-red-400'
-            }`}
-          >
-            {saveMessage.type === 'success' && <Check className="w-4 h-4" />}
-            {saveMessage.text}
           </motion.div>
         )}
 
+        {/* Save Message */}
+        <AnimatePresence>
+          {saveMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, y: -10, height: 0 }}
+              className={`p-4 rounded-2xl text-sm flex items-center gap-3 ${
+                saveMessage.type === 'success'
+                  ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                  : 'bg-red-500/10 border border-red-500/30 text-red-400'
+              }`}
+            >
+              {saveMessage.type === 'success' && <Check className="w-4 h-4" />}
+              {saveMessage.text}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Save Button */}
-        <button
+        <motion.button
           type="submit"
           onClick={handleSubmit}
           disabled={isSaving}
-          className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-black font-semibold text-sm hover:from-emerald-400 hover:to-teal-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 shadow-[0_4px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_4px_30px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-black font-bold text-sm hover:from-emerald-400 hover:to-teal-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 shadow-[0_4px_24px_rgba(16,185,129,0.4)] hover:shadow-[0_6px_32px_rgba(16,185,129,0.5)] flex items-center justify-center gap-2.5 relative overflow-hidden group"
+          whileHover={{ scale: 1.01, y: -2 }}
+          whileTap={{ scale: 0.98 }}
         >
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
           {isSaving ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
               {t('settings.saving')}
             </>
           ) : (
             <>
-              <Save className="w-4 h-4" />
+              <Save className="w-5 h-5" />
               {t('settings.save_changes')}
             </>
           )}
-        </button>
+        </motion.button>
       </div>
     </motion.div>
   );

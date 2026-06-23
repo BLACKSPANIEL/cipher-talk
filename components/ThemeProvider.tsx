@@ -17,12 +17,13 @@ const COLOR_MAP: Record<string, string> = {
 };
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const { accentColor, glassIntensity } = useSettingsStore();
+  const { theme, accentColor, glassIntensity } = useSettingsStore();
 
   useEffect(() => {
     const d = document.documentElement;
     const hex = COLOR_MAP[accentColor] || accentColor || '#10b981';
     
+    // Apply accent color
     d.style.setProperty('--accent-color', hex);
     
     // Calculate RGB from hex
@@ -32,7 +33,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     d.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`);
     d.style.setProperty('--accent-color-name', accentColor);
     d.style.setProperty('--bg-blur', `${glassIntensity}px`);
-  }, [accentColor, glassIntensity]);
+
+    // Apply theme class
+    if (theme === 'light') {
+      d.classList.add('light');
+    } else {
+      d.classList.remove('light');
+    }
+  }, [theme, accentColor, glassIntensity]);
 
   return <>{children}</>;
 }

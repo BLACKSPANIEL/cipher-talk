@@ -30,29 +30,38 @@ export function SettingsLayout({
   onClose,
 }: SettingsLayoutProps) {
   const containerClasses = isModal
-    ? 'h-full md:h-[90vh] w-full md:max-w-6xl md:rounded-2xl rounded-none'
-    : 'w-full max-w-6xl h-[700px]';
+    ? 'h-full md:h-[90vh] w-full md:max-w-6xl md:rounded-3xl rounded-none'
+    : 'w-full max-w-6xl h-[750px]';
 
   return (
-    <div className={isModal ? 'h-full' : 'min-h-screen bg-[#0e0f12] flex items-center justify-center p-4'}>
+    <div className={isModal ? 'h-full' : 'min-h-screen bg-[#05070d] flex items-center justify-center p-4 md:p-8'}>
       {/* Main Glass Container */}
-      <div className={`backdrop-blur-xl bg-[#0e0f12]/90 border border-white/[0.08] shadow-[0_25px_50px_rgba(0,0,0,0.7)] rounded-2xl flex overflow-hidden ${containerClasses} relative`}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className={`backdrop-blur-2xl bg-[#0a0f17]/95 border border-white/[0.08] shadow-[0_25px_60px_rgba(0,0,0,0.8)] rounded-3xl flex overflow-hidden ${containerClasses} relative`}
+      >
+        {/* Subtle inner glow */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
         
         {/* Version Indicator */}
-        <div className="absolute top-4 right-4 z-10">
-          <span className="text-[10px] text-gray-600 font-mono bg-black/30 px-2 py-1 rounded-lg border border-white/5">
+        <div className="absolute top-5 right-5 z-10">
+          <span className="text-[10px] text-gray-600 font-mono bg-black/40 px-2.5 py-1.5 rounded-lg border border-white/5 backdrop-blur-sm">
             v2.1 Glassmorphism{isModal ? ' Modal' : ''}
           </span>
         </div>
 
         {/* Close button for modal */}
         {isModal && onClose && (
-          <button
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
             onClick={onClose}
-            className="absolute top-4 left-4 z-10 p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition"
+            className="absolute top-5 left-5 z-10 p-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-all border border-transparent hover:border-white/10"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-          </button>
+          </motion.button>
         )}
 
         {/* Left Sidebar */}
@@ -66,23 +75,23 @@ export function SettingsLayout({
         />
 
         {/* Right Content Area — скроллбар прижат к правому краю */}
-        <div className="flex-1 h-full overflow-y-auto custom-scrollbar pr-2 pl-8 py-8">
+        <div className="flex-1 h-full overflow-y-auto custom-scrollbar pr-3 pl-10 py-10">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15, ease: 'easeInOut' }}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
               className="w-full h-full"
             >
-              <div className="w-full flex flex-col gap-8">
+              <div className="w-full flex flex-col gap-10">
                 {children}
               </div>
             </motion.div>
           </AnimatePresence>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
