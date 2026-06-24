@@ -1,0 +1,21 @@
+{
+  "name": "cipher-talk",
+  "main": "https://cipher-talk-sigma.vercel.app/chat",
+  "window": {
+    "title": "Cipher Talk",
+    "width": 1280,
+    "height": 800,
+    "toolbar": false,
+    "frame": true,
+    "icon": "public/favicon.ico"
+  },
+  "description": "Cipher Talk — приватный мессенджер с E2EE шифрованием",
+  "author": "CipherTalk Team",
+  "version": "1.0.0",
+  "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) CipherTalk/1.0.0 Chrome/120.0.0.0",
+  "single-instance": true,
+  "chromium-args": "--disable-http-cache --disk-cache-size=0 --no-first-run --disable-features=ChromeWhatsNewUI",
+  "dom": {
+    "webSecurity": true
+  }
+}
