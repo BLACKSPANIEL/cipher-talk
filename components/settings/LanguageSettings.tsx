@@ -3,11 +3,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Check, Globe } from 'lucide-react';
-import { useLanguage, LOCALES } from '@/lib/i18n';
+import { useLanguage, LOCALES, type Locale } from '@/lib/i18n';
 
 interface LanguageSettingsProps {
-  selectedLanguage: string;
-  onLanguageChange: (lang: string) => void;
+  selectedLanguage: Locale;
+  onLanguageChange: (lang: Locale) => void;
 }
 
 export function LanguageSettings({ selectedLanguage, onLanguageChange }: LanguageSettingsProps) {
