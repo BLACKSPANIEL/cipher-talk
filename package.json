@@ -26,6 +26,7 @@
     "electron:publish:win": "cross-env NEXT_OUTPUT=export CSC_IDENTITY_AUTO_DISCOVERY=false next build && electron-builder --win --publish always",
     "electron:publish:mac": "cross-env NEXT_OUTPUT=export CSC_IDENTITY_AUTO_DISCOVERY=false next build && electron-builder --mac --publish always",
     "electron:publish:linux": "cross-env NEXT_OUTPUT=export next build && electron-builder --linux --publish always",
+    "dist:win": "nwbuild -p win64 -v latest -o ./dist .",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
@@ -64,6 +65,7 @@
     "cross-env": "^7.0.3",
     "electron": "^32.3.3",
     "electron-builder": "^25.1.8",
+    "nw-builder": "^3.5.4",
     "postcss": "^8.4.50",
     "tailwindcss": "^3.4.5",
     "typescript": "^5.5.4",
