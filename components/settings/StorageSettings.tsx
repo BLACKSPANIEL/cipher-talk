@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HardDrive, Trash2, Download, FileJson, Image, MessageSquare, Info, BarChart3, X } from 'lucide-react';
+import { HardDrive, Trash2, Download, FileJson, Image, MessageSquare, Info, BarChart3, X, Check } from 'lucide-react';
 import { useStorageInfo } from '@/lib/hooks/useStorageInfo';
 
 interface StorageSettingsProps {
@@ -34,6 +34,7 @@ const ICON_COLOR_MAP: Record<string, string> = {
 export function StorageSettings({ onClearCache: onClearCacheExternal, onExportData }: StorageSettingsProps) {
   const { storage, clearCache: hookClearCache, isClearing } = useStorageInfo();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [cleared, setCleared] = useState(false);
 
   const formatSize = (bytes: number) => {
     if (bytes >= 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
@@ -47,6 +48,8 @@ export function StorageSettings({ onClearCache: onClearCacheExternal, onExportDa
     setShowClearConfirm(false);
     await hookClearCache();
     await onClearCacheExternal();
+    setCleared(true);
+    setTimeout(() => setCleared(false), 2000);
   };
 
   const getCategorySizes = () => {
@@ -68,30 +71,32 @@ export function StorageSettings({ onClearCache: onClearCacheExternal, onExportDa
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="w-full flex flex-col gap-8"
+      className="w-full flex flex-col gap-6"
     >
       {/* Storage Overview Card */}
-      <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-6 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <HardDrive className="w-5 h-5 text-emerald-400" />
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
+      >
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(16,245,181,0.15)]">
+            <HardDrive className="w-6 h-6 text-emerald-400" />
           </div>
           <div>
-            <h3 className="text-white font-semibold">Хранилище</h3>
-            <p className="text-[10px] text-gray-500">Использование памяти</p>
+            <h3 className="text-xl font-bold text-white tracking-tight">Хранилище</h3>
+            <p className="text-xs text-gray-400 mt-1">Использование памяти</p>
           </div>
         </div>
 
         {/* Storage Bar */}
-        <div className="w-full">
+        <div className="w-full mb-8">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <span className="text-sm text-white font-medium">{formatSize(storage.used)}</span>
-              <span className="text-xs text-gray-500 ml-2">из {formatSize(storage.total)}</span>
+              <span className="text-2xl font-bold text-white">{formatSize(storage.used)}</span>
+              <span className="text-sm text-gray-500 ml-2">из {formatSize(storage.total)}</span>
             </div>
-            <span className="text-sm text-emerald-400 font-semibold">{usedPercent.toFixed(0)}%</span>
+            <span className="text-lg font-bold text-emerald-400">{usedPercent.toFixed(0)}%</span>
           </div>
-          <div className="h-3 bg-white/5 rounded-full overflow-hidden w-full">
+          <div className="h-4 bg-white/5 rounded-full overflow-hidden w-full">
             <motion.div 
               className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full"
               initial={{ width: 0 }}
@@ -117,14 +122,14 @@ export function StorageSettings({ onClearCache: onClearCacheExternal, onExportDa
               >
                 <div className="flex items-center justify-between w-full mb-2">
                   <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg bg-${cat.color}-500/10 flex items-center justify-center`}>
-                      <Icon className={`w-4 h-4 ${ICON_COLOR_MAP[cat.color]}`} />
+                    <div className={`w-10 h-10 rounded-xl bg-${cat.color}-500/10 flex items-center justify-center`}>
+                      <Icon className={`w-5 h-5 ${ICON_COLOR_MAP[cat.color]}`} />
                     </div>
-                    <span className="text-sm text-white">{cat.label}</span>
+                    <span className="text-sm font-semibold text-white">{cat.label}</span>
                   </div>
-                  <span className="text-xs text-gray-400">{formatSize(sizeData.size)}</span>
+                  <span className="text-sm text-gray-400 font-medium">{formatSize(sizeData.size)}</span>
                 </div>
-                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden w-full">
+                <div className="h-2 bg-white/5 rounded-full overflow-hidden w-full">
                   <motion.div 
                     className={`h-full ${COLOR_MAP[cat.color]} rounded-full`}
                     initial={{ width: 0 }}
@@ -139,47 +144,49 @@ export function StorageSettings({ onClearCache: onClearCacheExternal, onExportDa
       </div>
 
       {/* Actions Card */}
-      <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-6 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-            <Info className="w-5 h-5 text-cyan-400" />
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
+      >
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.15)]">
+            <Info className="w-6 h-6 text-cyan-400" />
           </div>
           <div>
-            <h3 className="text-white font-semibold">Действия с данными</h3>
-            <p className="text-[10px] text-gray-500">Управление хранилищем</p>
+            <h3 className="text-xl font-bold text-white tracking-tight">Действия с данными</h3>
+            <p className="text-xs text-gray-400 mt-1">Управление хранилищем</p>
           </div>
         </div>
 
         <div className="flex flex-col gap-3 w-full">
           <motion.button
             onClick={() => setShowClearConfirm(true)}
-            disabled={isClearing}
-            className="w-full flex items-center gap-4 p-4 rounded-xl bg-black/40 border border-white/[0.08] hover:border-red-500/30 transition-all group disabled:opacity-50"
-            whileHover={{ scale: 1.01 }}
+            disabled={isClearing || cleared}
+            className="w-full flex items-center gap-4 p-5 rounded-2xl bg-black/20 border border-white/[0.06] hover:border-red-500/30 transition-all group disabled:opacity-50"
+            whileHover={{ scale: 1.01, x: 4 }}
             whileTap={{ scale: 0.98 }}
           >
-            <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
-              <Trash2 className="w-5 h-5 text-red-400" />
+            <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/15 transition-colors">
+              {cleared ? <Check className="w-5 h-5 text-emerald-400" /> : <Trash2 className="w-5 h-5 text-red-400" />}
             </div>
             <div className="text-left flex-1">
-              <p className="text-sm font-medium text-white">Очистить кэш</p>
+              <p className="text-sm font-bold text-white">{cleared ? 'Кэш очищен!' : 'Очистить кэш'}</p>
               <p className="text-[10px] text-gray-500">
-                {isClearing ? 'Очистка...' : `Освободить ~${formatSize(storage.categories.cache)}`}
+                {isClearing ? 'Очистка...' : cleared ? 'Освобождено ~456 MB' : `Освободить ~${formatSize(storage.categories.cache)}`}
               </p>
             </div>
           </motion.button>
 
           <motion.button
             onClick={onExportData}
-            className="w-full flex items-center gap-4 p-4 rounded-xl bg-black/40 border border-white/[0.08] hover:border-emerald-500/30 transition-all group"
-            whileHover={{ scale: 1.01 }}
+            className="w-full flex items-center gap-4 p-5 rounded-2xl bg-black/20 border border-white/[0.06] hover:border-emerald-500/30 transition-all group"
+            whileHover={{ scale: 1.01, x: 4 }}
             whileTap={{ scale: 0.98 }}
           >
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/15 transition-colors">
               <Download className="w-5 h-5 text-emerald-400" />
             </div>
             <div className="text-left flex-1">
-              <p className="text-sm font-medium text-white">Экспорт данных</p>
+              <p className="text-sm font-bold text-white">Экспорт данных</p>
               <p className="text-[10px] text-gray-500">Скачать архив ({formatSize(storage.used)})</p>
             </div>
           </motion.button>

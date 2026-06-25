@@ -3,27 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Check, Globe } from 'lucide-react';
-import { useLanguage } from '@/lib/i18n';
-
-export interface Locale {
-  value: string;
-  label: string;
-  flag: string;
-  nativeName: string;
-}
-
-export const LOCALES: Locale[] = [
-  { value: 'ru', label: 'Русский', flag: '🇷🇺', nativeName: 'Русский' },
-  { value: 'en', label: 'English', flag: '🇬🇧', nativeName: 'English' },
-  { value: 'de', label: 'Deutsch', flag: '🇩🇪', nativeName: 'Deutsch' },
-  { value: 'fr', label: 'Français', flag: '🇫🇷', nativeName: 'Français' },
-  { value: 'es', label: 'Español', flag: '🇪🇸', nativeName: 'Español' },
-  { value: 'uk', label: 'Українська', flag: '🇺🇦', nativeName: 'Українська' },
-  { value: 'tr', label: 'Türkçe', flag: '🇹🇷', nativeName: 'Türkçe' },
-  { value: 'la', label: 'Lingua Latina', flag: '🏛️', nativeName: 'Lingua Latina' },
-  { value: 'ja', label: '日本語', flag: '🇯🇵', nativeName: '日本語' },
-  { value: 'tt', label: 'Татарча', flag: '🇷🇺', nativeName: 'Татарча' },
-];
+import { useLanguage, LOCALES } from '@/lib/i18n';
 
 interface LanguageSettingsProps {
   selectedLanguage: string;
@@ -39,16 +19,18 @@ export function LanguageSettings({ selectedLanguage, onLanguageChange }: Languag
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="w-full flex flex-col gap-10"
+      className="w-full flex flex-col gap-6"
     >
-      <div className="w-full bg-white/[0.03] border border-white/[0.08] rounded-3xl p-8 flex flex-col gap-6 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
-        <div className="flex items-center gap-4">
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
+      >
+        <div className="flex items-center gap-4 mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(16,245,181,0.15)]">
             <Globe className="w-6 h-6 text-emerald-400" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white tracking-tight">Язык интерфейса</h3>
-            <p className="text-xs text-gray-500 mt-1">Выберите предпочитаемый язык</p>
+            <h3 className="text-xl font-bold text-white tracking-tight">{t('settings.tab.language')}</h3>
+            <p className="text-xs text-gray-400 mt-1">{t('settings.language_desc')}</p>
           </div>
         </div>
 
@@ -72,7 +54,7 @@ export function LanguageSettings({ selectedLanguage, onLanguageChange }: Languag
                   <p className={`text-sm font-bold ${isActive ? 'text-emerald-300' : 'text-white'}`}>
                     {locale.label}
                   </p>
-                  <p className="text-[10px] text-gray-500 mt-0.5">{locale.nativeName}</p>
+                  <p className="text-[10px] text-gray-500 mt-0.5">{locale.label}</p>
                 </div>
                 {isActive && (
                   <motion.div
@@ -92,7 +74,7 @@ export function LanguageSettings({ selectedLanguage, onLanguageChange }: Languag
       {/* Info */}
       <div className="w-full p-5 rounded-2xl bg-black/20 border border-white/5">
         <p className="text-[11px] text-gray-500 text-center leading-relaxed">
-          Язык интерфейса изменится автоматически. Некоторые элементы могут обновляться с задержкой.
+          {t('settings.language_desc')}
         </p>
       </div>
     </motion.div>

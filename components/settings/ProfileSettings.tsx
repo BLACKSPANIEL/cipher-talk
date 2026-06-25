@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Camera, Save, Sparkles, Upload, Trash2, Check } from 'lucide-react';
+import { User, Camera, Save, Sparkles, Upload, Trash2, Check, Palette } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 import type { Profile } from '@/lib/supabaseClient';
 
@@ -93,7 +93,7 @@ export function ProfileSettings({ profile, onProfileUpdated }: ProfileSettingsPr
   const displayAvatar = avatarPreview || avatarUrl || null;
 
   const inputClasses =
-    'w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all backdrop-blur-sm';
+    'w-full bg-white/[0.06] border border-white/[0.1] rounded-2xl px-5 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all backdrop-blur-sm';
 
   return (
     <motion.div
@@ -101,10 +101,10 @@ export function ProfileSettings({ profile, onProfileUpdated }: ProfileSettingsPr
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="w-full flex flex-col gap-10"
+      className="w-full flex flex-col gap-8"
     >
       {/* Avatar Section with Drag & Drop */}
-      <div className="w-full bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] rounded-3xl p-8 backdrop-blur-xl"
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
         <div className="flex items-center gap-4 mb-8">
@@ -113,13 +113,13 @@ export function ProfileSettings({ profile, onProfileUpdated }: ProfileSettingsPr
           </div>
           <div>
             <h3 className="text-xl font-bold text-white tracking-tight">Профиль</h3>
-            <p className="text-xs text-gray-500 mt-1">Ваши личные данные и аватар</p>
+            <p className="text-xs text-gray-400 mt-1">Ваши личные данные и аватар</p>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-start gap-8">
+        <div className="flex flex-col lg:flex-row items-start gap-8">
           {/* Avatar with Drag & Drop Zone */}
-          <div className="flex-shrink-0 w-full sm:w-auto">
+          <div className="flex-shrink-0 w-full lg:w-auto">
             <div
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}

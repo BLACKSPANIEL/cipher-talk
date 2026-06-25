@@ -39,7 +39,7 @@ export function SettingsSidebar({
   ];
 
   return (
-    <div className="w-80 border-r border-white/[0.08] bg-black/40 backdrop-blur-3xl p-8 flex flex-col relative overflow-hidden">
+    <div className="w-80 border-r border-white/[0.08] bg-black/40 backdrop-blur-3xl p-6 flex flex-col relative overflow-hidden">
       {/* Premium gradient overlays */}
       <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/[0.04] via-transparent to-transparent pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-r from-white/[0.02] to-transparent pointer-events-none" />
@@ -52,7 +52,7 @@ export function SettingsSidebar({
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="mb-10 relative"
+        className="mb-8 relative"
       >
         <div className="relative p-5 rounded-3xl bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] backdrop-blur-xl"
           style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}

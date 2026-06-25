@@ -330,3 +330,148 @@ html.tauri body {
 :root.light .border-emerald-800\/30 {
   border-color: rgba(16, 185, 129, 0.2);
 }
+
+/* Settings cards unified premium style */
+:root.light .bg-gradient-to-br {
+  backdrop-filter: blur(20px) saturate(180%);
+}
+
+:root.light .bg-black\/20 {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+:root.light .bg-black\/40 {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+:root.light .border-white\/\[0\.1\] {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:root.light .border-white\/\[0\.06\] {
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+:root.light .text-white {
+  color: #0f172a;
+}
+
+:root.light .text-gray-400 {
+  color: #64748b;
+}
+
+:root.light .text-gray-500 {
+  color: #64748b;
+}
+
+:root.light .text-gray-300 {
+  color: #475569;
+}
+
+:root.light .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+:root.light .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+:root.light .hover\:bg-white\/10:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+:root.light .hover\:bg-white\/5:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+:root.light .bg-emerald-500\/10 {
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+:root.light .bg-emerald-500\/20 {
+  background-color: rgba(16, 185, 129, 0.15);
+}
+
+:root.light .bg-cyan-500\/10 {
+  background-color: rgba(6, 182, 212, 0.1);
+}
+
+:root.light .bg-cyan-500\/20 {
+  background-color: rgba(6, 182, 212, 0.15);
+}
+
+:root.light .bg-violet-500\/20 {
+  background-color: rgba(139, 92, 246, 0.12);
+}
+
+:root.light .bg-pink-500\/20 {
+  background-color: rgba(244, 114, 182, 0.12);
+}
+
+:root.light .bg-amber-500\/20 {
+  background-color: rgba(251, 191, 36, 0.12);
+}
+
+:root.light .border-emerald-500\/30 {
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+:root.light .border-emerald-500\/50 {
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+:root.light .border-cyan-500\/30 {
+  border-color: rgba(6, 182, 212, 0.35);
+}
+
+:root.light .border-violet-500\/30 {
+  border-color: rgba(139, 92, 246, 0.35);
+}
+
+:root.light .border-pink-500\/30 {
+  border-color: rgba(244, 114, 182, 0.35);
+}
+
+:root.light .shadow-\[0_0_20px_rgba\(16\,245\,181\,0\.15\)\] {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+:root.light .shadow-\[0_0_30px_rgba\(16\,185\,129\,0\.3\)\] {
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.25);
+}
+
+:root.light .shadow-\[0_0_40px_rgba\(16\,245\,181\,0\.3\)\] {
+  box-shadow: 0 0 40px rgba(16, 185, 129, 0.25);
+}
+
+:root.light .from-emerald-500\/20 {
+  --tw-gradient-from: rgba(16, 185, 129, 0.18);
+}
+
+:root.light .to-cyan-500\/10 {
+  --tw-gradient-to: rgba(6, 182, 212, 0.1);
+}
+
+:root.light .from-violet-500\/20 {
+  --tw-gradient-from: rgba(139, 92, 246, 0.15);
+}
+
+:root.light .to-purple-500\/10 {
+  --tw-gradient-to: rgba(168, 85, 247, 0.1);
+}
+
+:root.light .from-pink-500\/20 {
+  --tw-gradient-from: rgba(244, 114, 182, 0.15);
+}
+
+:root.light .to-rose-500\/10 {
+  --tw-gradient-to: rgba(251, 113, 133, 0.1);
+}
+
+:root.light .from-amber-500\/20 {
+  --tw-gradient-from: rgba(251, 191, 36, 0.15);
+}
+
+:root.light .to-orange-500\/10 {
+  --tw-gradient-to: rgba(251, 146, 60, 0.1);
+}

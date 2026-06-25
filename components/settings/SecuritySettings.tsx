@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Lock, Key, Shield, Copy, RefreshCw, Check, AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Key, Shield, Copy, RefreshCw, Check, AlertTriangle, Monitor, Smartphone, Lock } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 
 interface SecuritySettingsProps {
@@ -36,10 +36,10 @@ export function SecuritySettings({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="w-full flex flex-col gap-10"
+      className="w-full flex flex-col gap-6"
     >
       {/* E2EE Key Card — Premium */}
-      <div className="w-full bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] rounded-3xl p-8 backdrop-blur-xl"
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
         <div className="flex items-center gap-4 mb-8">
@@ -48,7 +48,7 @@ export function SecuritySettings({
           </div>
           <div>
             <h3 className="text-xl font-bold text-white tracking-tight">E2EE Ключ шифрования</h3>
-            <p className="text-xs text-gray-500 mt-1">Ваш персональный ключ для сквозного шифрования</p>
+            <p className="text-xs text-gray-400 mt-1">Ваш персональный ключ для сквозного шифрования</p>
           </div>
         </div>
 
@@ -109,7 +109,7 @@ export function SecuritySettings({
       </div>
 
       {/* Sessions Card — Premium */}
-      <div className="w-full bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] rounded-3xl p-8 backdrop-blur-xl"
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
         <div className="flex items-center gap-4 mb-8">
@@ -118,7 +118,7 @@ export function SecuritySettings({
           </div>
           <div>
             <h3 className="text-xl font-bold text-white tracking-tight">Активные сессии</h3>
-            <p className="text-xs text-gray-500 mt-1">Устройства, где вы авторизованы</p>
+            <p className="text-xs text-gray-400 mt-1">Устройства, где вы авторизованы</p>
           </div>
         </div>
 
@@ -176,21 +176,5 @@ export function SecuritySettings({
         </div>
       </div>
     </motion.div>
-  );
-}
-
-function Monitor({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-    </svg>
-  );
-}
-
-function Smartphone({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-    </svg>
   );
 }

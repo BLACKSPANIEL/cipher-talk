@@ -30,29 +30,28 @@ function ToggleSwitch({ enabled, onChange, label, description, icon }: {
   icon: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between p-4 rounded-2xl bg-black/30 border border-white/5 hover:border-white/10 transition-all">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-white/[0.04] flex items-center justify-center text-zinc-400">
+    <div className="flex items-center justify-between p-5 rounded-2xl bg-black/20 border border-white/[0.06] hover:border-emerald-500/30 transition-all duration-200 group">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/15 transition-colors">
           {icon}
         </div>
         <div>
-          <p className="text-sm text-white font-semibold">{label}</p>
-          <p className="text-[10px] text-gray-500">{description}</p>
+          <p className="text-sm font-bold text-white">{label}</p>
+          <p className="text-[10px] text-gray-500 mt-0.5">{description}</p>
         </div>
       </div>
       <motion.button
         onClick={() => onChange(!enabled)}
-        className={`w-12 h-7 rounded-full p-1 transition-all duration-300 ${
-          enabled ? 'bg-emerald-500' : 'bg-white/10'
+        className={`relative w-14 h-8 rounded-full transition-all duration-300 ${
+          enabled ? 'bg-emerald-500/30 border border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-white/10 border border-white/10'
         }`}
         whileTap={{ scale: 0.95 }}
       >
         <motion.div
-          className={`w-5 h-5 rounded-full bg-white shadow-lg ${
-            enabled ? 'translate-x-5' : 'translate-x-0'
-          }`}
-          animate={{ x: enabled ? 20 : 0 }}
+          className={`absolute top-1 w-6 h-6 rounded-full ${enabled ? 'bg-emerald-400' : 'bg-gray-500'}`}
+          animate={{ left: enabled ? 'calc(100% - 1.75rem)' : '0.25rem' }}
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          style={{ boxShadow: enabled ? '0 0 10px rgba(16,245,181,0.5)' : 'none' }}
         />
       </motion.button>
     </div>
@@ -112,10 +111,10 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="w-full flex flex-col gap-10"
+      className="w-full flex flex-col gap-6"
     >
       {/* Theme Selection Card */}
-      <div className="w-full bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] rounded-3xl p-8 backdrop-blur-xl"
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
         <div className="flex items-center justify-between mb-8">
@@ -125,7 +124,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
             </div>
             <div>
               <h3 className="text-xl font-bold text-white tracking-tight">Тема оформления</h3>
-              <p className="text-xs text-gray-500 mt-1">Выберите светлую или тёмную тему</p>
+              <p className="text-xs text-gray-400 mt-1">Выберите светлую или тёмную тему</p>
             </div>
           </div>
           <div className={`px-4 py-2 rounded-xl text-xs font-bold border ${
@@ -175,7 +174,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
       </div>
 
       {/* Visual Toggles Card */}
-      <div className="w-full bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] rounded-3xl p-8 backdrop-blur-xl"
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
         <div className="flex items-center gap-4 mb-8">
@@ -184,7 +183,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
           </div>
           <div>
             <h3 className="text-xl font-bold text-white tracking-tight">Настройки интерфейса</h3>
-            <p className="text-xs text-gray-500 mt-1">Управление визуальными эффектами</p>
+            <p className="text-xs text-gray-400 mt-1">Управление визуальными эффектами</p>
           </div>
         </div>
 
@@ -214,7 +213,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
       </div>
 
       {/* Glass Intensity Card */}
-      <div className="w-full bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] rounded-3xl p-8 backdrop-blur-xl"
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
         <div className="flex items-center justify-between mb-8">
@@ -224,7 +223,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
             </div>
             <div>
               <h3 className="text-xl font-bold text-white tracking-tight">Интенсивность Glassmorphism</h3>
-              <p className="text-xs text-gray-500 mt-1">Настройте эффект размытия фона</p>
+              <p className="text-xs text-gray-400 mt-1">Настройте эффект размытия фона</p>
             </div>
           </div>
           <div className="text-right">
@@ -255,7 +254,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
       </div>
 
       {/* Accent Color Card */}
-      <div className="w-full bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] rounded-3xl p-8 backdrop-blur-xl"
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
         <div className="flex items-center gap-4 mb-8">
@@ -264,7 +263,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
           </div>
           <div>
             <h3 className="text-xl font-bold text-white tracking-tight">Акцентный цвет</h3>
-            <p className="text-xs text-gray-500 mt-1">Выберите цвет интерфейса</p>
+            <p className="text-xs text-gray-400 mt-1">Выберите цвет интерфейса</p>
           </div>
         </div>
 
@@ -288,9 +287,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
                   }`}
                   style={selectedColor === color.id ? { boxShadow: `0 0 24px ${color.hex}80, 0 0 48px ${color.hex}40` } : {}}
                 />
-                <span className={`text-[10px] font-bold ${
-                  selectedColor === color.id ? 'text-emerald-400' : 'text-gray-400'
-                }`}>
+                <span className={`text-[10px] font-bold ${selectedColor === color.id ? 'text-emerald-400' : 'text-gray-400'}`}>
                   {color.label}
                 </span>
               </div>
@@ -338,7 +335,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
       </div>
 
       {/* Live Preview Card */}
-      <div className="w-full bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] rounded-3xl p-8 backdrop-blur-xl"
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
         <div className="flex items-center gap-4 mb-8">
@@ -347,12 +344,12 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
           </div>
           <div>
             <h3 className="text-xl font-bold text-white tracking-tight">Предпросмотр</h3>
-            <p className="text-xs text-gray-500 mt-1">Как будет выглядеть интерфейс</p>
+            <p className="text-xs text-gray-400 mt-1">Как будет выглядеть интерфейс</p>
           </div>
         </div>
 
         <div 
-          className="p-6 rounded-2xl bg-black/40 border border-white/[0.08] backdrop-blur-xl w-full"
+          className="p-6 rounded-2xl bg-black/40 border border-white/[0.1] backdrop-blur-xl w-full"
           style={{ boxShadow: `0 0 40px ${accentGlow}15, inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 32px rgba(0,0,0,0.3)` }}
         >
           <div className="flex items-center gap-3 mb-4 pb-4 border-b border-white/5">
