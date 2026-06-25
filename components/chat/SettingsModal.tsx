@@ -154,7 +154,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
             exit={{ opacity: 0, y: '30%', scale: 0.97 }}
             transition={{ type: 'spring', damping: 30, stiffness: 300, mass: 0.9 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full md:max-w-5xl md:h-[90vh] h-[95vh] md:rounded-2xl rounded-t-2xl border border-white/[0.08] bg-[#0e0f12]/95 backdrop-blur-xl shadow-[0_25px_50px_rgba(0,0,0,0.7)] overflow-hidden flex flex-col md:flex-row"
+            className="relative w-full md:max-w-5xl h-[95vh] md:h-[90vh] md:rounded-2xl rounded-t-2xl border border-white/[0.08] bg-[#0e0f12]/95 backdrop-blur-xl shadow-[0_25px_50px_rgba(0,0,0,0.7)] overflow-hidden flex flex-col md:flex-row"
           >
             <SettingsLayout
               activeTab={activeTab}

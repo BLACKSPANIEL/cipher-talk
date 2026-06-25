@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SettingsSidebar } from '@/components/settings/SettingsSidebar';
+import { Menu, X } from 'lucide-react';
 
 export type SettingsTab = 'profile' | 'account' | 'security' | 'notifications' | 'appearance' | 'language' | 'devices' | 'storage' | 'about';
 
@@ -29,6 +30,8 @@ export function SettingsLayout({
   isModal = false,
   onClose,
 }: SettingsLayoutProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className={isModal ? 'h-full' : 'min-h-screen bg-[#05070d] flex items-center justify-center p-4 md:p-8'}>
       {/* Main Premium Glass Container */}
@@ -76,10 +79,54 @@ export function SettingsLayout({
           </motion.button>
         )}
 
+        {/* Mobile menu toggle */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden absolute top-4 left-4 z-50 p-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-all border border-white/10 bg-black/40"
+        >
+          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+
+        {/* Mobile sidebar overlay */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+                onClick={() => setMobileMenuOpen(false)}
+              />
+              <motion.div
+                initial={{ x: -300, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -300, opacity: 0 }}
+                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                className="md:hidden fixed left-0 top-0 bottom-0 w-[280px] z-50 bg-[#0a0f17] border-r border-white/10 shadow-2xl"
+              >
+                <div className="pt-16 pb-4 h-full overflow-y-auto">
+                  <SettingsSidebar
+                    activeTab={activeTab}
+                    onTabChange={(tab) => {
+                      onTabChange(tab);
+                      setMobileMenuOpen(false);
+                    }}
+                    username={username}
+                    status={status}
+                    tier={tier}
+                    onLogout={onLogout}
+                  />
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
         {/* Two-panel layout: Sidebar + Content */}
         <div className="flex flex-row h-full w-full">
-          {/* Left Sidebar — fixed width */}
-          <div className="w-[280px] flex-shrink-0 h-full border-r border-white/5">
+          {/* Left Sidebar — fixed width, hidden on mobile */}
+          <div className="hidden md:block w-[280px] flex-shrink-0 h-full border-r border-white/5">
             <SettingsSidebar
               activeTab={activeTab}
               onTabChange={onTabChange}
@@ -91,7 +138,7 @@ export function SettingsLayout({
           </div>
 
           {/* Right Content Area — fills remaining space with independent scroll */}
-          <div className="flex-1 h-full overflow-y-auto custom-scrollbar p-8 relative z-10">
+          <div className="flex-1 h-full overflow-y-auto custom-scrollbar p-4 md:p-8 relative z-10">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
@@ -101,7 +148,7 @@ export function SettingsLayout({
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
                 className="w-full"
               >
-                <div className="w-full flex flex-col gap-10">
+                <div className="w-full flex flex-col gap-6 md:gap-10">
                   {children}
                 </div>
               </motion.div>

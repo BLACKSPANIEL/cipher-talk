@@ -172,23 +172,23 @@ function HeroSection() {
       <div className="absolute inset-0 pointer-events-none">
         {/* Main neon orbs */}
         <motion.div
-          className="absolute top-1/4 -left-32 w-[800px] h-[800px] rounded-full bg-emerald-400/[0.06] blur-[180px]"
+          className="absolute top-1/4 -left-32 w-[800px] h-[800px] rounded-full bg-emerald-400/[0.07] blur-[180px]"
           animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.1, 1] }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute bottom-1/4 -right-32 w-[700px] h-[700px] rounded-full bg-cyan-400/[0.05] blur-[160px]"
+          className="absolute bottom-1/4 -right-32 w-[700px] h-[700px] rounded-full bg-cyan-400/[0.06] blur-[160px]"
           animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.05, 1] }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-violet-500/[0.04] blur-[140px]" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-violet-500/[0.05] blur-[140px]" />
 
         {/* Subtle grid */}
         <div
-          className="absolute inset-0 opacity-[0.015] md:opacity-[0.025]"
+          className="absolute inset-0 opacity-[0.02] md:opacity-[0.03]"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(16,245,181,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(16,245,181,0.3) 1px, transparent 1px)',
+              'linear-gradient(rgba(16,245,181,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(16,245,181,0.4) 1px, transparent 1px)',
             backgroundSize: '56px 56px',
           }}
         />
@@ -208,7 +208,7 @@ function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-400 border border-emerald-500/20 bg-emerald-500/5 mb-8">
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 mb-8 shadow-[0_0_20px_rgba(16,245,181,0.15)]">
                 <Shield className="w-3.5 h-3.5" />
                 E2EE <span className="text-zinc-600 mx-1.5">·</span> Zero Logs <span className="text-zinc-600 mx-1.5">·</span> Open Source
               </span>
@@ -222,7 +222,7 @@ function HeroSection() {
               transition={{ duration: 0.7, delay: 0.1 }}
             >
               {isDesktop ? (
-                <span className="bg-gradient-to-r from-emerald-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-emerald-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent animate-pulse">
                   Cipher Talk
                 </span>
               ) : (
@@ -366,22 +366,22 @@ function HeroSection() {
           >
             <div className="relative">
               {/* Outer glow */}
-              <div className="absolute -inset-16 bg-emerald-500/[0.05] blur-3xl rounded-full" />
-              <div className="absolute -inset-8 bg-cyan-400/[0.03] blur-3xl rounded-full" />
+              <div className="absolute -inset-16 bg-emerald-500/[0.06] blur-3xl rounded-full" />
+              <div className="absolute -inset-8 bg-cyan-400/[0.04] blur-3xl rounded-full" />
 
               {/* Mac-style Window Frame */}
               <motion.div
-                className="relative rounded-3xl overflow-hidden border border-white/[0.08] backdrop-blur-2xl"
+                className="relative rounded-3xl overflow-hidden border border-white/[0.1] backdrop-blur-2xl"
                 style={{
                   background: 'linear-gradient(180deg, rgba(14,20,28,0.96) 0%, rgba(8,12,18,0.98) 100%)',
                   boxShadow:
-                    '0 -20px 80px rgba(0,0,0,0.6), 0 0 100px rgba(16,245,181,0.08), inset 0 1px 0 rgba(255,255,255,0.05)',
+                    '0 -20px 80px rgba(0,0,0,0.6), 0 0 100px rgba(16,245,181,0.1), inset 0 1px 0 rgba(255,255,255,0.05)',
                 }}
                 whileHover={{ scale: 1.01 }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
               >
                 {/* ── Window Title Bar ── */}
-                <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06]">
+                <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.08]">
                   <div className="flex gap-2">
                     <div className="w-3.5 h-3.5 rounded-full bg-red-500/70 shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
                     <div className="w-3.5 h-3.5 rounded-full bg-yellow-500/70 shadow-[0_0_8px_rgba(234,179,8,0.4)]" />
@@ -389,7 +389,7 @@ function HeroSection() {
                   </div>
 
                   <div className="flex-1 flex justify-center">
-                    <div className="flex items-center gap-2.5 px-4 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+                    <div className="flex items-center gap-2.5 px-4 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08]">
                       <Shield className="w-3 h-3 text-emerald-400" />
                       <span className="text-[11px] text-zinc-400 font-bold tracking-[0.15em]">CIPHER TALK</span>
                       <span className="px-2 py-0.5 rounded-lg text-[8px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -404,9 +404,9 @@ function HeroSection() {
                 {/* ── Sidebar + Chat Content ── */}
                 <div className="flex" style={{ height: '420px' }}>
                   {/* Sidebar */}
-                  <div className="w-[100px] border-r border-white/[0.06] p-2.5 space-y-2 flex flex-col">
+                  <div className="w-[100px] border-r border-white/[0.08] p-2.5 space-y-2 flex flex-col">
                     {/* Search */}
-                    <div className="flex items-center gap-2 px-2.5 py-2 rounded-xl bg-white/[0.03] border border-white/[0.05]">
+                    <div className="flex items-center gap-2 px-2.5 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                       <svg className="w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
@@ -457,7 +457,7 @@ function HeroSection() {
                   {/* Chat Area */}
                   <div className="flex-1 flex flex-col">
                     {/* Chat Header */}
-                    <div className="flex items-center gap-3.5 px-5 py-3.5 border-b border-white/[0.06]">
+                    <div className="flex items-center gap-3.5 px-5 py-3.5 border-b border-white/[0.08]">
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/30 to-cyan-500/15 flex items-center justify-center ring-1 ring-emerald-500/30">
                         <span className="text-sm font-bold text-emerald-300">A</span>
                       </div>
@@ -478,9 +478,9 @@ function HeroSection() {
                     <div className="flex-1 p-4 md:p-5 space-y-3 overflow-hidden">
                       {/* Date divider */}
                       <div className="flex items-center gap-4">
-                        <div className="flex-1 h-px bg-white/[0.05]" />
+                        <div className="flex-1 h-px bg-white/[0.06]" />
                         <span className="text-[9px] text-zinc-500 font-semibold">Сегодня</span>
-                        <div className="flex-1 h-px bg-white/[0.05]" />
+                        <div className="flex-1 h-px bg-white/[0.06]" />
                       </div>
 
                       {/* Received */}
@@ -539,7 +539,7 @@ function HeroSection() {
                     </div>
 
                     {/* Input */}
-                    <div className="px-4 pb-4 pt-2 border-t border-white/[0.06]">
+                    <div className="px-4 pb-4 pt-2 border-t border-white/[0.08]">
                       <div className="flex items-center gap-3 rounded-2xl px-4 py-3 border border-zinc-700/50 transition-all duration-300 focus-within:border-emerald-500/40 focus-within:shadow-[0_0_25px_rgba(16,245,181,0.08)]" style={{ background: 'rgba(39,39,42,0.3)' }}>
                         <Lock className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
                         <div className="flex-1 h-5 flex items-center">
