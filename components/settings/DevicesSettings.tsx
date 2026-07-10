@@ -109,17 +109,19 @@ export function DevicesSettings({ devices: initialDevices, onRevoke }: DevicesSe
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="w-full flex flex-col gap-8"
+      className="w-full flex flex-col gap-6"
     >
-      {/* Active Sessions Card */}
-      <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-6 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <Monitor className="w-5 h-5 text-emerald-400" />
+      {/* Active Sessions Card — Premium */}
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
+      >
+        <div className="flex items-center gap-4 mb-6 md:mb-8">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(16,245,181,0.15)]">
+            <Monitor className="w-6 h-6 text-emerald-400" />
           </div>
           <div>
-            <h3 className="text-white font-semibold">Активные устройства</h3>
-            <p className="text-[10px] text-gray-500">Устройства, где вы авторизованы</p>
+            <h3 className="text-xl font-bold text-white tracking-tight">Активные устройства</h3>
+            <p className="text-xs text-gray-400 mt-1">Устройства, где вы авторизованы</p>
           </div>
         </div>
 
@@ -140,15 +142,15 @@ export function DevicesSettings({ devices: initialDevices, onRevoke }: DevicesSe
                   layout
                   variants={itemVariants}
                   exit="exit"
-                  className={`w-full p-5 rounded-xl border transition-all ${
+                  className={`w-full p-5 rounded-2xl border transition-all ${
                     device.current
-                      ? 'border-emerald-500/30 bg-emerald-500/5'
+                      ? 'border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,245,181,0.1)]'
                       : 'border-white/[0.08] bg-black/40 hover:border-white/10'
                   }`}
                   whileHover={{ scale: 1.01 }}
                 >
                   <div className="flex items-center gap-4 w-full">
-                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${
                       device.current ? 'bg-emerald-500/15' : 'bg-white/5'
                     }`}>
                       <Icon className={`w-7 h-7 ${device.current ? 'text-emerald-400' : 'text-gray-500'}`} />
@@ -206,14 +208,16 @@ export function DevicesSettings({ devices: initialDevices, onRevoke }: DevicesSe
         </motion.div>
       </div>
 
-      {/* Security Notice Card */}
-      <div className="w-full bg-white/[0.02] border border-cyan-500/20 rounded-2xl p-6 flex flex-col gap-4 backdrop-blur-md">
+      {/* Security Notice Card — Premium */}
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-cyan-500/20 rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
+      >
         <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0">
-            <Shield className="w-5 h-5 text-cyan-400" />
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.15)] flex-shrink-0">
+            <Shield className="w-6 h-6 text-cyan-400" />
           </div>
           <div>
-            <h3 className="text-white font-semibold mb-2">Безопасность устройств</h3>
+            <h3 className="text-lg font-bold text-white mb-2">Безопасность устройств</h3>
             <p className="text-xs text-gray-400 leading-relaxed">
               Если вы не узнаёте какое-либо устройство, завершите его сессию. 
               Все активные сессии будут автоматически завершены при смене пароля.
@@ -222,24 +226,24 @@ export function DevicesSettings({ devices: initialDevices, onRevoke }: DevicesSe
         </div>
       </div>
 
-      {/* Revoke All Button */}
+      {/* Revoke All Button — Premium */}
       <motion.button 
         onClick={() => setShowRevokeAllModal(true)}
-        className="w-full py-3.5 rounded-xl border border-red-500/30 text-red-400 font-medium text-sm hover:bg-red-500/10 transition-all duration-200"
+        className="w-full py-4 rounded-2xl border border-red-500/30 text-red-400 font-medium text-sm hover:bg-red-500/10 transition-all duration-200"
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.98 }}
       >
         Завершить все другие сессии
       </motion.button>
 
-      {/* Revoke All Confirmation Modal */}
+      {/* Revoke All Confirmation Modal — Premium */}
       <AnimatePresence>
         {showRevokeAllModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
             onClick={() => setShowRevokeAllModal(false)}
           >
             <motion.div
@@ -247,7 +251,8 @@ export function DevicesSettings({ devices: initialDevices, onRevoke }: DevicesSe
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="p-6 rounded-2xl bg-black/80 border border-white/10 backdrop-blur-xl max-w-md w-full mx-4"
+              className="p-6 rounded-3xl bg-[#0a0f17] border border-white/10 backdrop-blur-xl max-w-md w-full"
+              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">

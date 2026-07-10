@@ -32,11 +32,11 @@ export function NotificationsSettings({ settings, onUpdate }: NotificationsSetti
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="w-full flex flex-col gap-6"
     >
-      {/* Desktop Notifications */}
-      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
+      {/* Desktop Notifications — Premium */}
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-6 md:mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(16,245,181,0.15)]">
             <Monitor className="w-6 h-6 text-emerald-400" />
           </div>
@@ -89,11 +89,11 @@ export function NotificationsSettings({ settings, onUpdate }: NotificationsSetti
         </div>
       </div>
 
-      {/* Mobile Notifications */}
-      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
+      {/* Mobile Notifications — Premium */}
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 mb-6 md:mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.15)]">
             <Smartphone className="w-6 h-6 text-cyan-400" />
           </div>

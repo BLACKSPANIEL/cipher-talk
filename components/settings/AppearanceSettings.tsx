@@ -113,11 +113,11 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="w-full flex flex-col gap-6"
     >
-      {/* Theme Selection Card */}
-      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
+      {/* Theme Selection Card — Premium */}
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6 md:mb-8">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(16,245,181,0.15)]">
               <Palette className="w-6 h-6 text-emerald-400" />
@@ -173,11 +173,11 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
         </div>
       </div>
 
-      {/* Visual Toggles Card */}
-      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
+      {/* Visual Toggles Card — Premium */}
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-6 md:mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 border border-amber-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(251,191,36,0.15)]">
             <ToggleLeft className="w-6 h-6 text-amber-400" />
           </div>
@@ -212,11 +212,11 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
         </div>
       </div>
 
-      {/* Glass Intensity Card */}
-      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
+      {/* Glass Intensity Card — Premium */}
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6 md:mb-8">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.15)]">
               <Sliders className="w-6 h-6 text-cyan-400" />
@@ -253,11 +253,11 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
         </div>
       </div>
 
-      {/* Accent Color Card */}
-      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
+      {/* Accent Color Card — Premium */}
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-6 md:mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/10 border border-violet-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(167,139,250,0.15)]">
             <Sparkles className="w-6 h-6 text-violet-400" />
           </div>
@@ -334,11 +334,11 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
         </div>
       </div>
 
-      {/* Live Preview Card */}
-      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
+      {/* Live Preview Card — Premium */}
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-6 md:mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 border border-amber-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(251,191,36,0.15)]">
             <Eye className="w-6 h-6 text-amber-400" />
           </div>
@@ -377,7 +377,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
         </div>
       </div>
 
-      {/* Reset Button */}
+      {/* Reset Button — Premium */}
       <motion.button
         onClick={resetSettings}
         className="w-full py-4 rounded-2xl border border-white/10 text-gray-400 hover:text-white hover:border-white/20 hover:bg-white/5 transition-all duration-200 flex items-center justify-center gap-2.5 font-medium"

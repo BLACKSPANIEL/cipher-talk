@@ -22,11 +22,11 @@ export function AboutSettings() {
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="w-full flex flex-col gap-6"
     >
-      {/* About Card */}
-      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
+      {/* About Card — Premium */}
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-6 md:mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/10 border border-violet-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(167,139,250,0.15)]">
             <Info className="w-6 h-6 text-violet-400" />
           </div>
@@ -64,11 +64,11 @@ export function AboutSettings() {
         </div>
       </div>
 
-      {/* Links Card */}
-      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
+      {/* Links Card — Premium */}
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-6 md:mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500/20 to-rose-500/10 border border-pink-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(244,114,182,0.15)]">
             <Heart className="w-6 h-6 text-pink-400" />
           </div>
@@ -107,7 +107,7 @@ export function AboutSettings() {
         </div>
       </div>
 
-      {/* Credits */}
+      {/* Credits — Premium */}
       <div className="w-full p-6 rounded-2xl bg-black/20 border border-white/5 text-center">
         <p className="text-[11px] text-gray-500 leading-relaxed">
           {t('settings.about.made_with')}<br />

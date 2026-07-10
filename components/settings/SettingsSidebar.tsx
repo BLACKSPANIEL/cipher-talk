@@ -39,7 +39,7 @@ export function SettingsSidebar({
   ];
 
   return (
-    <div className="w-80 border-r border-white/[0.08] bg-black/40 backdrop-blur-3xl p-6 flex flex-col relative overflow-hidden">
+    <div className="w-full h-full bg-black/40 backdrop-blur-3xl flex flex-col relative overflow-hidden">
       {/* Premium gradient overlays */}
       <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/[0.04] via-transparent to-transparent pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-r from-white/[0.02] to-transparent pointer-events-none" />
@@ -52,7 +52,7 @@ export function SettingsSidebar({
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="mb-8 relative"
+        className="mb-6 relative p-5"
       >
         <div className="relative p-5 rounded-3xl bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] backdrop-blur-xl"
           style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
@@ -83,12 +83,12 @@ export function SettingsSidebar({
       </motion.div>
 
       {/* Navigation Tabs */}
-      <nav className="flex-1 space-y-1.5 relative">
+      <nav className="flex-1 space-y-1.5 relative px-3">
         {tabs.map((tab, index) => (
           <motion.button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-200 relative group min-h-[52px] ${
+            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 relative group min-h-[52px] ${
               activeTab === tab.id
                 ? 'text-emerald-400'
                 : 'text-neutral-400 hover:text-neutral-200'
@@ -142,19 +142,21 @@ export function SettingsSidebar({
       </nav>
 
       {/* Logout Button — Premium */}
-      <motion.button
-        onClick={onLogout}
-        className="mt-auto flex items-center gap-4 px-5 py-3.5 rounded-2xl text-neutral-400 hover:text-red-400 transition-all text-sm group relative overflow-hidden"
-        whileHover={{ scale: 1.02, x: 4 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        {/* Hover background */}
-        <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="absolute inset-0 border border-transparent group-hover:border-red-500/30 rounded-2xl transition-all" />
-        
-        <LogOut className="w-5 h-5 relative z-10 transition-transform group-hover:scale-110" />
-        <span className="font-semibold relative z-10">{t('common.logout')}</span>
-      </motion.button>
+      <div className="p-3 mt-auto">
+        <motion.button
+          onClick={onLogout}
+          className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-neutral-400 hover:text-red-400 transition-all text-sm group relative overflow-hidden"
+          whileHover={{ scale: 1.02, x: 4 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          {/* Hover background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 border border-transparent group-hover:border-red-500/30 rounded-2xl transition-all" />
+          
+          <LogOut className="w-5 h-5 relative z-10 transition-transform group-hover:scale-110" />
+          <span className="font-semibold relative z-10">{t('common.logout')}</span>
+        </motion.button>
+      </div>
     </div>
   );
 }

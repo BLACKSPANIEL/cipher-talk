@@ -101,13 +101,13 @@ export function ProfileSettings({ profile, onProfileUpdated }: ProfileSettingsPr
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="w-full flex flex-col gap-8"
+      className="w-full flex flex-col gap-6"
     >
-      {/* Avatar Section with Drag & Drop */}
-      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
+      {/* Profile Card — Premium */}
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-6 md:mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/20 to-pink-500/10 border border-violet-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(139,92,246,0.15)]">
             <User className="w-6 h-6 text-violet-400" />
           </div>
@@ -117,7 +117,7 @@ export function ProfileSettings({ profile, onProfileUpdated }: ProfileSettingsPr
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row items-start gap-8">
+        <div className="flex flex-col lg:flex-row items-start gap-6 md:gap-8">
           {/* Avatar with Drag & Drop Zone */}
           <div className="flex-shrink-0 w-full lg:w-auto">
             <div
@@ -198,7 +198,7 @@ export function ProfileSettings({ profile, onProfileUpdated }: ProfileSettingsPr
         </div>
 
         {/* Emoji Picker */}
-        <div className="mt-8 pt-8 border-t border-white/5">
+        <div className="mt-6 pt-6 border-t border-white/5">
           <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
             Выберите эмодзи статуса
           </label>

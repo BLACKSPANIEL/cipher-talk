@@ -73,11 +73,11 @@ export function StorageSettings({ onClearCache: onClearCacheExternal, onExportDa
       transition={{ duration: 0.2 }}
       className="w-full flex flex-col gap-6"
     >
-      {/* Storage Overview Card */}
-      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
+      {/* Storage Overview Card — Premium */}
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-6 md:mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(16,245,181,0.15)]">
             <HardDrive className="w-6 h-6 text-emerald-400" />
           </div>
@@ -143,11 +143,11 @@ export function StorageSettings({ onClearCache: onClearCacheExternal, onExportDa
         </div>
       </div>
 
-      {/* Actions Card */}
-      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-8 backdrop-blur-2xl"
+      {/* Actions Card — Premium */}
+      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-6 md:mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.15)]">
             <Info className="w-6 h-6 text-cyan-400" />
           </div>
@@ -193,14 +193,14 @@ export function StorageSettings({ onClearCache: onClearCacheExternal, onExportDa
         </div>
       </div>
 
-      {/* Clear Cache Confirmation Modal */}
+      {/* Clear Cache Confirmation Modal — Premium */}
       <AnimatePresence>
         {showClearConfirm && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
             onClick={() => setShowClearConfirm(false)}
           >
             <motion.div
@@ -208,7 +208,8 @@ export function StorageSettings({ onClearCache: onClearCacheExternal, onExportDa
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="p-6 rounded-2xl bg-black/80 border border-white/10 backdrop-blur-xl max-w-md w-full mx-4"
+              className="p-6 rounded-3xl bg-[#0a0f17] border border-white/10 backdrop-blur-xl max-w-md w-full"
+              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-white">Подтверждение</h3>

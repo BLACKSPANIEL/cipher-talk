@@ -33,16 +33,16 @@ export function SettingsLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className={isModal ? 'h-full' : 'min-h-screen bg-[#05070d] flex items-center justify-center p-4 md:p-8'}>
+    <div className={isModal ? 'h-full' : 'min-h-screen bg-[#05070d] flex items-center justify-center p-0 md:p-6 lg:p-8'}>
       {/* Main Premium Glass Container */}
       <motion.div
         initial={{ opacity: 0, scale: 0.98, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className={`backdrop-blur-2xl bg-[#0a0f17]/95 border border-white/[0.08] shadow-[0_25px_60px_rgba(0,0,0,0.8),0_0_80px_rgba(16,245,181,0.08)] rounded-3xl flex overflow-hidden relative ${
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className={`backdrop-blur-2xl bg-[#0a0f17]/95 border border-white/[0.08] shadow-[0_25px_60px_rgba(0,0,0,0.8),0_0_80px_rgba(16,245,181,0.08)] flex overflow-hidden relative ${
           isModal
-            ? 'h-[80vh] min-h-[600px] w-full max-w-5xl md:rounded-3xl rounded-none'
-            : 'w-full max-w-6xl h-[750px]'
+            ? 'h-full w-full md:rounded-3xl rounded-none'
+            : 'w-full max-w-7xl h-[100dvh] md:h-[850px] md:rounded-3xl'
         }`}
       >
         {/* Premium inner glow effects */}
@@ -50,18 +50,18 @@ export function SettingsLayout({
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
         
         {/* Ambient glow orbs */}
-        <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-emerald-500/[0.06] blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-cyan-500/[0.04] blur-3xl pointer-events-none" />
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-emerald-500/[0.06] blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-cyan-500/[0.04] blur-3xl pointer-events-none" />
 
         {/* Version Badge */}
-        <div className="absolute top-5 right-5 z-20">
+        <div className="absolute top-4 right-4 z-20 hidden md:block">
           <motion.span
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
             className="text-[10px] text-gray-500 font-mono bg-black/40 px-3 py-1.5 rounded-lg border border-white/5 backdrop-blur-sm"
           >
-            v2.1 Glassmorphism{isModal ? ' Modal' : ''}
+            v2.1 Premium
           </motion.span>
         </div>
 
@@ -82,7 +82,7 @@ export function SettingsLayout({
         {/* Mobile menu toggle */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden absolute top-4 left-4 z-50 p-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-all border border-white/10 bg-black/40"
+          className="md:hidden absolute top-4 left-4 z-50 p-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-all border border-white/10 bg-black/40 backdrop-blur-xl"
         >
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
@@ -138,21 +138,26 @@ export function SettingsLayout({
           </div>
 
           {/* Right Content Area — fills remaining space with independent scroll */}
-          <div className="flex-1 h-full overflow-y-auto custom-scrollbar p-4 md:p-8 relative z-10">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="w-full"
-              >
-                <div className="w-full flex flex-col gap-6 md:gap-10">
-                  {children}
-                </div>
-              </motion.div>
-            </AnimatePresence>
+          <div className="flex-1 h-full overflow-y-auto custom-scrollbar relative z-10">
+            <div className="p-4 md:p-8 lg:p-10">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  className="w-full"
+                >
+                  <div className="w-full flex flex-col gap-6 md:gap-8">
+                    {children}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+            
+            {/* Bottom spacer for mobile */}
+            <div className="h-6 md:h-0" />
           </div>
         </div>
       </motion.div>
