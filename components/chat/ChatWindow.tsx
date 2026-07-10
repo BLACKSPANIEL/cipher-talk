@@ -101,7 +101,7 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
-      {/* Chat Header */}
+      {/* Chat Header — Premium Glass */}
       <div className="flex items-center justify-between px-4 md:px-5 py-3 border-b border-white/5 bg-black/20 backdrop-blur-xl flex-shrink-0">
         <div className="flex items-center gap-3">
           {/* Mobile back button */}

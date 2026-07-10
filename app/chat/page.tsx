@@ -419,8 +419,8 @@ export default function ChatPage() {
       setMessages((prev) => prev.map((msg) => {
         if (msg.id === messageId && msg.isEncrypted && msg.originalText && msg.cipher) {
           const decrypted = msg.cipher === 'caesar' 
-            ? msg.originalText // Caesar already decrypted
-            : msg.originalText; // Base64 already decoded
+            ? msg.originalText 
+            : msg.originalText;
           return { ...msg, text: decrypted, isEncrypted: false, originalText: undefined };
         }
         return msg;

@@ -34,20 +34,20 @@ function Avatar({ avatar, name }: { avatar?: string | null; name: string }) {
 
   if (isImage) {
     return (
-      <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-white/10">
+      <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-white/10 shadow-[0_0_20px_rgba(16,245,181,0.15)]">
         <img src={avatar} alt={name} className="w-full h-full object-cover" />
       </div>
     );
   }
   if (isEmoji) {
     return (
-      <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0 ring-1 ring-emerald-500/20">
+      <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0 ring-1 ring-emerald-500/20 shadow-[0_0_20px_rgba(16,245,181,0.15)]">
         <span className="text-lg leading-none">{avatar}</span>
       </div>
     );
   }
   return (
-    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 flex items-center justify-center flex-shrink-0 ring-1 ring-emerald-500/25">
+    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 flex items-center justify-center flex-shrink-0 ring-1 ring-emerald-500/25 shadow-[0_0_20px_rgba(16,245,181,0.15)]">
       <span className="text-sm font-bold text-emerald-300">{initial}</span>
     </div>
   );
@@ -107,14 +107,16 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
           </p>
         )}
 
-        <div
-          className={`relative rounded-2xl px-4 py-3 backdrop-blur-sm ${
+        <motion.div
+          className={`relative rounded-2xl px-4 py-3 backdrop-blur-xl ${
             isMine
-              ? `bg-emerald-500/10 border border-emerald-500/20 text-white rounded-2xl rounded-tr-md shadow-[0_0_20px_rgba(16,185,129,0.08)] ${
+              ? `bg-gradient-to-br from-emerald-500/15 to-emerald-600/10 border border-emerald-500/25 text-white rounded-2xl rounded-tr-md shadow-[0_0_30px_rgba(16,245,181,0.15),inset_0_1px_0_rgba(255,255,255,0.1)] ${
                   isError ? 'border-red-500/50' : ''
                 }`
-              : 'bg-white/[0.03] border border-white/[0.07] text-neutral-200 rounded-2xl rounded-tl-md'
+              : 'bg-gradient-to-br from-white/[0.04] to-white/[0.02] border border-white/[0.08] text-neutral-200 rounded-2xl rounded-tl-md shadow-[0_0_20px_rgba(0,0,0,0.2)]'
           }`}
+          whileHover={{ scale: 1.01 }}
+          transition={{ duration: 0.2 }}
         >
           {isMine && message.isE2ee && (
             <div className="flex items-center gap-1.5 mb-1.5">
@@ -143,13 +145,15 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
 
           <div className={`flex items-center gap-2 mt-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
             {message.isEncrypted && !isDecrypting && !isMine && (
-              <button
+              <motion.button
                 onClick={handleToggleDecrypt}
                 className="text-[10px] uppercase tracking-wider flex items-center gap-1 transition text-zinc-500 hover:text-emerald-300"
                 title={t('chat.decrypt')}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {isDecrypted ? <><Unlock className="w-3 h-3" />{t('chat.decrypted')}</> : <><Lock className="w-3 h-3" />{t('chat.decrypt')}</>}
-              </button>
+              </motion.button>
             )}
 
             {message.cipher && message.cipher !== 'none' && !message.isEncrypted && (
@@ -164,7 +168,7 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
 
             {isMine && <StatusIcon status={message.status} />}
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {isMine && <Avatar avatar={message.senderAvatar} name={message.senderName} />}
