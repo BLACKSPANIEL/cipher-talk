@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Palette, Moon, Sun, Monitor, Check, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
@@ -9,11 +9,11 @@ type ThemeMode = 'dark' | 'light' | 'system';
 type AccentColor = 'emerald' | 'cyan' | 'violet' | 'amber' | 'rose';
 
 const accentColors = [
-  { id: 'emerald', label: 'Изумрудный', value: '#10f5b5', gradient: 'from-emerald-400 to-emerald-600' },
-  { id: 'cyan', label: 'Циан', value: '#06b6d4', gradient: 'from-cyan-400 to-cyan-600' },
-  { id: 'violet', label: 'Фиолетовый', value: '#8b5cf6', gradient: 'from-violet-400 to-violet-600' },
-  { id: 'amber', label: 'Янтарный', value: '#f59e0b', gradient: 'from-amber-400 to-amber-600' },
-  { id: 'rose', label: 'Розовый', value: '#f43f5e', gradient: 'from-rose-400 to-rose-600' },
+  { id: 'emerald', label: 'Изумрудный', value: '#10f5b5', cssVar: '16,245,181', gradient: 'from-emerald-400 to-emerald-600' },
+  { id: 'cyan', label: 'Циан', value: '#06b6d4', cssVar: '6,182,212', gradient: 'from-cyan-400 to-cyan-600' },
+  { id: 'violet', label: 'Фиолетовый', value: '#8b5cf6', cssVar: '139,92,246', gradient: 'from-violet-400 to-violet-600' },
+  { id: 'amber', label: 'Янтарный', value: '#f59e0b', cssVar: '245,158,11', gradient: 'from-amber-400 to-amber-600' },
+  { id: 'rose', label: 'Розовый', value: '#f43f5e', cssVar: '244,63,94', gradient: 'from-rose-400 to-rose-600' },
 ] as const;
 
 interface AppearanceSettingsProps {
@@ -22,16 +22,59 @@ interface AppearanceSettingsProps {
 
 export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
   const { t } = useLanguage();
-  const [theme, setTheme] = useState<ThemeMode>('dark');
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    if (typeof document !== 'undefined') {
+      const cls = document.documentElement.classList;
+      if (cls.contains('light')) return 'light';
+      if (cls.contains('system')) return 'system';
+    }
+    return 'dark';
+  });
   const [accentColor, setAccentColor] = useState<AccentColor>('emerald');
   const [fontSize, setFontSize] = useState(14);
   const [isSaving, setIsSaving] = useState(false);
   const [showSaved, setShowSaved] = useState(false);
 
+  // Apply theme to <html>
+  const applyTheme = (t: ThemeMode) => {
+    const root = document.documentElement;
+    root.classList.remove('dark', 'light', 'system');
+    root.classList.add(t);
+    if (t === 'light') {
+      root.style.colorScheme = 'light';
+    } else {
+      root.style.colorScheme = 'dark';
+    }
+  };
+
+  // Apply accent color as CSS variables
+  const applyAccent = (color: AccentColor) => {
+    const c = accentColors.find(a => a.id === color);
+    if (!c) return;
+    const root = document.documentElement;
+    root.style.setProperty('--accent-rgb', c.cssVar);
+    root.style.setProperty('--accent-hex', c.value);
+  };
+
+  // Apply font size to root
+  const applyFontSize = (px: number) => {
+    document.documentElement.style.setProperty('--base-font-size', `${px}px`);
+    document.documentElement.style.fontSize = `${px}px`;
+  };
+
+  // Initialize on mount
+  useEffect(() => {
+    applyTheme(theme);
+    applyAccent(accentColor);
+    applyFontSize(fontSize);
+  }, []);
+
   const handleSave = async () => {
     setIsSaving(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    applyTheme(theme);
+    applyAccent(accentColor);
+    applyFontSize(fontSize);
+    await new Promise(resolve => setTimeout(resolve, 600));
     setIsSaving(false);
     setShowSaved(true);
     setTimeout(() => setShowSaved(false), 2000);
@@ -57,16 +100,16 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
             <Palette className="w-6 h-6 text-violet-400" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Тема оформления</h3>
+            <h3 className="text-lg font-bold text-white">{t('settings.tab.appearance')}</h3>
             <p className="text-xs text-zinc-500">Выберите режим отображения</p>
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-3">
           {[
-            { id: 'dark', label: 'Тёмная', icon: Moon, desc: 'Для ночи' },
-            { id: 'light', label: 'Светлая', icon: Sun, desc: 'Для дня' },
-            { id: 'system', label: 'Система', icon: Monitor, desc: 'Авто' },
+            { id: 'dark', label: 'Тёмная', icon: Moon, desc: 'Cyberpunk noir' },
+            { id: 'light', label: 'Светлая', icon: Sun, desc: 'Clean & bright' },
+            { id: 'system', label: 'Система', icon: Monitor, desc: 'Автоматически' },
           ].map((mode) => {
             const Icon = mode.icon;
             const isActive = theme === mode.id;
@@ -77,7 +120,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
                 onClick={() => setTheme(mode.id as ThemeMode)}
                 className={`p-4 rounded-xl border transition-all ${
                   isActive
-                    ? 'border-violet-500/40 bg-violet-500/10'
+                    ? 'border-violet-500/40 bg-violet-500/10 shadow-[0_0_20px_rgba(139,92,246,0.15)]'
                     : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]'
                 }`}
               >
@@ -110,7 +153,7 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
           </div>
           <div>
             <h3 className="text-lg font-bold text-white">Акцентный цвет</h3>
-            <p className="text-xs text-zinc-500">Выберите основной цвет интерфейса</p>
+            <p className="text-xs text-zinc-500">Основной цвет интерфейса</p>
           </div>
         </div>
 
@@ -162,18 +205,23 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
         <input
           type="range"
           min="12"
-          max="18"
+          max="20"
           value={fontSize}
-          onChange={(e) => setFontSize(Number(e.target.value))}
+          onChange={(e) => {
+            const val = Number(e.target.value);
+            setFontSize(val);
+            // Live preview
+            applyFontSize(val);
+          }}
           className="w-full h-2 rounded-full appearance-none cursor-pointer"
           style={{
-            background: `linear-gradient(to right, #06b6d4 0%, #06b6d4 ${((fontSize - 12) / 6) * 100}%, rgba(255,255,255,0.1) ${((fontSize - 12) / 6) * 100}%, rgba(255,255,255,0.1) 100%)`,
+            background: `linear-gradient(to right, #06b6d4 0%, #06b6d4 ${((fontSize - 12) / 8) * 100}%, rgba(255,255,255,0.1) ${((fontSize - 12) / 8) * 100}%, rgba(255,255,255,0.1) 100%)`,
           }}
         />
         <div className="flex justify-between mt-2 text-[10px] text-zinc-500">
-          <span>Мелкий</span>
-          <span>Средний</span>
-          <span>Крупный</span>
+          <span>A</span>
+          <span>A</span>
+          <span>A</span>
         </div>
       </div>
 
@@ -192,15 +240,15 @@ export function AppearanceSettings({ onUpdate }: AppearanceSettingsProps) {
               transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
               className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
             />
-            Сохранение...
+            Применение...
           </>
         ) : showSaved ? (
           <>
             <Check className="w-5 h-5" />
-            Сохранено!
+            Применено!
           </>
         ) : (
-          'Сохранить настройки'
+          'Применить настройки'
         )}
       </motion.button>
     </motion.div>

@@ -109,25 +109,34 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
             </p>
           </div>
 
-          {/* Stats cards */}
-          <div className="grid grid-cols-3 gap-2 md:gap-3 max-w-sm mx-auto">
-            <div className="rounded-xl md:rounded-2xl p-3 md:p-4 border border-emerald-500/20 bg-emerald-500/5 backdrop-blur-xl">
-              <div className="text-lg md:text-2xl font-bold text-emerald-400 mb-0.5">0</div>
-              <div className="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-wider">Чатов</div>
+          {/* Single premium stat card */}
+          <div className="relative max-w-xs mx-auto">
+            <div className="rounded-2xl md:rounded-3xl p-4 md:p-5 border border-emerald-500/20 bg-gradient-to-br from-emerald-500/[0.08] to-transparent backdrop-blur-2xl"
+              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-emerald-400" />
+                  <span className="text-[10px] uppercase tracking-widest text-emerald-400/80 font-bold">СТАТИСТИКА</span>
+                </div>
+                <Lock className="w-3.5 h-3.5 text-emerald-400" />
+              </div>
+              <div className="flex items-center justify-around py-2">
+                <div className="text-center">
+                  <div className="text-xl md:text-2xl font-bold text-emerald-400 mb-0.5">0</div>
+                  <div className="text-[9px] text-zinc-500 uppercase tracking-widest font-medium">Чатов</div>
+                </div>
+                <div className="w-px h-10 bg-emerald-500/20" />
+                <div className="text-center">
+                  <div className="text-xl md:text-2xl font-bold text-cyan-400 mb-0.5">0</div>
+                  <div className="text-[9px] text-zinc-500 uppercase tracking-widest font-medium">E2EE</div>
+                </div>
+                <div className="w-px h-10 bg-emerald-500/20" />
+                <div className="text-center">
+                  <div className="text-xl md:text-2xl font-bold text-violet-400 mb-0.5">0</div>
+                  <div className="text-[9px] text-zinc-500 uppercase tracking-widest font-medium">Сообщ.</div>
+                </div>
+              </div>
             </div>
-            <div className="rounded-xl md:rounded-2xl p-3 md:p-4 border border-cyan-500/20 bg-cyan-500/5 backdrop-blur-xl">
-              <div className="text-lg md:text-2xl font-bold text-cyan-400 mb-0.5">0</div>
-              <div className="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-wider">E2EE</div>
-            </div>
-            <div className="rounded-xl md:rounded-2xl p-3 md:p-4 border border-violet-500/20 bg-violet-500/5 backdrop-blur-xl">
-              <div className="text-lg md:text-2xl font-bold text-violet-400 mb-0.5">0</div>
-              <div className="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-wider">Сообщений</div>
-            </div>
-          </div>
-
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 mx-auto">
-            <Lock className="w-3 h-3 md:w-3.5 md:h-3.5 text-emerald-400" />
-            <span className="text-[10px] md:text-[11px] uppercase tracking-wider text-emerald-400 font-medium">{t('chat.e2ee_label')}</span>
           </div>
         </div>
       </div>

@@ -34,11 +34,24 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
   const [e2eeKey, setE2eeKey] = useState('aes256-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
   const [keyCopied, setKeyCopied] = useState(false);
 
-  // Reset tab on open
+  // Sync fresh profile data on every open — never stale
+  const [syncedProfile, setSyncedProfile] = useState<Profile | null>(null);
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && profile) {
       setActiveTab('profile');
+      setSyncedProfile(profile);   // store latest
     }
+  }, [isOpen, profile]);
+
+  // Re-fetch profile silently on each open
+  useEffect(() => {
+    if (!isOpen || !profile) return;
+    supabase.from('profiles').select('*').eq('id', profile.id).single().then(({ data }) => {
+      if (data) {
+        setSyncedProfile(data as Profile);
+        onProfileUpdated?.(data as Profile);
+      }
+    });
   }, [isOpen]);
 
   useEffect(() => {
@@ -97,9 +110,9 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
             <SettingsLayout
               activeTab={activeTab}
               onTabChange={(tab) => setActiveTab(tab as any)}
-              username={profile?.username || ''}
+              username={syncedProfile?.username || profile?.username || ''}
               status="online"
-              tier={profile?.tier}
+              tier={syncedProfile?.tier || profile?.tier}
               onLogout={handleLogout}
               isModal={true}
               onClose={onClose}
