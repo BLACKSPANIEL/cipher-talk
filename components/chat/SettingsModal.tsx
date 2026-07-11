@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, LogOut, Loader2 } from 'lucide-react';
+import { X, LogOut, Loader2, Settings2 } from 'lucide-react';
 import { supabase, type Profile } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import { SettingsLayout, type SettingsTab } from '@/components/settings/SettingsLayout';
@@ -39,7 +39,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
   useEffect(() => {
     if (isOpen && profile) {
       setActiveTab('profile');
-      setSyncedProfile(profile);   // store latest
+      setSyncedProfile(profile);
     }
   }, [isOpen, profile]);
 
@@ -95,18 +95,72 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md"
           onClick={onClose}
         >
           <motion.div
-            initial={{ opacity: 0, y: '40%', scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: '30%', scale: 0.97 }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300, mass: 0.9 }}
+            initial={{ opacity: 0, scale: 0.92, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320, mass: 0.8 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full md:max-w-5xl h-[95vh] md:h-[90vh] md:rounded-2xl rounded-t-2xl border border-white/[0.08] bg-[#0e0f12]/95 backdrop-blur-xl shadow-[0_25px_50px_rgba(0,0,0,0.7)] overflow-hidden flex flex-col md:flex-row"
+            className="relative w-full md:max-w-6xl h-[92vh] md:h-[88vh] md:rounded-[2rem] rounded-t-[2rem] border border-white/[0.12] bg-[#0a0f17]/[0.98] backdrop-blur-3xl shadow-[0_30px_80px_rgba(0,0,0,0.85),0_0_100px_rgba(16,245,181,0.12),inset_0_1px_0_rgba(255,255,255,0.08)] overflow-hidden flex flex-col md:flex-row"
           >
+            {/* Premium inner glow effects */}
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.04] via-transparent to-cyan-500/[0.03] pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+            
+            {/* Ambient glow orbs */}
+            <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-emerald-500/[0.07] blur-[100px] pointer-events-none" />
+            <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-cyan-500/[0.05] blur-[100px] pointer-events-none" />
+
+            {/* Premium Header — visible on all screens */}
+            <div className="md:hidden flex items-center justify-between px-5 py-4 border-b border-white/10 bg-black/20 backdrop-blur-xl relative z-20">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center ring-1 ring-emerald-500/30"
+                  style={{ boxShadow: '0 0 20px rgba(16,245,181,0.2)' }}>
+                  <Settings2 className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-white">Настройки</h2>
+                  <p className="text-[10px] text-zinc-500">Управление аккаунтом</p>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-all border border-white/10"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Desktop close button */}
+            {onClose && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ scale: 1.1, borderColor: 'rgba(16,245,181,0.4)', boxShadow: '0 0 20px rgba(16,245,181,0.3)' }}
+                whileTap={{ scale: 0.9 }}
+                onClick={onClose}
+                className="hidden md:flex absolute top-6 right-6 z-50 p-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-all border border-white/10 hover:border-emerald-500/30 items-center justify-center"
+              >
+                <X className="w-5 h-5" />
+              </motion.button>
+            )}
+
+            {/* Version Badge */}
+            <div className="absolute top-4 right-4 z-20 hidden md:block">
+              <motion.span
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-[10px] text-gray-500 font-mono bg-black/40 px-3 py-1.5 rounded-lg border border-white/5 backdrop-blur-sm"
+              >
+                v2.1 Premium
+              </motion.span>
+            </div>
+
             <SettingsLayout
               activeTab={activeTab}
               onTabChange={(tab) => setActiveTab(tab as any)}
@@ -117,13 +171,13 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
               isModal={true}
               onClose={onClose}
             >
-              <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-6 space-y-5 md:space-y-6 scroll-smooth">
+              <div className="flex-1 overflow-y-auto px-5 md:px-8 py-5 md:py-8 space-y-5 md:space-y-6 scroll-smooth">
                 <AnimatePresence mode="wait">
                   {/* ═══ PROFILE ═══ */}
                   {activeTab === 'profile' && (
                     <ProfileSettings
                       key="modal-profile"
-                      profile={profile}
+                      profile={syncedProfile || profile}
                       onProfileUpdated={(updated) => {
                         onProfileUpdated?.(updated);
                       }}
@@ -134,8 +188,8 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                   {activeTab === 'account' && (
                     <AccountSettings
                       key="modal-account"
-                      username={profile?.username || ''}
-                      email={(profile as { email?: string } | null)?.email || ''}
+                      username={syncedProfile?.username || profile?.username || ''}
+                      email={(syncedProfile as { email?: string } | null)?.email || (profile as { email?: string } | null)?.email || ''}
                       onUpdate={async (field, value) => {
                         if (!profile) return;
                         await supabase.from('profiles').update({ [field]: value }).eq('id', profile.id);
