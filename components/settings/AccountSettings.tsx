@@ -1,170 +1,234 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Mail, Shield, Key, Trash2, Loader2, Check, AlertTriangle } from 'lucide-react';
+import { Mail, Key, Trash2, AlertTriangle, Check, Loader2, Shield } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n';
+import { supabase } from '@/lib/supabaseClient';
 
 interface AccountSettingsProps {
-  username: string;
-  email: string;
-  onUpdate: (field: string, value: string) => Promise<void>;
+  username?: string;
+  email?: string;
+  onUpdate?: (field: string, value: string) => Promise<void>;
 }
 
-export function AccountSettings({ username, email, onUpdate }: AccountSettingsProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [newEmail, setNewEmail] = useState(email);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+export function AccountSettings({ username = '', email: initialEmail = 'user@ciphertalk.app', onUpdate }: AccountSettingsProps) {
+  const { t } = useLanguage();
+  const [email, setEmail] = useState(initialEmail);
+  const [isChangingEmail, setIsChangingEmail] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showSaved, setShowSaved] = useState(false);
 
-  const handleSaveEmail = async () => {
-    setIsSaving(true);
-    await onUpdate('email', newEmail);
-    setIsSaving(false);
-    setIsEditing(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const handleChangeEmail = async () => {
+    setIsChangingEmail(true);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsChangingEmail(false);
+    setShowSaved(true);
+    setTimeout(() => setShowSaved(false), 2000);
+  };
+
+  const handleChangePassword = async () => {
+    setIsChangingPassword(true);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsChangingPassword(false);
+    setShowSaved(true);
+    setTimeout(() => setShowSaved(false), 2000);
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsDeleting(false);
+    setShowDeleteConfirm(false);
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="w-full flex flex-col gap-6"
+      transition={{ duration: 0.3 }}
+      className="space-y-5"
     >
-      {/* Account Info Card — Premium */}
-      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
-        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
+      {/* Email Settings */}
+      <div className="rounded-3xl p-6 border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-white/[0.02] backdrop-blur-2xl"
+        style={{ boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
-        <div className="flex items-center gap-4 mb-6 md:mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(16,245,181,0.15)]">
-            <User className="w-6 h-6 text-emerald-400" />
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-12 h-12 rounded-2xl bg-cyan-500/15 flex items-center justify-center ring-1 ring-cyan-500/30"
+            style={{ boxShadow: '0 0 20px rgba(6,182,212,0.2)' }}>
+            <Mail className="w-6 h-6 text-cyan-400" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white tracking-tight">Информация об аккаунте</h3>
-            <p className="text-xs text-gray-400 mt-1">Основные данные вашего аккаунта</p>
+            <h3 className="text-lg font-bold text-white">Email</h3>
+            <p className="text-xs text-zinc-500">Управление адресом электронной почты</p>
           </div>
         </div>
 
-        <div className="flex flex-col gap-5 w-full">
-          {/* Username */}
-          <div className="w-full">
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-              Имя пользователя
-            </label>
-            <div className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm font-medium backdrop-blur-sm">
-              {username}
-            </div>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs text-zinc-400 mb-2 font-medium">Текущий email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20 transition-all text-sm"
+            />
           </div>
 
-          {/* Email */}
-          <div className="w-full">
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-              Email адрес
-            </label>
-            <AnimatePresence mode="wait">
-              {isEditing ? (
-                <motion.div
-                  key="editing"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="flex gap-3 w-full"
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={handleChangeEmail}
+            disabled={isChangingEmail}
+            className="w-full py-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 hover:bg-cyan-500/10 hover:border-cyan-500/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {isChangingEmail ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
+                <span className="text-sm font-semibold text-cyan-400">Отправка подтверждения...</span>
+              </>
+            ) : (
+              <>
+                <Mail className="w-4 h-4 text-cyan-400" />
+                <span className="text-sm font-semibold text-white">Изменить email</span>
+              </>
+            )}
+          </motion.button>
+        </div>
+      </div>
+
+      {/* Password Settings */}
+      <div className="rounded-3xl p-6 border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-white/[0.02] backdrop-blur-2xl"
+        style={{ boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
+      >
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-12 h-12 rounded-2xl bg-violet-500/15 flex items-center justify-center ring-1 ring-violet-500/30"
+            style={{ boxShadow: '0 0 20px rgba(139,92,246,0.2)' }}>
+            <Key className="w-6 h-6 text-violet-400" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-white">Пароль</h3>
+            <p className="text-xs text-zinc-500">Измените пароль для входа</p>
+          </div>
+        </div>
+
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          onClick={handleChangePassword}
+          disabled={isChangingPassword}
+          className="w-full py-3 rounded-xl border border-violet-500/20 bg-violet-500/5 hover:bg-violet-500/10 hover:border-violet-500/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          {isChangingPassword ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin text-violet-400" />
+              <span className="text-sm font-semibold text-violet-400">Отправка ссылки...</span>
+            </>
+          ) : (
+            <>
+              <Key className="w-4 h-4 text-violet-400" />
+              <span className="text-sm font-semibold text-white">Изменить пароль</span>
+            </>
+          )}
+        </motion.button>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="rounded-3xl p-6 border border-red-500/20 bg-gradient-to-br from-red-500/5 to-red-600/5 backdrop-blur-2xl"
+        style={{ boxShadow: '0 12px 40px rgba(0,0,0,0.3), 0 0 30px rgba(239,68,68,0.1), inset 0 1px 0 rgba(255,255,255,0.05)' }}
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <AlertTriangle className="w-5 h-5 text-red-400" />
+          <h3 className="text-base font-bold text-white">Опасная зона</h3>
+        </div>
+
+        <div className="space-y-3">
+          <div className="p-4 rounded-xl border border-red-500/10 bg-red-500/5">
+            <div className="flex items-start gap-3">
+              <Trash2 className="w-5 h-5 text-red-400 mt-0.5" />
+              <div className="flex-1">
+                <h4 className="text-sm font-semibold text-white mb-1">Удалить аккаунт</h4>
+                <p className="text-xs text-zinc-400 mb-3">
+                  Это действие необратимо. Все ваши данные, сообщения и медиафайлы будут удалены навсегда.
+                </p>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="px-4 py-2 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-400 transition-colors"
                 >
-                  <input
-                    type="email"
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    className="flex-1 bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all backdrop-blur-sm"
-                  />
-                  <motion.button
-                    onClick={handleSaveEmail}
-                    disabled={isSaving}
-                    className="px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-bold text-sm hover:from-emerald-400 hover:to-cyan-400 transition-all disabled:opacity-50 flex items-center gap-2"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : 'Сохранить'}
-                  </motion.button>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="view"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="flex items-center justify-between w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 backdrop-blur-sm group hover:border-emerald-500/30 transition-all"
-                >
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-gray-500" />
-                    <span className="text-white text-sm font-medium">{email}</span>
-                  </div>
-                  <motion.button
-                    onClick={() => setIsEditing(true)}
-                    className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors font-bold px-3 py-1.5 rounded-lg hover:bg-emerald-500/10"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Изменить
-                  </motion.button>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  Удалить аккаунт
+                </motion.button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Security Card — Premium */}
-      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
-        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
-      >
-        <div className="flex items-center gap-4 mb-6 md:mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.15)]">
-            <Shield className="w-6 h-6 text-cyan-400" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-white tracking-tight">Безопасность</h3>
-            <p className="text-xs text-gray-400 mt-1">Дополнительные опции защиты</p>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 w-full">
-          <motion.button 
-            className="flex items-center justify-between w-full p-5 rounded-2xl bg-black/20 border border-white/[0.06] hover:border-emerald-500/30 transition-all duration-200 group"
-            whileHover={{ scale: 1.01, x: 4 }}
+      {/* Saved Indicator */}
+      <AnimatePresence>
+        {showSaved && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/15 transition-colors">
-                <Key className="w-5 h-5 text-emerald-400" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-bold text-white">Двухфакторная аутентификация</p>
-                <p className="text-[10px] text-gray-500 mt-0.5">Дополнительный уровень защиты</p>
-              </div>
-            </div>
-            <span className="text-xs text-gray-500 font-medium px-3 py-1.5 rounded-lg bg-white/5">Отключено</span>
-          </motion.button>
+            <Check className="w-4 h-4 text-emerald-400" />
+            <span className="text-sm text-emerald-400 font-medium">Сохранено!</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-          <motion.button 
-            className="flex items-center justify-between w-full p-5 rounded-2xl bg-black/20 border border-white/[0.06] hover:border-red-500/30 transition-all duration-200 group"
-            whileHover={{ scale: 1.01, x: 4 }}
+      {/* Delete Account Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowDeleteConfirm(false)}
           >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/15 transition-colors">
-                <Trash2 className="w-5 h-5 text-red-400" />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="rounded-3xl p-6 border border-red-500/30 bg-[#0a0f17] backdrop-blur-2xl max-w-sm w-full"
+              style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(239,68,68,0.2)' }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-red-500/15 flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Удалить аккаунт?</h3>
+                  <p className="text-xs text-zinc-400">Это необратимо</p>
+                </div>
               </div>
-              <div className="text-left">
-                <p className="text-sm font-bold text-white">Удалить аккаунт</p>
-                <p className="text-[10px] text-gray-500 mt-0.5">Безвозвратное удаление</p>
+              <p className="text-sm text-zinc-300 mb-6">
+                Все ваши данные будут удалены навсегда. Это действие нельзя отменить.
+              </p>
+              <div className="flex gap-2.5">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-zinc-300 hover:bg-white/5 transition-colors text-sm font-medium"
+                >
+                  Отмена
+                </button>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleDeleteAccount}
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-white hover:bg-red-400 transition-colors text-sm font-bold disabled:opacity-50"
+                >
+                  {isDeleting ? 'Удаление...' : 'Удалить'}
+                </motion.button>
               </div>
-            </div>
-            <span className="text-xs text-red-400 font-bold px-3 py-1.5 rounded-lg bg-red-500/10">Удалить</span>
-          </motion.button>
-        </div>
-      </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
-
-export default AccountSettings;

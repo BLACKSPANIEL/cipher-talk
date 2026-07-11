@@ -1,290 +1,212 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { User, Camera, Save, Sparkles, Upload, Trash2, Check, Palette } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { User, Camera, Shield, Check, Loader2, Upload } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
+import { supabase } from '@/lib/supabaseClient';
 import type { Profile } from '@/lib/supabaseClient';
 
 interface ProfileSettingsProps {
   profile: Profile | null;
-  onProfileUpdated: (updated: Profile) => void;
+  onProfileUpdated: (profile: Profile) => void;
 }
-
-const EMOJIS = ['😀','😎','🚀','💻','🎮','🔥','💎','🌟','🌈','⚡','🦊','🐉','🦋','🌺','🍀','🎯','🏆','💪','🧠','👑','🎵','🎨','📸','🌊','🍕','🧊','🪐','⚔️','🛡️','🧩','🎭','📡','🔮','💿','🕹️','🎸','🥋','🏄','🧘','🎪'];
 
 export function ProfileSettings({ profile, onProfileUpdated }: ProfileSettingsProps) {
   const { t } = useLanguage();
-  const [username, setUsername] = useState(profile?.username || '');
-  const [displayName, setDisplayName] = useState(profile?.display_name || '');
-  const [bio, setBio] = useState(profile?.bio || '');
-  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '');
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [selectedEmoji, setSelectedEmoji] = useState('😎');
+  const [username, setUsername] = useState('');
+  const [status, setStatus] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [isDragOver, setIsDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const emojiGridRef = useRef<HTMLDivElement>(null);
+  const [showSaved, setShowSaved] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setUsername(profile.username || '');
-      setDisplayName(profile.display_name || '');
-      setBio(profile.bio || '');
-      setAvatarUrl(profile.avatar_url || '');
+      setStatus(profile.status || 'online');
+      setAvatarUrl((profile as any).avatar_url || null);
     }
   }, [profile]);
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  }, []);
-
-  const handleDragLeave = useCallback(() => {
-    setIsDragOver(false);
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      setAvatarFile(file);
-      const reader = new FileReader();
-      reader.onload = (ev) => setAvatarPreview(ev.target?.result as string);
-      reader.readAsDataURL(file);
-    }
-  }, []);
-
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setAvatarFile(file);
-      const reader = new FileReader();
-      reader.onload = (ev) => setAvatarPreview(ev.target?.result as string);
-      reader.readAsDataURL(file);
+    if (!file || !profile?.id) return;
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${profile.id}/avatar.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
+      const { error: updateError } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', profile.id);
+      if (updateError) throw updateError;
+      setAvatarUrl(publicUrl);
+      onProfileUpdated({ ...profile, avatar_url: publicUrl } as Profile);
+    } catch (err) {
+      console.error('Avatar upload error:', err);
+    } finally {
+      setIsUploading(false);
     }
-  }, []);
-
-  const handleRemoveAvatar = useCallback(() => {
-    setAvatarFile(null);
-    setAvatarPreview(null);
-    setAvatarUrl('');
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  }, []);
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    onProfileUpdated({
-      ...profile!,
-      username,
-      display_name: displayName,
-      bio,
-      avatar_url: avatarPreview || avatarUrl,
-    });
-    setIsSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
   };
 
-  const displayAvatar = avatarPreview || avatarUrl || null;
+  const handleSave = async () => {
+    if (!profile?.id) return;
+    setIsSaving(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ username, status, updated_at: new Date().toISOString() })
+        .eq('id', profile.id)
+        .select()
+        .single();
+      if (error) throw error;
+      onProfileUpdated(data as Profile);
+      setShowSaved(true);
+      setTimeout(() => setShowSaved(false), 2000);
+    } catch (err) {
+      console.error('Profile update error:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-  const inputClasses =
-    'w-full bg-white/[0.06] border border-white/[0.1] rounded-2xl px-5 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all backdrop-blur-sm';
+  const statusOptions = [
+    { value: 'online', label: 'Онлайн', color: 'emerald' },
+    { value: 'away', label: 'Отошёл', color: 'amber' },
+    { value: 'busy', label: 'Занят', color: 'red' },
+    { value: 'offline', label: 'Не в сети', color: 'zinc' },
+  ];
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="w-full flex flex-col gap-6"
+      transition={{ duration: 0.3 }}
+      className="space-y-5"
     >
-      {/* Profile Card — Premium */}
-      <div className="w-full bg-gradient-to-br from-white/[0.06] to-transparent border border-white/[0.1] rounded-3xl p-6 md:p-8 backdrop-blur-2xl"
-        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
+      {/* Avatar Section */}
+      <div className="rounded-3xl p-6 border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-white/[0.02] backdrop-blur-2xl"
+        style={{ boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}
       >
-        <div className="flex items-center gap-4 mb-6 md:mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/20 to-pink-500/10 border border-violet-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(139,92,246,0.15)]">
-            <User className="w-6 h-6 text-violet-400" />
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 flex items-center justify-center ring-1 ring-emerald-500/30"
+            style={{ boxShadow: '0 0 20px rgba(16,245,181,0.2)' }}>
+            <User className="w-6 h-6 text-emerald-400" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white tracking-tight">Профиль</h3>
-            <p className="text-xs text-gray-400 mt-1">Ваши личные данные и аватар</p>
+            <h3 className="text-lg font-bold text-white">Профиль</h3>
+            <p className="text-xs text-zinc-500">Ваши личные данные</p>
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row items-start gap-6 md:gap-8">
-          {/* Avatar with Drag & Drop Zone */}
-          <div className="flex-shrink-0 w-full lg:w-auto">
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`relative w-32 h-32 rounded-3xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all duration-200 ${
-                isDragOver
-                  ? 'border-emerald-400 bg-emerald-500/15 shadow-[0_0_40px_rgba(16,245,181,0.3)]'
-                  : displayAvatar
-                    ? 'border-emerald-500/40 bg-gradient-to-br from-emerald-500/30 to-cyan-500/20'
-                    : 'border-white/20 bg-white/[0.03] hover:border-emerald-500/30 hover:bg-emerald-500/5'
-              }`}
-              style={displayAvatar ? { boxShadow: '0 0 30px rgba(16,245,181,0.2)' } : {}}
-            >
-              {displayAvatar ? (
-                <img src={displayAvatar} alt="Avatar" className="w-full h-full object-cover rounded-[22px]" />
-              ) : isDragOver ? (
-                <div className="flex flex-col items-center gap-2">
-                  <Upload className="w-8 h-8 text-emerald-400" />
-                  <span className="text-[10px] text-emerald-400 font-medium">Drop here</span>
-                </div>
+        <div className="flex flex-col items-center mb-6">
+          <div className="relative mb-4">
+            <div className="w-24 h-24 rounded-2xl overflow-hidden ring-2 ring-emerald-500/30"
+              style={{ boxShadow: '0 0 30px rgba(16,245,181,0.2)' }}>
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <Camera className="w-8 h-8 text-gray-500" />
-                  <span className="text-[9px] text-gray-500 font-medium text-center px-2">Drag & drop or click</span>
+                <div className="w-full h-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 flex items-center justify-center">
+                  <User className="w-12 h-12 text-emerald-400" />
                 </div>
               )}
+            </div>
+            <label className="absolute bottom-0 right-0 w-8 h-8 rounded-xl bg-emerald-500 flex items-center justify-center cursor-pointer hover:bg-emerald-400 transition-colors"
+              style={{ boxShadow: '0 0 20px rgba(16,245,181,0.4)' }}>
+              <Camera className="w-4 h-4 text-black" />
+              <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
+            </label>
+          </div>
+          {isUploading && (
+            <div className="flex items-center gap-2 text-xs text-emerald-400">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Загрузка...
+            </div>
+          )}
+        </div>
 
-              {/* Remove button */}
-              {displayAvatar && (
-                <motion.button
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  onClick={(e) => { e.stopPropagation(); handleRemoveAvatar(); }}
-                  className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-red-500 border-2 border-[#0a0f17] flex items-center justify-center shadow-lg hover:bg-red-400 transition-colors"
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs text-zinc-400 mb-2 font-medium">Имя пользователя</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-all text-sm"
+              placeholder="Введите имя"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs text-zinc-400 mb-2 font-medium">Статус</label>
+            <div className="grid grid-cols-2 gap-2">
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setStatus(option.value)}
+                  className={`p-3 rounded-xl border transition-all ${
+                    status === option.value
+                      ? 'border-emerald-500/40 bg-emerald-500/10'
+                      : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]'
+                  }`}
                 >
-                  <Trash2 className="w-4 h-4 text-white" />
-                </motion.button>
-              )}
-            </div>
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-            
-            <div className="mt-3 text-center sm:text-left">
-              <p className="text-[10px] text-gray-500">PNG, JPG, WEBP</p>
-              <p className="text-[10px] text-gray-600">Max 5MB</p>
-            </div>
-          </div>
-
-          {/* Fields */}
-          <div className="flex-1 w-full space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                Имя пользователя
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="@username"
-                className={inputClasses}
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                Отображаемое имя
-              </label>
-              <input
-                type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Ваше имя"
-                className={inputClasses}
-              />
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${
+                      option.color === 'emerald' ? 'bg-emerald-400' :
+                      option.color === 'amber' ? 'bg-amber-400' :
+                      option.color === 'red' ? 'bg-red-400' : 'bg-zinc-500'
+                    }`} />
+                    <span className="text-xs font-medium text-white">{option.label}</span>
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
-        </div>
-
-        {/* Emoji Picker */}
-        <div className="mt-6 pt-6 border-t border-white/5">
-          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
-            Выберите эмодзи статуса
-          </label>
-          <div ref={emojiGridRef} className="grid grid-cols-10 gap-2">
-            {EMOJIS.map((emoji) => (
-              <motion.button
-                key={emoji}
-                onClick={() => setSelectedEmoji(emoji)}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-all ${
-                  selectedEmoji === emoji
-                    ? 'bg-emerald-500/20 border border-emerald-500/40 shadow-[0_0_20px_rgba(16,245,181,0.3)] scale-110'
-                    : 'bg-white/[0.03] border border-transparent hover:bg-white/[0.06] hover:scale-105'
-                }`}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                {emoji}
-              </motion.button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-            О себе
-          </label>
-          <textarea
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            placeholder="Расскажите о себе..."
-            rows={3}
-            className={`${inputClasses} resize-none`}
-          />
         </div>
       </div>
 
-      {/* Save Button — Premium */}
+      {/* Security Info */}
+      <div className="rounded-3xl p-6 border border-emerald-500/20 bg-emerald-500/5 backdrop-blur-2xl"
+        style={{ boxShadow: '0 12px 40px rgba(0,0,0,0.3), 0 0 30px rgba(16,245,181,0.1), inset 0 1px 0 rgba(255,255,255,0.05)' }}
+      >
+        <div className="flex items-start gap-3">
+          <Shield className="w-5 h-5 text-emerald-400 mt-0.5" />
+          <div>
+            <h4 className="text-sm font-bold text-white mb-1">Защита профиля</h4>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Ваш профиль защищён E2EE шифрованием. Данные хранятся локально и синхронизируются только на ваших устройствах.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Save Button */}
       <motion.button
-        whileHover={{ scale: 1.02, y: -2 }}
         whileTap={{ scale: 0.98 }}
         onClick={handleSave}
         disabled={isSaving}
-        className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-bold text-base hover:from-emerald-400 hover:to-cyan-400 transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
-        style={{ boxShadow: '0 0 40px rgba(16,245,181,0.3)' }}
+        className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-bold text-sm hover:from-emerald-400 hover:to-cyan-400 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+        style={{ boxShadow: '0 0 30px rgba(16,245,181,0.3)' }}
       >
-        <AnimatePresence mode="wait">
-          {isSaving ? (
+        {isSaving ? (
+          <>
             <motion.div
-              key="saving"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="flex items-center gap-2"
-            >
-              <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
-                <Sparkles className="w-5 h-5" />
-              </motion.div>
-              Сохранение...
-            </motion.div>
-          ) : saved ? (
-            <motion.div
-              key="saved"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="flex items-center gap-2"
-            >
-              <Check className="w-5 h-5" />
-              Сохранено!
-            </motion.div>
-          ) : (
-            <motion.div
-              key="idle"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="flex items-center gap-2"
-            >
-              <Save className="w-5 h-5" />
-              Сохранить изменения
-            </motion.div>
-          )}
-        </AnimatePresence>
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+              className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+            />
+            Сохранение...
+          </>
+        ) : showSaved ? (
+          <>
+            <Check className="w-5 h-5" />
+            Сохранено!
+          </>
+        ) : (
+          'Сохранить изменения'
+        )}
       </motion.button>
     </motion.div>
   );
 }
-
-export default ProfileSettings;

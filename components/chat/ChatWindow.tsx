@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Shield, Lock, ChevronDown, ChevronLeft, MessageSquare, Loader2, Paperclip } from 'lucide-react';
+import { Send, Shield, Lock, ChevronDown, ChevronLeft, MessageSquare, Loader2, Paperclip, CheckCheck, Check, Clock, AlertCircle } from 'lucide-react';
 import { MessageBubble, type Message } from './MessageBubble';
 import { type ChatRoom } from './Sidebar';
 import { CIPHER_OPTIONS, type CipherType } from '@/lib/ciphers';
@@ -26,8 +26,10 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
   const [showCipherMenu, setShowCipherMenu] = useState(false);
   const [showEncryptingIndicator, setShowEncryptingIndicator] = useState(false);
   const [typingUser, setTypingUser] = useState<string | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const scrollToBottom = () => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); };
   useEffect(() => { scrollToBottom(); }, [messages, typingUser]);
@@ -48,12 +50,22 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
   const handleInputChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     setInputText(newValue);
+    
+    // Send typing indicator with debounce
     if (room?.id && newValue.trim() && currentUserId) {
-      const { data: profile } = await supabase.from('profiles').select('username').eq('id', currentUserId).single();
-      if (profile) {
-        const ch = supabase.channel(`typing-${room.id}`);
-        ch.send({ type: 'broadcast', event: 'typing', payload: { username: profile.username, userId: currentUserId } });
+      if (!isTyping) {
+        setIsTyping(true);
+        const { data: profile } = await supabase.from('profiles').select('username').eq('id', currentUserId).single();
+        if (profile) {
+          const ch = supabase.channel(`typing-${room.id}`);
+          ch.send({ type: 'broadcast', event: 'typing', payload: { username: profile.username, userId: currentUserId } });
+        }
       }
+      
+      if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
+      typingDebounceRef.current = setTimeout(() => {
+        setIsTyping(false);
+      }, 2000);
     }
   };
 
@@ -62,32 +74,57 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
     if (!text) return;
     if (cipher !== 'none') {
       setShowEncryptingIndicator(true);
-      setTimeout(() => { setShowEncryptingIndicator(false); onSendMessage(text, cipher); }, 1000);
+      setTimeout(() => { setShowEncryptingIndicator(false); onSendMessage(text, cipher); }, 800);
     } else { onSendMessage(text, cipher); }
     setInputText('');
+    setIsTyping(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
   const activeCipherLabel = CIPHER_OPTIONS.find((o) => o.value === cipher)?.label ?? t('chat.cipher_none');
   const roomMessages = messages.filter((m) => m.roomId === room?.id);
+  const unreadCount = roomMessages.filter(m => m.sender !== 'me' && m.status !== 'read').length;
 
   if (!room) {
     return (
       <div className="flex-1 flex items-center justify-center relative">
         <div className="text-center space-y-4 md:space-y-6 px-4 md:px-6 max-w-md mx-auto">
-          {/* Mobile: smaller shield */}
+          {/* Premium empty state with stats */}
           <div className="relative inline-flex items-center justify-center mx-auto">
-            <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-emerald-500/10 flex items-center justify-center" style={{ boxShadow: '0 0 40px rgba(16,245,181,0.3), 0 0 80px rgba(16,245,181,0.10)' }}>
-              <Shield className="w-8 h-8 md:w-12 md:h-12 text-emerald-400" style={{ filter: 'drop-shadow(0 0 12px rgba(16,245,181,0.6))' }} />
+            <motion.div
+              className="absolute inset-0 -m-8 rounded-full bg-emerald-400/20 blur-3xl"
+              animate={{ opacity: [0.3, 0.6, 0.3], scale: [0.9, 1.1, 0.9] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <div className="relative w-20 h-20 md:w-28 md:h-28 rounded-full bg-emerald-500/10 flex items-center justify-center" style={{ boxShadow: '0 0 60px rgba(16,245,181,0.4), 0 0 120px rgba(16,245,181,0.15)' }}>
+              <Shield className="w-10 h-10 md:w-14 md:h-14 text-emerald-400" style={{ filter: 'drop-shadow(0 0 20px rgba(16,245,181,0.8))' }} />
             </div>
-            <span className="absolute inset-0 rounded-full border border-emerald-500/25 animate-pulse" />
+            <span className="absolute inset-0 rounded-full border-2 border-emerald-500/30 animate-pulse" />
           </div>
+          
           <div>
-            <h3 className="text-lg md:text-2xl font-bold text-white mb-1 md:mb-2 tracking-tight">{t('chat.empty_title')}</h3>
+            <h3 className="text-xl md:text-3xl font-bold text-white mb-2 md:mb-3 tracking-tight">{t('chat.empty_title')}</h3>
             <p className="text-zinc-400 text-xs md:text-sm leading-relaxed px-2 md:px-0">
               {t('chat.empty_desc')}
             </p>
           </div>
+
+          {/* Stats cards */}
+          <div className="grid grid-cols-3 gap-2 md:gap-3 max-w-sm mx-auto">
+            <div className="rounded-xl md:rounded-2xl p-3 md:p-4 border border-emerald-500/20 bg-emerald-500/5 backdrop-blur-xl">
+              <div className="text-lg md:text-2xl font-bold text-emerald-400 mb-0.5">0</div>
+              <div className="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-wider">Чатов</div>
+            </div>
+            <div className="rounded-xl md:rounded-2xl p-3 md:p-4 border border-cyan-500/20 bg-cyan-500/5 backdrop-blur-xl">
+              <div className="text-lg md:text-2xl font-bold text-cyan-400 mb-0.5">0</div>
+              <div className="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-wider">E2EE</div>
+            </div>
+            <div className="rounded-xl md:rounded-2xl p-3 md:p-4 border border-violet-500/20 bg-violet-500/5 backdrop-blur-xl">
+              <div className="text-lg md:text-2xl font-bold text-violet-400 mb-0.5">0</div>
+              <div className="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-wider">Сообщений</div>
+            </div>
+          </div>
+
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 mx-auto">
             <Lock className="w-3 h-3 md:w-3.5 md:h-3.5 text-emerald-400" />
             <span className="text-[10px] md:text-[11px] uppercase tracking-wider text-emerald-400 font-medium">{t('chat.e2ee_label')}</span>
@@ -120,14 +157,35 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
           <div>
             <h3 className="font-semibold text-white text-sm">{room.name}</h3>
             <p className="text-xs text-zinc-500">
-              {otherTyping ? <span className="text-emerald-400">{typingUser} {t('chat.typing_indicator').replace('{name}', '').trim()}</span> : t('chat.messages_count_short', { count: roomMessages.length })}
+              {otherTyping ? (
+                <span className="text-emerald-400 flex items-center gap-1">
+                  <span className="flex gap-0.5">
+                    <span className="w-1 h-1 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-1 h-1 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-1 h-1 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </span>
+                  {typingUser} печатает...
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ boxShadow: '0 0 6px rgba(16,245,181,0.6)' }} />
+                  {t('chat.messages_count_short', { count: roomMessages.length })}
+                </span>
+              )}
             </p>
           </div>
         </div>
-        <button type="button" className="group/e2ee flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/40 transition-all duration-300">
-          <Lock className="w-3.5 h-3.5 text-emerald-400 transition-transform group-hover/e2ee:scale-110" />
-          <span className="text-xs font-medium text-emerald-400">{t('chat.e2ee_badge')}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {unreadCount > 0 && (
+            <div className="px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-400 font-semibold">
+              {unreadCount} новых
+            </div>
+          )}
+          <button type="button" className="group/e2ee flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/40 transition-all duration-300">
+            <Lock className="w-3.5 h-3.5 text-emerald-400 transition-transform group-hover/e2ee:scale-110" />
+            <span className="text-xs font-medium text-emerald-400">{t('chat.e2ee_badge')}</span>
+          </button>
+        </div>
       </div>
 
       {/* Messages Area — subtle radial gradient */}

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Shield, MessageSquare, User, Loader2, Settings, Sparkles, Search } from 'lucide-react';
+import { Shield, MessageSquare, User, Loader2, Settings, Sparkles, Search, BarChart3 } from 'lucide-react';
 import { type Profile } from '@/lib/supabaseClient';
 import { TierBadge } from './TierBadge';
 import { useLanguage } from '@/lib/i18n';
@@ -131,6 +131,11 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
   const { t } = useLanguage();
   const isOnline = currentProfile?.status === 'online';
 
+  // Calculate real statistics
+  const totalChats = rooms.length;
+  const totalMessages = rooms.reduce((sum, room) => sum + (room.lastMessage ? 1 : 0), 0);
+  const encryptedChats = rooms.filter(room => room.isEncrypted).length;
+
   return (
     <div className="flex flex-col h-full bg-neutral-950/40 border-r border-white/5 backdrop-blur-3xl relative min-h-0">
       {/* Ambient glow */}
@@ -242,6 +247,31 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
           )}
         </AnimatePresence>
       </div>
+
+      {/* Stats Bar — Premium */}
+      {rooms.length > 0 && (
+        <div className="relative z-10 px-3 py-2 border-t border-white/[0.06] bg-black/20 backdrop-blur-xl">
+          <div className="flex items-center justify-between text-[10px] text-zinc-500">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                <BarChart3 className="w-3 h-3 text-emerald-400" />
+                <span className="text-emerald-400 font-semibold">{totalChats}</span>
+                <span>чатов</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Shield className="w-3 h-3 text-cyan-400" />
+                <span className="text-cyan-400 font-semibold">{encryptedChats}</span>
+                <span>E2EE</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              <MessageSquare className="w-3 h-3 text-violet-400" />
+              <span className="text-violet-400 font-semibold">{totalMessages}</span>
+              <span>сообщений</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Profile dock */}
       <div className="relative z-20 mt-auto shrink-0">

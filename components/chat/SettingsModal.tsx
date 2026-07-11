@@ -417,9 +417,9 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
                 {activeTab === 'devices' && (
                   <DevicesSettings
                     devices={[
-                      { id: 1, name: 'Windows Desktop', type: 'desktop', os: 'Windows 11', location: 'Москва, RU', lastActive: 'сейчас', current: true },
-                      { id: 2, name: 'Chrome Browser', type: 'desktop', os: 'Windows 11', location: 'Москва, RU', lastActive: '2 часа назад', current: false },
-                      { id: 3, name: 'iPhone 15 Pro', type: 'mobile', os: 'iOS 17', location: 'Санкт-Петербург, RU', lastActive: '1 день назад', current: false },
+                      { id: '1', name: 'Windows Desktop', type: 'desktop', os: 'Windows 11', location: 'Москва, RU', lastActive: 'сейчас', isCurrent: true, isTrusted: true, ip: '192.168.1.1' },
+                      { id: '2', name: 'Chrome Browser', type: 'desktop', os: 'Windows 11', location: 'Москва, RU', lastActive: '2 часа назад', isCurrent: false, isTrusted: true, ip: '192.168.1.2' },
+                      { id: '3', name: 'iPhone 15 Pro', type: 'mobile', os: 'iOS 17', location: 'Санкт-Петербург, RU', lastActive: '1 день назад', isCurrent: false, isTrusted: false, ip: '192.168.1.3' },
                     ]}
                     onRevoke={async (id) => { console.log('Revoke device:', id); }}
                   />
