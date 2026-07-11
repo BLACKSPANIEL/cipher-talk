@@ -34,20 +34,20 @@ function Avatar({ avatar, name }: { avatar?: string | null; name: string }) {
 
   if (isImage) {
     return (
-      <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-white/10 shadow-[0_0_20px_rgba(16,245,181,0.15)]">
+      <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 relative ring-1 ring-white/10 shadow-[0_0_20px_rgba(16,245,181,0.15)]">
         <img src={avatar} alt={name} className="w-full h-full object-cover" />
       </div>
     );
   }
   if (isEmoji) {
     return (
-      <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0 ring-1 ring-emerald-500/20 shadow-[0_0_20px_rgba(16,245,181,0.15)]">
+      <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0 relative ring-1 ring-emerald-500/20 shadow-[0_0_20px_rgba(16,245,181,0.15)]">
         <span className="text-lg leading-none">{avatar}</span>
       </div>
     );
   }
   return (
-    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 flex items-center justify-center flex-shrink-0 ring-1 ring-emerald-500/25 shadow-[0_0_20px_rgba(16,245,181,0.15)]">
+    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 flex items-center justify-center flex-shrink-0 relative ring-1 ring-emerald-500/25 shadow-[0_0_20px_rgba(16,245,181,0.15)]">
       <span className="text-sm font-bold text-emerald-300">{initial}</span>
     </div>
   );

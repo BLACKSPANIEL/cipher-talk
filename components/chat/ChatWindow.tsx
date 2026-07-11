@@ -89,7 +89,7 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
     return (
       <div className="flex-1 flex items-center justify-center relative">
         <div className="text-center space-y-4 md:space-y-6 px-4 md:px-6 max-w-md mx-auto">
-          {/* Premium empty state with stats */}
+          {/* Premium empty state with animated shield */}
           <div className="relative inline-flex items-center justify-center mx-auto">
             <motion.div
               className="absolute inset-0 -m-8 rounded-full bg-emerald-400/20 blur-3xl"
@@ -109,33 +109,21 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
             </p>
           </div>
 
-          {/* Single premium stat card */}
-          <div className="relative max-w-xs mx-auto">
-            <div className="rounded-2xl md:rounded-3xl p-4 md:p-5 border border-emerald-500/20 bg-gradient-to-br from-emerald-500/[0.08] to-transparent backdrop-blur-2xl"
-              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' }}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-emerald-400" />
-                  <span className="text-[10px] uppercase tracking-widest text-emerald-400/80 font-bold">СТАТИСТИКА</span>
-                </div>
-                <Lock className="w-3.5 h-3.5 text-emerald-400" />
-              </div>
-              <div className="flex items-center justify-around py-2">
-                <div className="text-center">
-                  <div className="text-xl md:text-2xl font-bold text-emerald-400 mb-0.5">0</div>
-                  <div className="text-[9px] text-zinc-500 uppercase tracking-widest font-medium">Чатов</div>
-                </div>
-                <div className="w-px h-10 bg-emerald-500/20" />
-                <div className="text-center">
-                  <div className="text-xl md:text-2xl font-bold text-cyan-400 mb-0.5">0</div>
-                  <div className="text-[9px] text-zinc-500 uppercase tracking-widest font-medium">E2EE</div>
-                </div>
-                <div className="w-px h-10 bg-emerald-500/20" />
-                <div className="text-center">
-                  <div className="text-xl md:text-2xl font-bold text-violet-400 mb-0.5">0</div>
-                  <div className="text-[9px] text-zinc-500 uppercase tracking-widest font-medium">Сообщ.</div>
-                </div>
-              </div>
+          {/* Minimal stat preview */}
+          <div className="inline-flex items-center gap-4 px-5 py-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 backdrop-blur-xl">
+            <div className="text-center">
+              <div className="text-lg font-bold text-emerald-400">0</div>
+              <div className="text-[9px] text-zinc-500 uppercase tracking-wider">Чатов</div>
+            </div>
+            <div className="w-px h-8 bg-emerald-500/20" />
+            <div className="text-center">
+              <div className="text-lg font-bold text-cyan-400">0</div>
+              <div className="text-[9px] text-zinc-500 uppercase tracking-wider">E2EE</div>
+            </div>
+            <div className="w-px h-8 bg-emerald-500/20" />
+            <div className="text-center">
+              <div className="text-lg font-bold text-violet-400">0</div>
+              <div className="text-[9px] text-zinc-500 uppercase tracking-wider">Сообщ.</div>
             </div>
           </div>
         </div>
