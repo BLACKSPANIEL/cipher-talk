@@ -1,53 +1,37 @@
 import 'package:flutter/material.dart';
 
+/// Cipher Talk premium dark theme colors
 class AppColors {
-  // Background
-  static const Color background = Color(0xFF05070d);
-  static const Color backgroundSecondary = Color(0xFF0a0f17);
-  static const Color backgroundCard = Color(0xFF0e141c);
+  AppColors._();
 
-  // Neon Accents
-  static const Color emerald = Color(0xFF10f5b5);
-  static const Color emeraldDark = Color(0xFF059669);
-  static const Color cyan = Color(0xFF22d3ee);
-  static const Color violet = Color(0xFF8b5cf6);
+  // Core colors
+  static const Color darkBackground = Color(0xFF0A0A0A);
+  static const Color darkSurface = Color(0xFF1A1A1A);
+  static const Color darkCard = Color(0xFF222222);
 
-  // Text
-  static const Color textPrimary = Color(0xFFffffff);
-  static const Color textSecondary = Color(0xFFa1a1aa);
-  static const Color textMuted = Color(0xFF71717a);
-
-  // Borders
-  static const Color borderSubtle = Color(0xFF27272a);
-  static const Color borderDefault = Color(0xFF3f3f46);
-  static const Color borderEmerald = Color(0xFF10f5b5);
-
-  // Glass
-  static const Color glassBackground = Color(0x0affffff);
-  static const Color glassBorder = Color(0x14ffffff);
-
-  // Status
-  static const Color success = Color(0xFF10b981);
-  static const Color warning = Color(0xFFf59e0b);
-  static const Color error = Color(0xFFef4444);
-  static const Color info = Color(0xFF3b82f6);
+  // Neon accents
+  static const Color neonEmerald = Color(0xFF10f5b5);
+  static const Color neonCyan = Color(0xFF22d3ee);
+  static const Color neonViolet = Color(0xFF8B5CF6);
 
   // Gradients
-  static const Gradient emeraldGradient = LinearGradient(
-    colors: [Color(0xFF10f5b5), Color(0xFF22d3ee)],
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [neonEmerald, neonCyan],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  static const Gradient violetGradient = LinearGradient(
-    colors: [Color(0xFF8b5cf6), Color(0xFFec4899)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
+  // Status colors
+  static const Color success = Color(0xFF10B981);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color error = Color(0xFFEF4444);
 
-  static const Gradient darkGradient = LinearGradient(
-    colors: [Color(0xFF0a0f17), Color(0xFF05070d)],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-  );
+  // Text
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xFF9CA3AF);
+  static const Color textHint = Color(0xFF6B7280);
+
+  // Glassmorphism
+  static Color glassBackground = Colors.white.withValues(alpha: 0.05);
+  static Color glassBorder = Colors.white.withValues(alpha: 0.1);
 }

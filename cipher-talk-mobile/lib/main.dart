@@ -1,22 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'features/chat/screens/chat_list_screen.dart';
+import 'core/theme/app_theme.dart';
+import 'core/routes/app_router.dart';
+import 'shared/services/storage_service.dart';
+import 'shared/providers/storage_provider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: CipherTalkApp()));
+  
+  // Initialize Hive storage
+  final storageService = StorageService();
+  await storageService.initialize();
+  
+  runApp(ProviderScope(
+    overrides: [
+      storageServiceProvider.overrideWithValue(storageService),
+    ],
+    child: const CipherTalkApp(),
+  ));
 }
 
-class CipherTalkApp extends StatelessWidget {
+class CipherTalkApp extends ConsumerWidget {
   const CipherTalkApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(appThemeProvider);
+
     return MaterialApp(
       title: 'Cipher Talk',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(),
-      home: const ChatListScreen(),
+      theme: theme.lightTheme,
+      darkTheme: theme.darkTheme,
+      themeMode: ThemeMode.dark,
+      initialRoute: AppRouter.splash,
+      onGenerateRoute: AppRouter.generateRoute,
     );
   }
 }

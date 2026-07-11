@@ -1,154 +1,220 @@
-import 'package:flutter/material.dart';
-import '../../../shared/widgets/glass_card.dart';
-import '../../../core/constants/colors.dart';
+import 'dart:ui';
 
-class ChatListScreen extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/routes/app_router.dart';
+import '../../../shared/providers/chat_provider.dart';
+
+class ChatListScreen extends ConsumerWidget {
   const ChatListScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final chatState = ref.watch(chatProvider);
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Чаты'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: AppColors.emerald),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: 5,
-        itemBuilder: (context, index) {
-          final chats = [
-            {'name': 'Алексей', 'message': 'Привет! Готов к вечеринке? 🎉', 'time': '19:42', 'online': true},
-            {'name': 'Мария', 'message': 'Отлично, увидимся!', 'time': '18:30', 'online': true},
-            {'name': 'Дмитрий', 'message': 'Код готов к ревью', 'time': '17:15', 'online': false},
-            {'name': 'Елена', 'message': 'Спасибо за помощь!', 'time': 'Вчера', 'online': false},
-            {'name': 'Сергей', 'message': 'Встреча завтра в 10', 'time': 'Вчера', 'online': true},
-          ];
-
-          final chat = chats[index];
-          final isActive = index == 0;
-
-          return GlassCard(
-            isActive: isActive,
-            margin: const EdgeInsets.only(bottom: 12),
-            onTap: () {
-              // Navigate to chat screen
-            },
-            child: Row(
-              children: [
-                // Avatar
-                Stack(
-                  children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        gradient: isActive ? AppColors.emeraldGradient : null,
-                        color: isActive ? null : AppColors.backgroundCard,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: isActive ? AppColors.emerald : AppColors.borderSubtle,
-                          width: 1,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          chat['name']![0],
-                          style: TextStyle(
-                            color: isActive ? AppColors.background : AppColors.textSecondary,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (chat['online'] == true)
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          width: 14,
-                          height: 14,
-                          decoration: BoxDecoration(
-                            color: AppColors.emerald,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.background, width: 2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.emerald.withOpacity(0.5),
-                                blurRadius: 8,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+      backgroundColor: AppTheme.darkBackground,
+      body: CustomScrollView(
+        slivers: [
+          // Glassmorphism AppBar
+          SliverAppBar(
+            expandedHeight: 100,
+            floating: false,
+            pinned: true,
+            backgroundColor: Colors.transparent,
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppTheme.darkSurface.withValues(alpha: 0.9),
+                    AppTheme.darkSurface.withValues(alpha: 0.7),
+                    Colors.transparent,
                   ],
                 ),
-                const SizedBox(width: 16),
-                // Content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 16, left: 20, right: 20, bottom: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      const Row(
                         children: [
-                          Text(
-                            chat['name']!,
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Icon(
+                            LucideIcons.messageSquare,
+                            color: AppTheme.neonEmerald,
+                            size: 28,
                           ),
+                          SizedBox(width: 12),
                           Text(
-                            chat['time']!,
-                            style: const TextStyle(
-                              color: AppColors.textMuted,
-                              fontSize: 12,
+                            'Cipher Talk',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        chat['message']!,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
+                      IconButton(
+                        icon: const Icon(
+                          LucideIcons.settings,
+                          color: AppTheme.neonEmerald,
+                          size: 24,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        onPressed: () {
+                          Navigator.pushReplacementNamed(context, AppRouter.settings);
+                        },
                       ),
                     ],
                   ),
                 ),
+              ),
+            ),
+          ),
+          // Chat list
+          SliverToBoxAdapter(
+            child: chatState.isLoading
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32),
+                      child: CircularProgressIndicator(
+                        color: AppTheme.neonEmerald,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    itemCount: chatState.chats.length,
+                    itemBuilder: (context, index) {
+                      final chat = chatState.chats[index];
+                      return _buildChatCard(context, theme, chat);
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChatCard(BuildContext context, ThemeData theme, Chat chat) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(context, AppRouter.chatScreen, arguments: {'chatId': chat.id});
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppTheme.darkSurface,
+                AppTheme.darkSurface.withValues(alpha: 0.8),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.05),
+              width: 1,
+            ),
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            leading: Stack(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [AppTheme.neonEmerald, AppTheme.neonCyan],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: const Icon(
+                    LucideIcons.user,
+                    size: 28,
+                    color: AppTheme.darkBackground,
+                  ),
+                ),
+                if (chat.isOnline)
+                  Positioned(
+                    bottom: 2,
+                    right: 2,
+                    child: Container(
+                      width: 14,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: AppTheme.neonEmerald,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppTheme.darkSurface, width: 2),
+                      ),
+                    ),
+                  ),
               ],
             ),
-          );
-        },
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: AppColors.emeraldGradient,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.emerald.withOpacity(0.4),
-              blurRadius: 20,
-              spreadRadius: 2,
+            title: Text(
+              chat.name,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
             ),
-          ],
-        ),
-        child: FloatingActionButton(
-          onPressed: () {},
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: const Icon(Icons.add, color: AppColors.background),
+            subtitle: Text(
+              chat.lastMessage,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: Colors.white60,
+                fontSize: 13,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  chat.time,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppTheme.neonEmerald.withValues(alpha: 0.7),
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                if (chat.unreadCount > 0)
+                  Container(
+                    width: 20,
+                    height: 20,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppTheme.neonEmerald,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${chat.unreadCount}',
+                        style: const TextStyle(
+                          color: AppTheme.darkBackground,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
