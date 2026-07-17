@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Shield, Lock, ChevronDown, ChevronLeft, MessageSquare, Loader2, Paperclip, CheckCheck, Check, Clock, AlertCircle } from 'lucide-react';
+import { Send, Shield, Lock, ChevronDown, ChevronLeft, MessageSquare, Loader2, Paperclip } from 'lucide-react';
 import { MessageBubble, type Message } from './MessageBubble';
 import { type ChatRoom } from './Sidebar';
 import { CIPHER_OPTIONS, type CipherType } from '@/lib/ciphers';

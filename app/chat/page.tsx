@@ -9,7 +9,7 @@ import { SearchUserModal } from '@/components/chat/SearchUserModal';
 import { SettingsModal } from '@/components/chat/SettingsModal';
 import { BottomNavBar } from '@/components/chat/BottomNavBar';
 import { type Message } from '@/components/chat/MessageBubble';
-import { type CipherType, encryptText } from '@/lib/ciphers';
+import { type CipherType, encryptText, caesarDecrypt, base64Decode } from '@/lib/ciphers';
 import { supabase } from '@/lib/supabaseClient';
 import type { DbMessage, Profile } from '@/lib/supabaseClient';
 import { encryptMessage, decryptMessage } from '@/lib/cryptoUtils';
@@ -389,11 +389,11 @@ export default function ChatPage() {
         ? globalThis.crypto.randomUUID()
         : `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-      const optimisticMessage: Message = {
+const optimisticMessage: Message = {
         id: tempId, text: visibleCipherText, senderId: currentUserId, senderName: currentProfile?.username || 'Я',
         sender: 'me', senderAvatar: (currentProfile as any)?.avatar_url || null, timestamp: new Date(),
         roomId: activeRoomId, cipher: cipher !== 'none' ? cipher : undefined, isEncrypted: cipher !== 'none',
-        originalText: visibleCipherText, isE2ee: true, status: 'sending',
+        originalText: text, isE2ee: true, status: 'sending',
       };
 
       setMessages((prev) => [...prev, optimisticMessage]);

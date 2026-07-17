@@ -76,7 +76,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   var hex = colorMap[accentColor] || '#10b981';
                   
                   d.style.setProperty('--accent-color', hex);
-                  d.style.setProperty('--accent-rgb', hex.replace('#', '').match(/.{2}/g).map(function(c) { return parseInt(c, 16); }).join(','));
+                  var rgbMatch = hex.replace('#', '').match(/.{2}/g);
+                  d.style.setProperty('--accent-rgb', rgbMatch ? rgbMatch.map(function(c) { return parseInt(c, 16); }).join(',') : '16,245,181');
                   d.style.setProperty('--accent-color-name', accentColor);
                   d.style.setProperty('--bg-blur', glassIntensity + 'px');
                   
