@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, MessageSquare, User, Loader2, Settings, Sparkles, Search, BarChart3 } from 'lucide-react';
+import { Shield, MessageSquare, User, Loader2, Settings, Sparkles, Search, Lock, ChevronRight } from 'lucide-react';
 import { type Profile } from '@/lib/supabaseClient';
 import { TierBadge } from './TierBadge';
 import { useLanguage } from '@/lib/i18n';
@@ -30,98 +30,80 @@ function getRoomInitial(name: string): string {
   return name.charAt(0).toUpperCase();
 }
 
-function Avatar({ avatar, name, size = 'md', showStatus = false, status }: { avatar?: string | null; name: string; size?: 'sm' | 'md'; showStatus?: boolean; status?: string }) {
+function RoomAvatar({ avatar, name, isActive }: { avatar?: string | null; name: string; isActive: boolean }) {
   const isImage = avatar && (avatar.startsWith('data:') || avatar.startsWith('http'));
   const isEmoji = avatar && !isImage;
-  const sizeClass = size === 'sm' ? 'w-10 h-10 text-sm' : 'w-11 h-11 text-base';
   
-  const statusDot = showStatus && status === 'online' ? (
-    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#0b0c10]" style={{ boxShadow: '0 0 10px rgba(16,245,181,0.7)' }} />
-  ) : showStatus && status === 'away' ? (
-    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-amber-400 border-2 border-[#0b0c10]" />
-  ) : showStatus ? (
-    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-zinc-600 border-2 border-[#0b0c10]" />
-  ) : null;
+  const baseClasses = "w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300";
+  const activeClasses = isActive 
+    ? "ring-2 ring-emerald-400/50 shadow-[0_0_20px_rgba(16,245,181,0.3)]" 
+    : "ring-1 ring-white/10 group-hover:ring-emerald-400/30";
 
-  if (isImage) return (
-    <div className={`${sizeClass} rounded-xl overflow-hidden flex-shrink-0 relative ring-1 ring-white/10 shadow-[0_0_20px_rgba(16,245,181,0.15)]`}>
-      <img src={avatar} alt={name} className="w-full h-full object-cover" />
-      {statusDot}
-    </div>
-  );
-  if (isEmoji) return (
-    <div className={`${sizeClass} rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0 relative ring-1 ring-emerald-500/20 shadow-[0_0_20px_rgba(16,245,181,0.15)]`}>
-      <span className="text-lg leading-none">{avatar}</span>
-      {statusDot}
-    </div>
-  );
+  if (isImage) {
+    return (
+      <div className={`${baseClasses} ${activeClasses} overflow-hidden`}>
+        <img src={avatar} alt={name} className="w-full h-full object-cover" />
+      </div>
+    );
+  }
+  if (isEmoji) {
+    return (
+      <div className={`${baseClasses} ${activeClasses} bg-emerald-500/10`}>
+        <span className="text-lg leading-none">{avatar}</span>
+      </div>
+    );
+  }
   return (
-    <div className={`${sizeClass} rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 flex items-center justify-center flex-shrink-0 relative ring-1 ring-emerald-500/25 shadow-[0_0_20px_rgba(16,245,181,0.15)]`}>
+    <div className={`${baseClasses} ${activeClasses} bg-gradient-to-br from-emerald-500/20 to-cyan-500/10`}>
       <span className="font-bold text-emerald-300 text-sm">{getRoomInitial(name)}</span>
-      {statusDot}
     </div>
   );
 }
 
 const listItem = {
-  initial: { opacity: 0, x: -12 },
-  animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -12 },
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -8 },
 };
 
 function EmptyChatsState({ onOpenSearch }: { onOpenSearch: () => void }) {
   const { t } = useLanguage();
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="flex flex-col items-center text-center px-4 pt-8 pb-4"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className="flex flex-col items-center justify-center h-full min-h-[300px] px-6 text-center"
     >
-      {/* Neon icon cluster */}
-      <div className="relative mb-5">
+      {/* Premium animated icon */}
+      <div className="relative mb-6">
         <motion.div
-          className="absolute inset-0 -m-4 rounded-full bg-emerald-400/20 blur-2xl"
-          animate={{ opacity: [0.35, 0.65, 0.35], scale: [0.92, 1.08, 0.92] }}
-          transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute inset-0 -m-6 rounded-full bg-emerald-400/15 blur-2xl"
+          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <motion.div
-          className="absolute inset-0 -m-2 rounded-full"
-          style={{ boxShadow: '0 0 48px rgba(16,245,181,0.35), 0 0 96px rgba(0,255,102,0.12)' }}
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <div
-          className="relative w-16 h-16 rounded-2xl flex items-center justify-center"
-          style={{
-            background: 'linear-gradient(145deg, rgba(16,185,129,0.18), rgba(6,78,59,0.35))',
-            boxShadow: '0 0 32px rgba(16,245,181,0.45), 0 0 64px rgba(0,255,102,0.15), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 0 24px rgba(16,245,181,0.08)',
-            border: '1px solid rgba(16,245,181,0.35)',
-          }}
-        >
-          <MessageSquare className="w-7 h-7 text-emerald-300" style={{ filter: 'drop-shadow(0 0 10px rgba(16,245,181,0.9)) drop-shadow(0 0 20px rgba(0,255,102,0.5))' }} />
+        <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border border-emerald-500/30 flex items-center justify-center"
+          style={{ boxShadow: '0 0 40px rgba(16,245,181,0.25), inset 0 1px 0 rgba(255,255,255,0.1)' }}>
+          <Lock className="w-10 h-10 text-emerald-400" style={{ filter: 'drop-shadow(0 0 8px rgba(16,245,181,0.5))' }} />
         </div>
       </div>
 
-      <p className="text-sm font-bold text-white tracking-tight">
-        {t('sidebar.no_chats')}
-      </p>
-      <p className="mt-2 text-[11px] text-zinc-400 leading-relaxed max-w-[200px]">
-        {t('sidebar.no_chats_hint')}
-      </p>
+      <h3 className="text-lg font-bold text-white mb-2 tracking-tight">{t('sidebar.no_chats')}</h3>
+      <p className="text-sm text-zinc-400 mb-6 max-w-xs leading-relaxed">{t('sidebar.no_chats_hint')}</p>
 
       <motion.button
         onClick={onOpenSearch}
-        whileTap={{ scale: 0.97 }}
-        className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] font-bold text-emerald-300/90"
+        whileHover={{ scale: 1.02, boxShadow: '0 0 25px rgba(16,245,181,0.4)' }}
+        whileTap={{ scale: 0.98 }}
+        className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl text-sm font-semibold text-emerald-300"
         style={{
-          background: 'rgba(16,185,129,0.08)',
-          border: '1px solid rgba(16,245,181,0.2)',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+          background: 'linear-gradient(180deg, rgba(16,185,129,0.12), rgba(16,185,129,0.06))',
+          border: '1px solid rgba(16,245,181,0.25)',
+          boxShadow: '0 0 20px rgba(16,245,181,0.15), inset 0 1px 0 rgba(255,255,255,0.05)',
         }}
       >
-        <Sparkles className="w-4 h-4 text-emerald-400" />
-        <span>{t('sidebar.new_chat')}</span>
+        <Sparkles className="w-4 h-4" />
+        {t('sidebar.new_chat')}
       </motion.button>
     </motion.div>
   );
@@ -131,194 +113,163 @@ export function Sidebar({ rooms, activeRoomId, onSelectRoom, onOpenSearch, onOpe
   const { t } = useLanguage();
   const isOnline = currentProfile?.status === 'online';
 
-  // Calculate real statistics
-  const totalChats = rooms.length;
-  const totalMessages = rooms.reduce((sum, room) => sum + (room.lastMessage ? 1 : 0), 0);
-  const encryptedChats = rooms.filter(room => room.isEncrypted).length;
-
   return (
-    <div className="flex flex-col h-full bg-neutral-950/40 border-r border-white/5 backdrop-blur-3xl relative min-h-0">
-      {/* Ambient glow */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-16 -left-16 w-[240px] h-[240px] rounded-full bg-emerald-400/[0.06] blur-3xl" />
-        <div className="absolute top-1/3 -right-12 w-[180px] h-[180px] rounded-full bg-cyan-400/[0.04] blur-3xl" />
+    <div className="flex flex-col h-full relative min-h-0 overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(8,12,18,0.85) 0%, rgba(5,7,13,0.95) 100%)',
+      }}>
+      {/* Deep ambient glow */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-emerald-400/[0.04] blur-3xl" />
+        <div className="absolute top-1/2 -right-16 w-64 h-64 rounded-full bg-cyan-400/[0.03] blur-3xl" />
       </div>
 
-      {/* Header */}
-      <div className="relative z-10 px-3 pt-[max(0.625rem,env(safe-area-inset-top))] pb-2 md:px-4 md:pt-4 md:pb-2.5 border-b border-white/[0.06]">
-        <div className="flex items-center justify-between mb-2.5">
-          <div className="flex items-center gap-2.5">
-            <motion.div
-              whileTap={{ scale: 0.95 }}
-              className="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center ring-1 ring-emerald-500/30"
-              style={{ boxShadow: '0 0 20px rgba(16,245,181,0.25), inset 0 1px 0 rgba(255,255,255,0.08)' }}
-            >
-              <Shield className="w-4 h-4 text-emerald-400" style={{ filter: 'drop-shadow(0 0 6px rgba(16,245,181,0.7))' }} />
-            </motion.div>
+      {/* Header - Ultra minimal */}
+      <div className="relative z-10 px-4 pt-4 pb-3 border-b border-white/[0.04]">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 flex items-center justify-center"
+              style={{ boxShadow: '0 0 20px rgba(16,245,181,0.2)' }}>
+              <Shield className="w-4 h-4 text-emerald-400" />
+            </div>
             <div>
-              <span className="font-bold text-white text-xs md:text-sm tracking-[0.18em] block leading-none">CIPHER TALK</span>
-              <p className="text-[9px] md:text-[10px] text-zinc-500 leading-tight mt-0.5">{t('sidebar.encrypted_chat')}</p>
+              <h1 className="text-sm font-bold text-white tracking-[0.2em]">CIPHER TALK</h1>
+              <p className="text-[10px] text-zinc-500 uppercase tracking-wider">{t('sidebar.encrypted_chat')}</p>
             </div>
           </div>
           <motion.button
-            whileTap={{ scale: 0.92 }}
+            whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.06)' }}
+            whileTap={{ scale: 0.95 }}
             onClick={onOpenSettings}
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-500 hover:text-emerald-400 hover:bg-white/[0.04] transition-colors"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-500 hover:text-emerald-400 transition-colors"
             aria-label="Settings"
           >
             <Settings className="w-4 h-4" />
           </motion.button>
         </div>
 
-        {/* Search */}
+        {/* Search trigger - glass button */}
         <motion.button
+          whileHover={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
           whileTap={{ scale: 0.98 }}
           onClick={onOpenSearch}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-emerald-200/80 transition-all duration-300 text-xs md:text-sm font-medium"
+          className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-sm"
           style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.06)',
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.05)',
           }}
         >
-          <Search className="w-3.5 h-3.5 text-zinc-500" />
+          <Search className="w-4 h-4 text-zinc-500" />
           <span className="text-zinc-500">{t('sidebar.search_placeholder')}</span>
         </motion.button>
       </div>
 
       {/* Room list */}
-      <div className="relative z-10 flex-1 overflow-y-auto overscroll-contain px-2 py-1.5 md:px-2.5 md:py-1.5 min-h-0">
+      <div className="relative z-10 flex-1 overflow-y-auto overscroll-contain px-2.5 py-2 min-h-0">
         <AnimatePresence mode="popLayout">
           {isLoadingRooms ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex items-center justify-center py-8"
-            >
-              <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
-            </motion.div>
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
+            </div>
           ) : rooms.length === 0 ? (
-            <EmptyChatsState key="empty" onOpenSearch={onOpenSearch} />
+            <EmptyChatsState onOpenSearch={onOpenSearch} />
           ) : (
-            rooms.map((room, i) => {
-              const isActive = activeRoomId === room.id;
-              return (
-                <motion.button
-                  key={room.id}
-                  variants={listItem}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={{ duration: 0.22, delay: i * 0.03 }}
-                  whileTap={{ scale: 0.985 }}
-                  onClick={() => onSelectRoom(room.id)}
-                  className={`relative w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl transition-all duration-200 group overflow-hidden mb-px ${
-                    isActive ? 'bg-emerald-500/5' : 'hover:bg-white/[0.03] active:bg-white/[0.05]'
-                  }`}
-                >
-                  {/* Active indicator — left border */}
-                  {isActive && (
-                    <motion.div
-                      layoutId="sidebar-active-indicator"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-8 bg-emerald-400 rounded-r-full"
-                      style={{ boxShadow: '0 0 10px rgba(16,245,181,0.8)' }}
-                    />
-                  )}
-
-                  <Avatar avatar={room.otherUserAvatar} name={room.name} showStatus={!!room.otherUserId} status={room.otherUserId ? 'online' : undefined} />
-                  <div className="flex-1 min-w-0 text-left">
-                    <div className="flex items-center justify-between gap-1">
-                      <span className={`text-[13px] font-semibold truncate ${isActive ? 'text-white' : 'text-zinc-100'}`}>{room.name}</span>
-                      {room.isEncrypted && <Shield className="w-3.5 h-3.5 text-emerald-500/60 flex-shrink-0" />}
+            <div className="space-y-1">
+              {rooms.map((room, i) => {
+                const isActive = activeRoomId === room.id;
+                return (
+                  <motion.button
+                    key={room.id}
+                    variants={listItem}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={{ duration: 0.2, delay: i * 0.02 }}
+                    whileHover={{ x: 2 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => onSelectRoom(room.id)}
+                    className={`relative w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group ${
+                      isActive 
+                        ? 'bg-gradient-to-r from-emerald-500/10 to-transparent border-l-2 border-emerald-400' 
+                        : 'hover:bg-white/[0.02]'
+                    }`}
+                  >
+                    <RoomAvatar avatar={room.otherUserAvatar} name={room.name} isActive={isActive} />
+                    
+                    <div className="flex-1 min-w-0 text-left">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className={`text-sm font-medium truncate ${isActive ? 'text-white' : 'text-zinc-200'}`}>
+                          {room.name}
+                        </span>
+                        {room.isEncrypted && (
+                          <Shield className="w-3.5 h-3.5 text-emerald-400/50 flex-shrink-0" />
+                        )}
+                      </div>
+                      {room.lastMessage && (
+                        <p className="text-xs text-zinc-500 mt-1 truncate">
+                          {room.lastMessage}
+                        </p>
+                      )}
                     </div>
-                    {room.lastMessage && (
-                      <p className="text-[10px] text-zinc-500 mt-px truncate leading-snug font-medium">{room.lastMessage}</p>
+
+                    {room.unread && room.unread > 0 && (
+                      <span className="flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full bg-emerald-400 text-[#05070d] text-xs font-bold">
+                        {room.unread > 99 ? '99+' : room.unread}
+                      </span>
                     )}
-                  </div>
-                  {room.unread && room.unread > 0 && (
-                    <span className="inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full bg-emerald-400 text-[#0b0c10] text-[9px] font-bold">
-                      {room.unread}
-                    </span>
-                  )}
-                </motion.button>
-              );
-            })
+                  </motion.button>
+                );
+              })}
+            </div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Stats Bar — Premium */}
-      {rooms.length > 0 && (
-        <div className="relative z-10 px-3 py-2 border-t border-white/[0.06] bg-black/20 backdrop-blur-xl">
-          <div className="flex items-center justify-between text-[10px] text-zinc-500">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1">
-                <BarChart3 className="w-3 h-3 text-emerald-400" />
-                <span className="text-emerald-400 font-semibold">{totalChats}</span>
-                <span>чатов</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Shield className="w-3 h-3 text-cyan-400" />
-                <span className="text-cyan-400 font-semibold">{encryptedChats}</span>
-                <span>E2EE</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-1">
-              <MessageSquare className="w-3 h-3 text-violet-400" />
-              <span className="text-violet-400 font-semibold">{totalMessages}</span>
-              <span>сообщений</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Profile dock */}
+      {/* Profile section - premium glass dock */}
       <div className="relative z-20 mt-auto shrink-0">
-        <div className="absolute -top-5 left-0 right-0 h-5 bg-gradient-to-b from-transparent via-[#0b0c10]/60 to-[#0b0c10] pointer-events-none" />
-        <div className="absolute top-0 left-3 right-3 h-px bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent" />
-
+        <div className="h-px bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent mx-4 mb-2" />
+        
         {currentProfile ? (
           <motion.button
+            whileHover={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
             whileTap={{ scale: 0.99 }}
             onClick={onOpenSettings}
-            className="w-full flex items-center gap-2.5 px-3 md:px-4 py-2.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] rounded-none md:rounded-xl transition-colors group"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors"
             style={{
-              background: 'linear-gradient(180deg, rgba(14,20,28,0.82) 0%, rgba(8,12,18,0.92) 100%)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-              boxShadow: '0 -8px 32px rgba(0,0,0,0.45), 0 0 40px rgba(16,245,181,0.04), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 32px rgba(16,245,181,0.03)',
-              borderTop: '1px solid rgba(16,245,181,0.12)',
+              background: 'linear-gradient(180deg, rgba(14,20,28,0.6), rgba(8,12,18,0.8))',
+              borderTop: '1px solid rgba(16,245,181,0.1)',
             }}
-            title="Открыть настройки профиля"
           >
-            <div className="relative flex-shrink-0">
-              <div
-                className={`rounded-[11px] p-[1.5px] ${isOnline ? 'bg-gradient-to-br from-emerald-400 via-emerald-300 to-cyan-400' : 'bg-white/10'}`}
-                style={isOnline ? { boxShadow: '0 0 20px rgba(16,245,181,0.35)' } : undefined}
-              >
-                <div className="rounded-[10px] overflow-hidden bg-[#0b0c10]">
-                  <Avatar avatar={(currentProfile as { avatar_url?: string | null }).avatar_url} name={currentProfile.username} size="sm" />
+            <div className="relative">
+              <div className={`p-0.5 rounded-xl ${isOnline ? 'bg-gradient-to-br from-emerald-400 to-cyan-400' : 'bg-white/10'}`}>
+                <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#0a0f17] flex items-center justify-center">
+                  {currentProfile.avatar_url && (currentProfile.avatar_url.startsWith('data:') || currentProfile.avatar_url.startsWith('http')) ? (
+                    <img src={currentProfile.avatar_url} alt={currentProfile.username} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-lg font-bold text-emerald-400">{currentProfile.username.charAt(0).toUpperCase()}</span>
+                  )}
                 </div>
               </div>
+              {isOnline && (
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#0a0f17]" 
+                  style={{ boxShadow: '0 0 8px rgba(16,245,181,0.6)' }} />
+              )}
             </div>
 
             <div className="flex-1 min-w-0 text-left">
-              <div className="flex items-center gap-1.5">
-                <p className="text-[13px] font-bold text-white truncate leading-tight">{currentProfile.username}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold text-white truncate">{currentProfile.username}</p>
                 {currentProfile.tier && currentProfile.tier !== 'free' && <TierBadge tier={currentProfile.tier} size="sm" />}
               </div>
-              <p className={`text-[10px] capitalize leading-tight mt-px ${isOnline ? 'text-emerald-400/90' : 'text-zinc-500'}`}>
+              <p className={`text-xs capitalize ${isOnline ? 'text-emerald-400' : 'text-zinc-500'}`}>
                 {isOnline ? t('common.online') : currentProfile.status}
               </p>
             </div>
 
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 group-hover:text-emerald-400 group-hover:bg-white/[0.04] transition-colors">
-              <User className="w-4 h-4" />
-            </div>
+            <ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
           </motion.button>
         ) : (
-          <div className="flex items-center justify-center py-2.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+          <div className="flex items-center justify-center py-4">
             <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
           </div>
         )}
