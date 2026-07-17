@@ -75,7 +75,7 @@ class AppTheme {
               borderRadius: BorderRadius.circular(16),
             ),
           ),
-        ), dialogTheme: DialogThemeData(backgroundColor: darkSurface),
+        ), dialogTheme: const DialogThemeData(backgroundColor: darkSurface),
       );
 }
 

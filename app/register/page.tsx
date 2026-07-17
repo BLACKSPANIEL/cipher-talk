@@ -74,14 +74,14 @@ export default function RegisterPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-bg-black flex flex-col">
+      <div className="min-h-screen bg-[#05070d] flex flex-col">
         <div className="flex-1 flex items-center justify-center px-4">
           <div className="w-full max-w-md">
             <div className="relative">
-              <div className="absolute -inset-1 bg-neon-green/5 rounded-2xl blur-xl" />
-              <div className="relative bg-surface-darker border border-neon-green/20 rounded-2xl p-8 backdrop-blur-xl text-center space-y-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-neon-green/10 border border-neon-green/20 mx-auto">
-                  <CheckCircle className="w-8 h-8 text-neon-green" />
+              <div className="absolute -inset-1 bg-emerald-500/5 rounded-2xl blur-xl" />
+              <div className="relative bg-[#0a0f17] border border-emerald-500/20 rounded-2xl p-8 backdrop-blur-xl text-center space-y-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 mx-auto">
+                  <CheckCircle className="w-8 h-8 text-emerald-400" />
                 </div>
                 <h2 className="text-xl font-bold text-white">{t('auth.register_success')}</h2>
                 <p className="text-sm text-gray-400">
@@ -89,7 +89,7 @@ export default function RegisterPage() {
                 </p>
                 <button
                   onClick={() => router.push('/login')}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-neon-green text-black font-semibold hover:bg-neon-dark-green transition-all mt-4"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 text-black font-semibold hover:bg-emerald-400 transition-all mt-4"
                 >
                   {t('auth.go_to_login')}
                 </button>
@@ -102,15 +102,15 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-black flex flex-col">
+    <div className="min-h-screen bg-[#05070d] flex flex-col">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-neon-green/10 bg-surface-darker/80">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-emerald-500/10 bg-[#0a0f17]/80">
         <button
           onClick={() => router.push('/')}
           className="flex items-center gap-2 group"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-400 group-hover:text-neon-green transition" />
-          <span className="text-sm font-medium text-white group-hover:text-neon-green transition">
+          <ArrowLeft className="w-5 h-5 text-gray-400 group-hover:text-emerald-400 transition" />
+          <span className="text-sm font-medium text-white group-hover:text-emerald-400 transition">
             Cipher Talk
           </span>
         </button>
@@ -120,11 +120,11 @@ export default function RegisterPage() {
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-md">
           <div className="relative">
-            <div className="absolute -inset-1 bg-neon-green/5 rounded-2xl blur-xl" />
-            <div className="relative bg-surface-darker border border-neon-green/20 rounded-2xl p-8 backdrop-blur-xl">
+            <div className="absolute -inset-1 bg-emerald-500/5 rounded-2xl blur-xl" />
+            <div className="relative bg-[#0a0f17] border border-emerald-500/20 rounded-2xl p-8 backdrop-blur-xl">
               <div className="flex justify-center mb-6">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-neon-green/10 border border-neon-green/20">
-                  <Shield className="w-8 h-8 text-neon-green" />
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                  <Shield className="w-8 h-8 text-emerald-400" />
                 </div>
               </div>
 
@@ -154,7 +154,7 @@ export default function RegisterPage() {
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="cyber_user"
                     autoComplete="username"
-                    className="w-full bg-black/40 border border-neon-green/20 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-neon-green/50 transition text-sm"
+                    className="w-full bg-black/40 border border-emerald-500/20 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 transition text-sm"
                   />
                 </div>
 
@@ -169,7 +169,7 @@ export default function RegisterPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your@email.com"
                     autoComplete="email"
-                    className="w-full bg-black/40 border border-neon-green/20 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-neon-green/50 transition text-sm"
+                    className="w-full bg-black/40 border border-emerald-500/20 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 transition text-sm"
                   />
                 </div>
 
@@ -185,7 +185,7 @@ export default function RegisterPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder={t('auth.password_placeholder')}
                       autoComplete="new-password"
-                      className="w-full bg-black/40 border border-neon-green/20 rounded-xl pl-4 pr-11 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-neon-green/50 transition text-sm"
+                      className="w-full bg-black/40 border border-emerald-500/20 rounded-xl pl-4 pr-11 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 transition text-sm"
                     />
                     <button
                       type="button"
@@ -209,14 +209,14 @@ export default function RegisterPage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
                     autoComplete="new-password"
-                    className="w-full bg-black/40 border border-neon-green/20 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-neon-green/50 transition text-sm"
+                    className="w-full bg-black/40 border border-emerald-500/20 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 transition text-sm"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 rounded-xl bg-neon-green text-black font-semibold text-sm hover:bg-neon-dark-green disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-xl bg-emerald-500 text-black font-semibold text-sm hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
                     <>
@@ -230,16 +230,16 @@ export default function RegisterPage() {
               </form>
 
               <div className="flex items-center gap-3 my-6">
-                <div className="flex-1 border-t border-neon-green/10" />
+                <div className="flex-1 border-t border-emerald-500/10" />
                 <span className="text-xs text-gray-600">{t('auth.or')}</span>
-                <div className="flex-1 border-t border-neon-green/10" />
+                <div className="flex-1 border-t border-emerald-500/10" />
               </div>
 
               <p className="text-center text-sm text-gray-500">
                 {t('auth.has_account')}{' '}
                 <button
                   onClick={() => router.push('/login')}
-                  className="text-neon-green hover:text-neon-dark-green transition font-medium"
+                  className="text-emerald-400 hover:text-emerald-300 transition font-medium"
                 >
                   {t('auth.login_link')}
                 </button>

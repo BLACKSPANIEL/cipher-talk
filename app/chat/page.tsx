@@ -436,7 +436,7 @@ export default function ChatPage() {
 
   return (
     <div className="h-[100dvh] flex flex-col bg-[#05070d] text-white relative overflow-hidden">
-      {/* Premium gradient background overlay */}
+      {/* Ultra-premium gradient background */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <motion.div
           className="absolute -top-32 -left-32 w-[380px] h-[380px] rounded-full bg-emerald-400/[0.07] blur-3xl"
