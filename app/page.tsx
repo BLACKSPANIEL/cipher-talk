@@ -6,7 +6,7 @@ import {
   Shield, ArrowRight, Download, Lock, Globe, Monitor,
   Check, ChevronDown, MessageSquare, Bell,
   Users, Fingerprint, Trash2, Sparkles, Zap, Server, Eye,
-  Github, Star, Command, Quote, Code2, ExternalLink, Menu
+  Github, Star, Command, Code2, ExternalLink, Menu
 } from 'lucide-react';
 import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
@@ -94,72 +94,6 @@ function SectionHeader({ badge, title, description }: {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   TYPEWRITER EFFECT (Premium)
-   ═══════════════════════════════════════════════════════════════════════════════ */
-
-function TypewriterText({ texts, className = '' }: { texts: string[]; className?: string }) {
-  const [index, setIndex] = useState(0);
-  const [displayed, setDisplayed] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    const current = texts[index];
-    let timer: NodeJS.Timeout;
-
-    if (!isDeleting && displayed === current) {
-      timer = setTimeout(() => setIsDeleting(true), 2800);
-    } else if (isDeleting && displayed === '') {
-      setIsDeleting(false);
-      setIndex((i) => (i + 1) % texts.length);
-    } else {
-      const speed = isDeleting ? 25 : 50;
-      timer = setTimeout(() => {
-        setDisplayed(isDeleting ? current.slice(0, displayed.length - 1) : current.slice(0, displayed.length + 1));
-      }, speed);
-    }
-
-    return () => clearTimeout(timer);
-  }, [displayed, isDeleting, index, texts]);
-
-  return (
-    <span className={className}>
-      {displayed}
-      <span className="inline-block w-[2px] h-[1.1em] bg-emerald-400 ml-[3px] -mb-[2px] animate-pulse align-middle shadow-[0_0_8px_rgba(16,245,181,0.6)]" />
-    </span>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════════
-   ANIMATED COUNTER (for stats)
-   ═══════════════════════════════════════════════════════════════════════════════ */
-
-function AnimatedCounter({ from = 0, to, suffix = '' }: { from?: number; to: number; suffix?: string }) {
-  const [count, setCount] = useState(from);
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true });
-
-  useEffect(() => {
-    if (!isInView) return;
-    const duration = 2000;
-    const steps = 60;
-    const increment = (to - from) / steps;
-    let current = from;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= to) {
-        setCount(to);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
-      }
-    }, duration / steps);
-    return () => clearInterval(timer);
-  }, [isInView, from, to]);
-
-  return <span ref={ref}>{count}{suffix}</span>;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════════
    1. HERO SECTION — Premium, Atmospheric, with App Mockup
    ═══════════════════════════════════════════════════════════════════════════════ */
 
@@ -170,7 +104,6 @@ function HeroSection() {
     <section className="relative min-h-[90vh] flex items-center justify-center pt-24 pb-20 overflow-hidden">
       {/* ── Premium Background ── */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Main neon orbs */}
         <motion.div
           className="absolute top-1/4 -left-32 w-[800px] h-[800px] rounded-full bg-emerald-400/[0.07] blur-[180px]"
           animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.1, 1] }}
@@ -183,7 +116,6 @@ function HeroSection() {
         />
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-violet-500/[0.05] blur-[140px]" />
 
-        {/* Subtle grid */}
         <div
           className="absolute inset-0 opacity-[0.02] md:opacity-[0.03]"
           style={{
@@ -192,8 +124,6 @@ function HeroSection() {
             backgroundSize: '56px 56px',
           }}
         />
-
-        {/* Vignette */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#05070d]" />
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-[#05070d]/30" />
       </div>
@@ -202,7 +132,6 @@ function HeroSection() {
         <div className="flex flex-col lg:flex-row lg:items-center gap-12 lg:gap-20">
           {/* ═══ Left: Text Block ═══ */}
           <div className="flex-1 text-center lg:text-left max-w-2xl mx-auto lg:mx-0">
-            {/* Badge */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -214,7 +143,6 @@ function HeroSection() {
               </span>
             </motion.div>
 
-            {/* Headline */}
             <motion.h1
               className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-[1.02] tracking-[-0.03em] mb-6"
               initial={{ opacity: 0, y: 30 }}
@@ -235,7 +163,6 @@ function HeroSection() {
               )}
             </motion.h1>
 
-            {/* Typewriter Subtitle */}
             <motion.div
               className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white/70 leading-[1.2] mb-8 h-[1.5em]"
               initial={{ opacity: 0, y: 20 }}
@@ -247,21 +174,11 @@ function HeroSection() {
               ) : (
                 <span>
                   с{' '}
-                  <TypewriterText
-                    texts={[
-                      'E2EE шифрованием',
-                      'disappearing messages',
-                      'нулевой политикой логов',
-                      'открытым исходным кодом',
-                      'мгновенной доставкой',
-                    ]}
-                    className="text-emerald-400"
-                  />
+                  <span className="text-emerald-400">сквозным шифрованием</span>
                 </span>
               )}
             </motion.div>
 
-            {/* Description */}
             <motion.p
               className="text-zinc-400 text-base md:text-lg leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0"
               initial={{ opacity: 0, y: 20 }}
@@ -270,10 +187,9 @@ function HeroSection() {
             >
               {isDesktop
                 ? 'Всё работает локально. Сообщения защищены сквозным шифрованием. Никаких логов, никакого доступа к вашим данным. Только приватность.'
-                : 'Защищённый мессенджер с сквозным шифрованием. Работает везде — в браузере, на Windows, macOS и Linux.'}
+                : 'Защищённый мессенджер с end-to-end шифрованием. Работает везде — в браузере, на Windows, macOS и Linux.'}
             </motion.p>
 
-            {/* ── CTA Buttons ── */}
             <motion.div
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
               initial={{ opacity: 0, y: 20 }}
@@ -313,7 +229,6 @@ function HeroSection() {
               )}
             </motion.div>
 
-            {/* ── Trust Badges ── */}
             <motion.div
               className="flex flex-wrap items-center gap-6 mt-10 justify-center lg:justify-start"
               initial={{ opacity: 0 }}
@@ -334,7 +249,6 @@ function HeroSection() {
               ))}
             </motion.div>
 
-            {/* ── Platform Badges (Web only) ── */}
             {!isDesktop && (
               <motion.div
                 className="flex items-center gap-5 mt-6 justify-center lg:justify-start"
@@ -365,11 +279,9 @@ function HeroSection() {
             transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="relative">
-              {/* Outer glow */}
               <div className="absolute -inset-16 bg-emerald-500/[0.06] blur-3xl rounded-full" />
               <div className="absolute -inset-8 bg-cyan-400/[0.04] blur-3xl rounded-full" />
 
-              {/* Mac-style Window Frame */}
               <motion.div
                 className="relative rounded-3xl overflow-hidden border border-white/[0.1] backdrop-blur-2xl"
                 style={{
@@ -380,7 +292,6 @@ function HeroSection() {
                 whileHover={{ scale: 1.01 }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
               >
-                {/* ── Window Title Bar ── */}
                 <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.08]">
                   <div className="flex gap-2">
                     <div className="w-3.5 h-3.5 rounded-full bg-red-500/70 shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
@@ -401,11 +312,8 @@ function HeroSection() {
                   <div className="w-[80px]" />
                 </div>
 
-                {/* ── Sidebar + Chat Content ── */}
                 <div className="flex" style={{ height: '420px' }}>
-                  {/* Sidebar */}
                   <div className="w-[100px] border-r border-white/[0.08] p-2.5 space-y-2 flex flex-col">
-                    {/* Search */}
                     <div className="flex items-center gap-2 px-2.5 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                       <svg className="w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -447,21 +355,18 @@ function HeroSection() {
                       </div>
                     ))}
 
-                    {/* Spacer + settings icon */}
                     <div className="flex-1" />
                     <div className="flex justify-center py-2 opacity-40 hover:opacity-100 transition-opacity cursor-pointer">
                       <Command className="w-4 h-4 text-zinc-400" />
                     </div>
                   </div>
 
-                  {/* Chat Area */}
                   <div className="flex-1 flex flex-col">
-                    {/* Chat Header */}
                     <div className="flex items-center gap-3.5 px-5 py-3.5 border-b border-white/[0.08]">
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/30 to-cyan-500/15 flex items-center justify-center ring-1 ring-emerald-500/30">
                         <span className="text-sm font-bold text-emerald-300">A</span>
                       </div>
-                      <div className="min-w-0">
+                      <div>
                         <p className="text-sm text-white font-semibold">Алексей</p>
                         <div className="flex items-center gap-2">
                           <div className="w-[6px] h-[6px] rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,245,181,0.6)]" />
@@ -474,16 +379,13 @@ function HeroSection() {
                       </div>
                     </div>
 
-                    {/* Messages */}
                     <div className="flex-1 p-4 md:p-5 space-y-3 overflow-hidden">
-                      {/* Date divider */}
                       <div className="flex items-center gap-4">
                         <div className="flex-1 h-px bg-white/[0.06]" />
                         <span className="text-[9px] text-zinc-500 font-semibold">Сегодня</span>
                         <div className="flex-1 h-px bg-white/[0.06]" />
                       </div>
 
-                      {/* Received */}
                       <motion.div
                         className="flex items-start gap-2.5 max-w-[80%]"
                         initial={{ opacity: 0, x: -10 }}
@@ -501,7 +403,6 @@ function HeroSection() {
                         </div>
                       </motion.div>
 
-                      {/* Sent */}
                       <motion.div
                         className="flex justify-end"
                         initial={{ opacity: 0, x: 10 }}
@@ -520,7 +421,6 @@ function HeroSection() {
                         </div>
                       </motion.div>
 
-                      {/* Received typing */}
                       <motion.div
                         className="flex items-start gap-2.5 max-w-[80%]"
                         initial={{ opacity: 0 }}
@@ -531,14 +431,13 @@ function HeroSection() {
                           <span className="text-[10px] font-bold text-emerald-300">A</span>
                         </div>
                         <div className="bg-zinc-800/60 border border-zinc-700/40 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-[4px]">
-                          <span className="typing-dot w-[6px] h-[6px] rounded-full bg-emerald-400" />
-                          <span className="typing-dot w-[6px] h-[6px] rounded-full bg-emerald-400" />
-                          <span className="typing-dot w-[6px] h-[6px] rounded-full bg-emerald-400" />
+                          <span className="w-[6px] h-[6px] rounded-full bg-emerald-400" />
+                          <span className="w-[6px] h-[6px] rounded-full bg-emerald-400" />
+                          <span className="w-[6px] h-[6px] rounded-full bg-emerald-400" />
                         </div>
                       </motion.div>
                     </div>
 
-                    {/* Input */}
                     <div className="px-4 pb-4 pt-2 border-t border-white/[0.08]">
                       <div className="flex items-center gap-3 rounded-2xl px-4 py-3 border border-zinc-700/50 transition-all duration-300 focus-within:border-emerald-500/40 focus-within:shadow-[0_0_25px_rgba(16,245,181,0.08)]" style={{ background: 'rgba(39,39,42,0.3)' }}>
                         <Lock className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
@@ -554,7 +453,6 @@ function HeroSection() {
                 </div>
               </motion.div>
 
-              {/* ── Floating Badges ── */}
               <motion.div
                 className="absolute -top-4 -right-4 z-10"
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -594,7 +492,6 @@ function HeroSection() {
           </motion.div>
         </div>
 
-        {/* ── Scroll Indicator ── */}
         <motion.div
           className="flex justify-center mt-16"
           initial={{ opacity: 0 }}
@@ -783,7 +680,7 @@ function StatsBanner() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   5. DOWNLOAD SECTION — Premium Enhanced
+   5. DOWNLOAD SECTION
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function DownloadSection() {
@@ -797,7 +694,6 @@ function DownloadSection() {
 
   return (
     <section id="download" className="relative py-24 md:py-32">
-      {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-emerald-500/[0.03] blur-[120px] rounded-full" />
       </div>
@@ -922,60 +818,7 @@ function DownloadSection() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   6. TESTIMONIALS
-   ═══════════════════════════════════════════════════════════════════════════════ */
-
-function TestimonialsSection() {
-  const testimonials = [
-    { text: 'Наконец-то мессенджер, который реально заботится о приватности. E2EE из коробки, никаких компромиссов.', author: 'Алексей К.', role: 'Security Engineer' },
-    { text: 'Дизайн на уровне премиум-продуктов. Тёмная тема, неоновые акценты, плавные анимации — глаз радуется.', author: 'Мария С.', role: 'UI/UX Designer' },
-    { text: 'Desktop-версия на Tauri — прорыв. Всего 8 MB, а работает как нативный софт. Без тормозов Electron.', author: 'Дмитрий И.', role: 'Fullstack Developer' },
-  ];
-
-  return (
-    <section className="relative py-24 md:py-32">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <FadeSection>
-          <SectionHeader
-            badge="Отзывы"
-            title="Что говорят пользователи"
-            description="Cipher Talk уже используют сотни людей, ценящих свою приватность."
-          />
-        </FadeSection>
-
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {testimonials.map((t, i) => (
-            <FadeSection key={t.author} delay={i * 0.15}>
-              <div className="relative rounded-3xl p-7 md:p-8 border border-white/[0.06] bg-white/[0.02] h-full flex flex-col"
-                style={{ boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)' }}
-              >
-                <Quote className="w-10 h-10 text-emerald-500/20 mb-4" />
-                <p className="text-base text-zinc-300 leading-relaxed mb-6 flex-1">&ldquo;{t.text}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 flex items-center justify-center text-sm font-bold text-emerald-300">
-                    {t.author[0]}
-                  </div>
-                  <div>
-                    <p className="text-sm text-white font-bold">{t.author}</p>
-                    <p className="text-[10px] text-zinc-500 font-medium">{t.role}</p>
-                  </div>
-                  <div className="ml-auto flex gap-1">
-                    {Array.from({ length: 5 }).map((_, si) => (
-                      <Star key={si} className="w-4 h-4 fill-emerald-400 text-emerald-400" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </FadeSection>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════════
-   7. FOOTER
+   6. FOOTER
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function Footer() {
@@ -1014,6 +857,36 @@ function Footer() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
+   ANIMATED COUNTER (for stats)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+function AnimatedCounter({ from = 0, to, suffix = '' }: { from?: number; to: number; suffix?: string }) {
+  const [count, setCount] = useState(from);
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true });
+
+  useEffect(() => {
+    if (!isInView) return;
+    const duration = 2000;
+    const steps = 60;
+    const increment = (to - from) / steps;
+    let current = from;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= to) {
+        setCount(to);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(current));
+      }
+    }, duration / steps);
+    return () => clearInterval(timer);
+  }, [isInView, from, to]);
+
+  return <span ref={ref}>{count}{suffix}</span>;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
    MAIN PAGE
    ═══════════════════════════════════════════════════════════════════════════════ */
 
@@ -1026,7 +899,6 @@ export default function HomePage() {
         <WhySection />
         <FeaturesGridSection />
         <StatsBanner />
-        <TestimonialsSection />
         <DownloadSection />
         <Footer />
       </main>
