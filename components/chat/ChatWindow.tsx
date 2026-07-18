@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Shield, Lock, ChevronDown, ChevronLeft, MessageSquare, Loader2, Paperclip } from 'lucide-react';
 import { MessageBubble, type Message } from './MessageBubble';
@@ -19,6 +19,32 @@ interface ChatWindowProps {
   onBack?: () => void;
 }
 
+// Memoized MessageList component to prevent re-renders
+const MessageList = memo(({ 
+  messages, 
+  onDecryptMessage, 
+  decryptingMessageId 
+}: { 
+  messages: Message[];
+  onDecryptMessage?: (messageId: string) => void;
+  decryptingMessageId?: string | null;
+}) => {
+  return (
+    <>
+      {messages.map((msg, idx) => {
+        const prevMsg = idx > 0 ? messages[idx - 1] : null;
+        const gapFromPrev = prevMsg && prevMsg.senderId !== msg.senderId;
+        return (
+          <div key={msg.id} className={gapFromPrev ? 'mt-3' : undefined}>
+            <MessageBubble message={msg} onDecrypt={onDecryptMessage} isDecrypting={decryptingMessageId === msg.id} />
+          </div>
+        );
+      })}
+    </>
+  );
+});
+MessageList.displayName = 'MessageList';
+
 export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDecryptMessage, decryptingMessageId, onBack }: ChatWindowProps) {
   const { t } = useLanguage();
   const [inputText, setInputText] = useState('');
@@ -31,8 +57,18 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  const scrollToBottom = () => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); };
-  useEffect(() => { scrollToBottom(); }, [messages, typingUser]);
+  // Memoized values to prevent unnecessary re-renders
+  const roomMessages = useMemo(() => messages.filter((m) => m.roomId === room?.id), [messages, room?.id]);
+  const unreadCount = useMemo(() => roomMessages.filter(m => m.sender !== 'me' && m.status !== 'read').length, [roomMessages]);
+  const activeCipherLabel = useMemo(() => CIPHER_OPTIONS.find((o) => o.value === cipher)?.label ?? t('chat.cipher_none'), [cipher, t]);
+
+  const scrollToBottom = useCallback(() => { 
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); 
+  }, []);
+
+  useEffect(() => { 
+    scrollToBottom(); 
+  }, [roomMessages.length, typingUser, scrollToBottom]);
 
   useEffect(() => {
     if (!room?.id) return;
@@ -44,10 +80,13 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = setTimeout(() => setTypingUser(null), 3000);
     }).subscribe();
-    return () => { supabase.removeChannel(channel); if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current); };
+    return () => { 
+      supabase.removeChannel(channel); 
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current); 
+    };
   }, [room?.id, currentUserId]);
 
-  const handleInputChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleInputChange = useCallback(async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     setInputText(newValue);
     
@@ -66,29 +105,34 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
         setIsTyping(false);
       }, 2000);
     }
-  };
+  }, [room?.id, currentUserId, isTyping]);
 
-  const handleSend = () => {
+  const handleSend = useCallback(() => {
     const text = inputText.trim();
     if (!text) return;
     if (cipher !== 'none') {
       setShowEncryptingIndicator(true);
       setTimeout(() => { setShowEncryptingIndicator(false); onSendMessage(text, cipher); }, 800);
-    } else { onSendMessage(text, cipher); }
+    } else { 
+      onSendMessage(text, cipher); 
+    }
     setInputText('');
     setIsTyping(false);
-  };
+  }, [inputText, cipher, onSendMessage]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
-  const activeCipherLabel = CIPHER_OPTIONS.find((o) => o.value === cipher)?.label ?? t('chat.cipher_none');
-  const roomMessages = messages.filter((m) => m.roomId === room?.id);
-  const unreadCount = roomMessages.filter(m => m.sender !== 'me' && m.status !== 'read').length;
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => { 
+    if (e.key === 'Enter' && !e.shiftKey) { 
+      e.preventDefault(); 
+      handleSend(); 
+    } 
+  }, [handleSend]);
+
+  const otherTyping = typingUser !== null;
 
   if (!room) {
     return (
       <div className="flex-1 flex items-center justify-center relative">
         <div className="text-center space-y-6 px-6 max-w-md mx-auto">
-          {/* Premium empty state */}
           <div className="relative inline-flex items-center justify-center mx-auto">
             <motion.div
               className="absolute inset-0 -m-10 rounded-full bg-emerald-400/15 blur-3xl"
@@ -108,7 +152,6 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
             </p>
           </div>
 
-          {/* Single CTA button */}
           <motion.button
             whileHover={{ scale: 1.03, boxShadow: '0 0 30px rgba(16,245,181,0.4)' }}
             whileTap={{ scale: 0.97 }}
@@ -127,11 +170,8 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
     );
   }
 
-  const otherTyping = typingUser !== null;
-
   return (
     <div className="flex-1 flex flex-col min-h-0">
-      {/* Chat Header - Ultra minimal */}
       <div className="flex items-center justify-between px-4 md:px-5 py-3.5 border-b border-white/[0.05] bg-black/[0.25] backdrop-blur-xl flex-shrink-0">
         <div className="flex items-center gap-3.5">
           {onBack && (
@@ -180,7 +220,6 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
         </div>
       </div>
 
-      {/* Messages Area */}
       <div className="flex-1 overflow-y-auto px-4 md:px-5 py-3 space-y-2 min-h-0 relative">
         {showEncryptingIndicator && (
           <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex justify-end mb-2">
@@ -207,15 +246,11 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
             </div>
           </div>
         ) : (
-          roomMessages.map((msg, idx) => {
-            const prevMsg = idx > 0 ? roomMessages[idx - 1] : null;
-            const gapFromPrev = prevMsg && prevMsg.senderId !== msg.senderId;
-            return (
-              <div key={msg.id} className={gapFromPrev ? 'mt-3' : undefined}>
-                <MessageBubble message={msg} onDecrypt={onDecryptMessage} isDecrypting={decryptingMessageId === msg.id} />
-              </div>
-            );
-          })
+          <MessageList 
+            messages={roomMessages} 
+            onDecryptMessage={onDecryptMessage} 
+            decryptingMessageId={decryptingMessageId} 
+          />
         )}
 
         <AnimatePresence>
@@ -232,11 +267,9 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Premium Input Area */}
       <div className="w-full px-3 md:px-5 pb-3 md:pb-5 pt-2.5 flex-shrink-0">
         <div className="flex items-end gap-2.5 bg-black/[0.35] border border-white/[0.08] rounded-2xl px-4 py-3 w-full backdrop-blur-2xl"
           style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03)' }}>
-          {/* Attachment button */}
           <motion.button
             whileHover={{ scale: 1.08, color: '#10f5b5' }}
             whileTap={{ scale: 0.92 }}
@@ -245,7 +278,6 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
             <Paperclip className="w-4 h-4" />
           </motion.button>
 
-          {/* Cipher selector */}
           <div className="relative">
             <motion.button
               whileTap={{ scale: 0.95 }}
@@ -276,7 +308,6 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
             )}
           </div>
 
-          {/* Text input */}
           <div className="flex-1 relative">
             <textarea
               value={inputText}
@@ -289,7 +320,6 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
             />
           </div>
 
-          {/* Send button */}
           <motion.button
             whileHover={{ scale: 1.05, boxShadow: '0 0 25px rgba(16,245,181,0.4)' }}
             whileTap={{ scale: 0.92 }}

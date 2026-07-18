@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Unlock, Loader2, AlertCircle, Check, CheckCheck } from 'lucide-react';
+import { Lock, Unlock, Loader2, AlertCircle, Check, CheckCheck, Shield } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 
 export interface Message {
@@ -27,7 +27,8 @@ interface MessageBubbleProps {
   isDecrypting?: boolean;
 }
 
-function Avatar({ avatar, name }: { avatar?: string | null; name: string }) {
+// Memoized Avatar component
+const Avatar = memo(({ avatar, name }: { avatar?: string | null; name: string }) => {
   const initial = name.charAt(0).toUpperCase();
   const isImage = avatar && (avatar.startsWith('data:') || avatar.startsWith('http'));
   const isEmoji = avatar && !isImage;
@@ -51,9 +52,11 @@ function Avatar({ avatar, name }: { avatar?: string | null; name: string }) {
       <span className="text-xs font-bold text-emerald-300">{initial}</span>
     </div>
   );
-}
+});
+Avatar.displayName = 'Avatar';
 
-function StatusIcon({ status }: { status?: Message['status'] }) {
+// Memoized StatusIcon component
+const StatusIcon = memo(({ status }: { status?: Message['status'] }) => {
   if (!status) return null;
   if (status === 'sending') {
     return <Loader2 className="w-3.5 h-3.5 text-zinc-400 animate-spin" />;
@@ -68,13 +71,14 @@ function StatusIcon({ status }: { status?: Message['status'] }) {
     return <CheckCheck className="w-3.5 h-3.5 text-zinc-400" />;
   }
   return <Check className="w-3.5 h-3.5 text-zinc-500" />;
-}
+});
+StatusIcon.displayName = 'StatusIcon';
 
-export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbleProps) {
+// Memoized main component
+export const MessageBubble = memo(function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbleProps) {
   const { t } = useLanguage();
   const [isDecrypted, setIsDecrypted] = useState(false);
   const isMine = message.sender === 'me';
-  const isOptimistic = message.status === 'sending';
   const isError = message.status === 'error';
 
   const formattedTime = new Intl.DateTimeFormat('ru-RU', {
@@ -123,7 +127,7 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
         >
           {isMine && message.isE2ee && (
             <div className="flex items-center gap-1.5 mb-2">
-              <Lock className="w-3 h-3 text-emerald-400/70" />
+              <Shield className="w-3 h-3 text-emerald-400" />
               <span className="text-[10px] uppercase tracking-widest text-emerald-400/70 font-bold">
                 {t('chat.e2ee_badge')}
               </span>
@@ -180,4 +184,4 @@ export function MessageBubble({ message, onDecrypt, isDecrypting }: MessageBubbl
       {isMine && <Avatar avatar={message.senderAvatar} name={message.senderName} />}
     </motion.div>
   );
-}
+});
