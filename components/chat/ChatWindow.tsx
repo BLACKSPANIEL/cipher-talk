@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Shield, Lock, ChevronDown, ChevronLeft, MessageSquare, Loader2, Paperclip, Smile, Image as ImageIcon, File, X, MoreVertical, Reply, Forward, Trash2, Copy, CheckCheck } from 'lucide-react';
+import { Send, Shield, Lock, ChevronDown, ChevronLeft, MessageSquare, Loader2, Paperclip, Smile, Image as ImageIcon, File, X, MoreVertical, Reply, Forward, Trash2, Copy, CheckCheck, Zap } from 'lucide-react';
 import { MessageBubble, type Message } from './MessageBubble';
 import { type ChatRoom } from './Sidebar';
 import { CIPHER_OPTIONS, type CipherType } from '@/lib/ciphers';
@@ -19,7 +19,7 @@ interface ChatWindowProps {
   onBack?: () => void;
 }
 
-// Memoized MessageList component
+// Memoized MessageList
 const MessageList = memo(({ 
   messages, 
   onDecryptMessage, 
@@ -35,7 +35,7 @@ const MessageList = memo(({
         const prevMsg = idx > 0 ? messages[idx - 1] : null;
         const gapFromPrev = prevMsg && prevMsg.senderId !== msg.senderId;
         return (
-          <div key={msg.id} className={gapFromPrev ? 'mt-4' : undefined}>
+          <div key={msg.id} className={gapFromPrev ? 'mt-3' : undefined}>
             <MessageBubble message={msg} onDecrypt={onDecryptMessage} isDecrypting={decryptingMessageId === msg.id} />
           </div>
         );
@@ -58,7 +58,6 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Memoized values
   const roomMessages = useMemo(() => messages.filter((m) => m.roomId === room?.id), [messages, room?.id]);
   const unreadCount = useMemo(() => roomMessages.filter(m => m.sender !== 'me' && m.status !== 'read').length, [roomMessages]);
   const activeCipherLabel = useMemo(() => CIPHER_OPTIONS.find((o) => o.value === cipher)?.label ?? t('chat.cipher_none'), [cipher, t]);
@@ -132,128 +131,81 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
 
   if (!room) {
     return (
-      <div className="flex-1 flex items-center justify-center relative">
-        <div className="text-center space-y-10 px-10 max-w-xl mx-auto">
-          <div className="relative inline-flex items-center justify-center mx-auto">
-            <motion.div
-              className="absolute inset-0 -m-16 rounded-full bg-emerald-400/25 blur-3xl"
-              animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-            />
-            <div className="relative w-36 h-36 rounded-3xl bg-gradient-to-br from-emerald-500/30 to-cyan-500/25 border-2 border-emerald-500/50 flex items-center justify-center"
-              style={{ 
-                boxShadow: '0 0 80px rgba(16,245,181,0.4), 0 0 160px rgba(16,245,181,0.2), inset 0 2px 0 rgba(255,255,255,0.15)' 
-              }}>
-              <Shield className="w-20 h-20 text-emerald-400" style={{ filter: 'drop-shadow(0 0 20px rgba(16,245,181,0.7))' }} />
-            </div>
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-[#0a0f17] to-[#05070d]">
+        <div className="text-center space-y-6 max-w-md">
+          <div className="w-16 h-16 rounded-3xl bg-emerald-500/10 flex items-center justify-center mx-auto"
+            style={{ boxShadow: '0 0 30px rgba(16,245,181,0.2)' }}>
+            <Shield className="w-10 h-10 text-emerald-400" />
           </div>
-          
           <div>
-            <h2 className="text-4xl font-bold text-white mb-5 tracking-tight">
-              {t('chat.empty_title')}
-            </h2>
-            <p className="text-xl text-zinc-400 leading-relaxed max-w-lg mx-auto">
-              {t('chat.empty_desc')}
-            </p>
+            <h2 className="text-2xl font-bold text-white mb-2">Выберите чат</h2>
+            <p className="text-zinc-400">Выберите диалог слева или найдите собеседника</p>
           </div>
-
-          <motion.button
-            whileHover={{ scale: 1.1, boxShadow: '0 0 60px rgba(16,245,181,0.6)' }}
-            whileTap={{ scale: 0.9 }}
-            onClick={onBack}
-            className="inline-flex items-center gap-4 px-12 py-6 rounded-3xl text-xl font-bold text-emerald-300"
-            style={{
-              background: 'linear-gradient(180deg, rgba(16,185,129,0.2), rgba(16,185,129,0.1))',
-              border: '2px solid rgba(16,245,181,0.4)',
-              boxShadow: '0 0 40px rgba(16,245,181,0.3), inset 0 2px 0 rgba(255,255,255,0.1)',
-            }}
-          >
-            <MessageSquare className="w-7 h-7" />
-            Выберите чат слева
-          </motion.button>
+          <button onClick={onBack} className="px-6 py-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-medium">
+            К списку чатов
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
-      {/* Chat Header - Premium glass panel */}
-      <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.08] bg-black/[0.35] backdrop-blur-2xl flex-shrink-0">
-        <div className="flex items-center gap-5">
+    <div className="flex-1 flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-black/20">
+        <div className="flex items-center gap-3">
           {onBack && (
-            <button onClick={onBack} className="md:hidden p-2.5 -ml-1.5 rounded-2xl text-zinc-400 hover:text-white hover:bg-white/[0.08] transition" aria-label={t('chat.back')}>
-              <ChevronLeft className="w-7 h-7" />
+            <button onClick={onBack} className="md:hidden p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5">
+              <ChevronLeft className="w-5 h-5" />
             </button>
           )}
-          <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-emerald-500/30 to-cyan-500/25 flex items-center justify-center text-xl font-bold text-emerald-400 overflow-hidden ring-2 ring-emerald-500/30"
-            style={{ boxShadow: '0 0 40px rgba(16,245,181,0.25)' }}>
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 flex items-center justify-center">
             {room.otherUserAvatar && (room.otherUserAvatar.startsWith('data:') || room.otherUserAvatar.startsWith('http')) ? (
-              <img src={room.otherUserAvatar} alt={room.name} className="w-full h-full object-cover" />
+              <img src={room.otherUserAvatar} alt={room.name} className="w-full h-full rounded-2xl object-cover" />
             ) : room.otherUserAvatar ? (
-              <span className="text-3xl leading-none">{room.otherUserAvatar}</span>
-            ) : room.name.charAt(0).toUpperCase()}
+              <span className="text-lg">{room.otherUserAvatar}</span>
+            ) : (
+              room.name.charAt(0).toUpperCase()
+            )}
           </div>
           <div>
-            <h3 className="font-bold text-white text-2xl">{room.name}</h3>
-            <p className="text-base text-zinc-500 flex items-center gap-2">
-              {otherTyping ? (
-                <span className="text-emerald-400 flex items-center gap-2">
-                  <span className="flex gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce" />
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </span>
-                  {typingUser} печатает...
-                </span>
-              ) : (
-                <>
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" style={{ boxShadow: '0 0 10px rgba(16,245,181,0.7)' }} />
-                  {t('chat.messages_count_short', { count: roomMessages.length })}
-                </>
-              )}
+            <h3 className="font-bold text-white">{room.name}</h3>
+            <p className="text-xs text-zinc-500">
+              {otherTyping ? `${typingUser} печатает...` : 'online'}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           {unreadCount > 0 && (
-            <div className="px-4 py-2 rounded-full bg-emerald-500/10 border-2 border-emerald-500/20 text-lg font-bold text-emerald-400">
-              {unreadCount} новых
-            </div>
+            <span className="px-2 py-1 rounded-full bg-emerald-500/10 text-xs text-emerald-400">
+              {unreadCount}
+            </span>
           )}
-          <div className="flex items-center gap-3 px-5 py-2.5 rounded-full border-2 border-emerald-500/30 bg-emerald-500/10"
-            style={{ boxShadow: '0 0 30px rgba(16,245,181,0.2)' }}>
-            <Lock className="w-5 h-5 text-emerald-400" />
-            <span className="text-base font-bold text-emerald-400">E2EE</span>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5">
+            <Lock className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-xs text-emerald-400">E2EE</span>
           </div>
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-3 min-h-0 relative">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-3">
         {showEncryptingIndicator && (
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex justify-end mb-4">
-            <div className="bg-emerald-950/40 border-2 border-emerald-800/30 rounded-3xl rounded-br-lg px-6 py-4 backdrop-blur-xl"
-              style={{ boxShadow: '0 0 30px rgba(16,245,181,0.2)' }}>
-              <div className="flex items-center gap-3">
-                <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
-                <span className="text-lg text-emerald-300/90 italic font-medium">{t('chat.encrypting_indicator')}</span>
+          <div className="flex justify-end mb-2">
+            <div className="bg-emerald-950/40 rounded-2xl px-4 py-2.5">
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                <span className="text-sm text-emerald-300">Шифрование...</span>
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
 
-        {roomMessages.length === 0 && !showEncryptingIndicator ? (
-          <div className="flex items-center justify-center h-full min-h-[280px]">
-            <div className="text-center space-y-6 px-10 max-w-lg mx-auto">
-              <div className="w-24 h-24 rounded-3xl bg-emerald-500/10 flex items-center justify-center mx-auto"
-                style={{ boxShadow: '0 0 50px rgba(16,245,181,0.3)' }}>
-                <MessageSquare className="w-12 h-12 text-emerald-400" style={{ filter: 'drop-shadow(0 0 15px rgba(16,245,181,0.5))' }} />
-              </div>
-              <div>
-                <h4 className="text-2xl font-bold text-white mb-2">{t('chat.no_messages')}</h4>
-                <p className="text-lg text-zinc-400 leading-relaxed">{t('chat.no_messages_hint')}</p>
-              </div>
+        {roomMessages.length === 0 ? (
+          <div className="flex items-center justify-center h-full min-h-[200px]">
+            <div className="text-center space-y-3">
+              <MessageSquare className="w-12 h-12 text-emerald-400 mx-auto" />
+              <p className="text-zinc-400">Нет сообщений</p>
             </div>
           </div>
         ) : (
@@ -265,84 +217,40 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
         )}
 
         <AnimatePresence>
-          {otherTyping && !showEncryptingIndicator && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }} transition={{ duration: 0.25 }} className="flex items-end gap-3 mb-2 justify-start">
-              <div className="bg-white/[0.04] border-2 border-white/[0.08] rounded-3xl rounded-bl-lg px-6 py-4 backdrop-blur-xl flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+          {otherTyping && (
+            <div className="flex items-end gap-2 mb-2 justify-start">
+              <div className="bg-white/5 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               </div>
-            </motion.div>
+            </div>
           )}
         </AnimatePresence>
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Premium Input Area */}
-      <div className="w-full px-5 pb-5 pt-4 flex-shrink-0">
-        <div className="flex items-end gap-4 bg-black/[0.45] border-2 border-white/[0.12] rounded-3xl px-6 py-5 w-full backdrop-blur-3xl"
-          style={{ boxShadow: '0 15px 50px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.06)' }}>
-          
-          {/* Attachment menu */}
+      {/* Input */}
+      <div className="p-3">
+        <div className="flex items-end gap-2 bg-black/30 border border-white/10 rounded-2xl px-3 py-2.5">
           <div className="relative">
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}
-              className="flex items-center justify-center w-12 h-12 rounded-3xl text-zinc-500 hover:text-emerald-400 hover:bg-white/[0.08] transition-all duration-200 flex-shrink-0"
-            >
-              <Paperclip className="w-6 h-6" />
-            </motion.button>
-            
-            <AnimatePresence>
-              {showAttachmentMenu && (
-                <motion.div
-                  initial={{ opacity: 0, y: 12, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 12, scale: 0.9 }}
-                  className="absolute bottom-full mb-4 left-0 z-20 w-56 rounded-3xl border-2 border-white/[0.12] bg-[#0a0f17]/95 backdrop-blur-3xl shadow-2xl overflow-hidden"
-                >
-                  <div className="p-3 space-y-2">
-                    <button className="w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-300 hover:bg-white/[0.06] transition">
-                      <ImageIcon className="w-6 h-6 text-emerald-400" />
-                      <span className="text-base font-medium">Фото</span>
-                    </button>
-                    <button className="w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-300 hover:bg-white/[0.06] transition">
-                      <File className="w-6 h-6 text-cyan-400" />
-                      <span className="text-base font-medium">Файл</span>
-                    </button>
-                    <button className="w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-300 hover:bg-white/[0.06] transition">
-                      <Smile className="w-6 h-6 text-violet-400" />
-                      <span className="text-base font-medium">Стикер</span>
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <button onClick={() => setShowAttachmentMenu(!showAttachmentMenu)} className="w-9 h-9 rounded-xl flex items-center justify-center text-zinc-400 hover:text-emerald-400">
+              <Paperclip className="w-4 h-4" />
+            </button>
           </div>
 
-          {/* Cipher selector */}
           <div className="relative">
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowCipherMenu(!showCipherMenu)}
-              className={`flex items-center gap-3 px-5 py-3 rounded-3xl border-2 transition-all duration-200 text-base font-medium ${
-                cipher === 'none' 
-                  ? 'border-white/[0.12] text-zinc-400 hover:border-emerald-400/50' 
-                  : 'border-emerald-500/50 text-emerald-400 bg-emerald-500/10'
-              }`}
-            >
-              <Lock className="w-5 h-5" />
+            <button onClick={() => setShowCipherMenu(!showCipherMenu)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/10 text-xs text-zinc-400">
+              <Lock className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{activeCipherLabel}</span>
-              <ChevronDown className="w-5 h-5" />
-            </motion.button>
+            </button>
             {showCipherMenu && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setShowCipherMenu(false)} />
-                <div className="absolute bottom-full mb-4 left-0 z-20 w-56 rounded-3xl border-2 border-white/[0.12] bg-[#0a0f17]/95 backdrop-blur-3xl shadow-2xl overflow-hidden">
+                <div className="absolute bottom-full mb-2 left-0 z-20 w-44 rounded-xl border border-white/10 bg-[#0a0f17] shadow-2xl">
                   {CIPHER_OPTIONS.map((opt) => (
                     <button key={opt.value} onClick={() => { setCipher(opt.value); setShowCipherMenu(false); }} 
-                      className={`w-full text-left px-5 py-3.5 text-base transition flex items-center gap-3 ${cipher === opt.value ? 'text-emerald-400 bg-emerald-500/10' : 'text-zinc-300 hover:bg-white/[0.06]'}`}>
-                      <Lock className={`w-5 h-5 ${opt.value === 'none' ? 'opacity-30' : 'text-emerald-400'}`} />
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-white/5">
                       {opt.label}
                     </button>
                   ))}
@@ -351,30 +259,23 @@ export function ChatWindow({ room, messages, currentUserId, onSendMessage, onDec
             )}
           </div>
 
-          {/* Text input */}
-          <div className="flex-1 relative">
-            <textarea
-              value={inputText}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              placeholder={t('chat.input_placeholder')}
-              rows={1}
-              className="w-full bg-transparent border-none rounded-3xl px-5 py-3.5 text-white placeholder-zinc-500 focus:outline-none resize-none text-lg max-h-40"
-              style={{ minHeight: '52px' }}
-            />
-          </div>
+          <textarea
+            value={inputText}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Сообщение..."
+            rows={1}
+            className="flex-1 bg-transparent border-none rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none resize-none"
+            style={{ minHeight: '36px' }}
+          />
 
-          {/* Send button */}
-          <motion.button
-            whileHover={{ scale: 1.12, boxShadow: '0 0 45px rgba(16,245,181,0.6)' }}
-            whileTap={{ scale: 0.9 }}
+          <button
             onClick={handleSend}
             disabled={!inputText.trim()}
-            className="group/send flex items-center justify-center w-14 h-14 rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-black hover:from-emerald-400 hover:to-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 flex-shrink-0"
-            style={{ boxShadow: '0 0 40px rgba(16,245,181,0.4)' }}
+            className="w-9 h-9 rounded-xl bg-emerald-500 text-black hover:bg-emerald-400 disabled:opacity-30"
           >
-            <Send className="w-6 h-6 transition-transform group-hover/send:translate-x-1" />
-          </motion.button>
+            <Send className="w-4 h-4 mx-auto" />
+          </button>
         </div>
       </div>
     </div>
