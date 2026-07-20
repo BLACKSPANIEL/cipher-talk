@@ -297,25 +297,25 @@ export default function LoginPage() {
               </div>
 
               {/* Legal */}
-              <p className="text-[11px] text-zinc-500 mt-5 text-center leading-relaxed">
-                {t('legal.agree_prefix')}{' '}
-                <button
-                  type="button"
-                  onClick={() => setIsTermsOpen(true)}
-                  className="text-emerald-400/80 hover:text-emerald-400 underline underline-offset-2 transition-colors font-medium"
-                >
-                  {t('legal.terms')}
-                </button>{' '}
-                {t('auth.or')}{' '}
-                <button
-                  type="button"
-                  onClick={() => setIsPrivacyOpen(true)}
-                  className="text-emerald-400/80 hover:text-emerald-400 underline underline-offset-2 transition-colors font-medium"
-                >
-                  {t('legal.privacy')}
-                </button>
-                .
-              </p>
+               <p className="text-[11px] text-zinc-500 mt-5 text-center leading-relaxed">
+                 Регистрируясь, вы соглашаетесь с{' '}
+                 <button
+                   type="button"
+                   onClick={() => setIsTermsOpen(true)}
+                   className="text-emerald-400/80 hover:text-emerald-400 underline underline-offset-2 transition-colors font-medium"
+                 >
+                   Правилами использования
+                 </button>{' '}
+                 и{' '}
+                 <button
+                   type="button"
+                   onClick={() => setIsPrivacyOpen(true)}
+                   className="text-emerald-400/80 hover:text-emerald-400 underline underline-offset-2 transition-colors font-medium"
+                 >
+                   Политикой конфиденциальности
+                 </button>
+                 .
+               </p>
             </div>
           </div>
         </div>

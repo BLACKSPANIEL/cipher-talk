@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, LogOut, Loader2, Settings2 } from 'lucide-react';
+import { X, LogOut, Loader2, Settings2, Shield, Bell, Palette, Monitor, HardDrive, Globe, Info, Lock, User, Sparkles } from 'lucide-react';
 import { supabase, type Profile } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import { SettingsLayout, type SettingsTab } from '@/components/settings/SettingsLayout';
@@ -16,6 +16,7 @@ import { AboutSettings } from '@/components/settings/AboutSettings';
 import { LanguageSettings } from '@/components/settings/LanguageSettings';
 import { SecuritySettings } from '@/components/settings/SecuritySettings';
 import { useLanguage } from '@/lib/i18n';
+import { ROLES, type UserRole } from '@/lib/roles';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
   const { t, locale, setLocale } = useLanguage();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [userRole, setUserRole] = useState<UserRole>('user');
 
   // Security state
   const [e2eeKey, setE2eeKey] = useState('aes256-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
@@ -40,8 +42,14 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
     if (isOpen && profile) {
       setActiveTab('profile');
       setSyncedProfile(profile);
+      fetchUserRole(profile.id);
     }
   }, [isOpen, profile]);
+
+  const fetchUserRole = async (userId: string) => {
+    const { data } = await supabase.from('profiles').select('role').eq('id', userId).single();
+    if (data?.role) setUserRole(data.role as UserRole);
+  };
 
   // Re-fetch profile silently on each open
   useEffect(() => {
@@ -88,6 +96,8 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
     { id: 3, device: 'Safari on iPhone', os: 'iOS 17', location: 'Казань, RU', time: '1 день назад', active: false, type: 'mobile' as const },
   ];
 
+  const roleConfig = ROLES[userRole];
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -95,15 +105,15 @@ export function SettingsModal({ isOpen, onClose, profile, onProfileUpdated }: Se
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md"
+          transition={{ duration: 0.3 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xl"
           onClick={onClose}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 30 }}
+            initial={{ opacity: 0, scale: 0.9, y: 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 320, mass: 0.8 }}
+            exit={{ opacity: 0, scale: 0.95, y: 30 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300, mass: 0.8 }}
             onClick={(e) => e.stopPropagation()}
             className="relative w-full md:max-w-6xl h-[92vh] md:h-[88vh] md:rounded-[2rem] rounded-t-[2rem] border border-white/[0.12] bg-[#0a0f17]/[0.98] backdrop-blur-3xl shadow-[0_30px_80px_rgba(0,0,0,0.85),0_0_100px_rgba(16,245,181,0.12),inset_0_1px_0_rgba(255,255,255,0.08)] overflow-hidden flex flex-col md:flex-row"
           >

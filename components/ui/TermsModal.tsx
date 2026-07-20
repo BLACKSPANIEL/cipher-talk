@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Shield, FileText, ChevronDown, ScrollText, Ban, Gavel } from 'lucide-react';
+import { X, Shield, FileText, ChevronDown, ScrollText, Ban, Gavel, Sparkles } from 'lucide-react';
 
 interface TermsModalProps {
   isOpen: boolean;

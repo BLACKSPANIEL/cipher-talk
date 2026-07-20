@@ -246,25 +246,25 @@ export default function RegisterPage() {
               </p>
 
               {/* Legal notice */}
-              <p className="text-xs text-zinc-500 mt-4 text-center leading-relaxed">
-                {t('legal.agree_prefix')}{' '}
-                <button
-                  type="button"
-                  onClick={() => setIsTermsOpen(true)}
-                  className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300 transition-colors font-medium"
-                >
-                  {t('legal.terms')}
-                </button>{' '}
-                {t('auth.or')}{' '}
-                <button
-                  type="button"
-                  onClick={() => setIsPrivacyOpen(true)}
-                  className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300 transition-colors font-medium"
-                >
-                  {t('legal.privacy')}
-                </button>
-                .
-              </p>
+               <p className="text-xs text-zinc-500 mt-4 text-center leading-relaxed">
+                 Регистрируясь, вы соглашаетесь с{' '}
+                 <button
+                   type="button"
+                   onClick={() => setIsTermsOpen(true)}
+                   className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300 transition-colors font-medium"
+                 >
+                   Правилами использования
+                 </button>{' '}
+                 и{' '}
+                 <button
+                   type="button"
+                   onClick={() => setIsPrivacyOpen(true)}
+                   className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300 transition-colors font-medium"
+                 >
+                   Политикой конфиденциальности
+                 </button>
+                 .
+               </p>
             </div>
           </div>
         </div>
