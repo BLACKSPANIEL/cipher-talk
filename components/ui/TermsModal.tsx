@@ -3,96 +3,25 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Shield, FileText, ChevronDown, ScrollText, Ban, Gavel, Sparkles } from 'lucide-react';
+import { LEGAL_SECTIONS } from '@/lib/legal';
 
 interface TermsModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const sections = [
-  {
-    id: 'terms',
-    icon: <ScrollText className="w-4 h-4" />,
-    title: 'Пользовательское соглашение',
-    color: 'emerald',
-    content: (
-      <div className="space-y-3 text-sm text-zinc-300 leading-relaxed">
-        <p>Дата вступления в силу: 9 июня 2026 года | Статус: Публичная оферта</p>
-        <p>Настоящее Пользовательское соглашение представляет собой юридически обязывающий договор между Пользователем и администрацией CipherTalk.</p>
-        <h4 className="text-emerald-400 font-medium mt-4 mb-2">1. Термины и определения</h4>
-        <ul className="list-disc pl-5 space-y-1 marker:text-emerald-500">
-          <li><strong className="text-white">CipherTalk</strong> — экосистема: Next.js клиент, Supabase, Broadcast API.</li>
-          <li><strong className="text-white">Аккаунт</strong> — уникальная совокупность данных авторизации и профиля.</li>
-          <li><strong className="text-white">E2EE</strong> — сквозное шифрование, доступное только участникам диалога.</li>
-        </ul>
-        <h4 className="text-emerald-400 font-medium mt-4 mb-2">2. Регистрация и безопасность</h4>
-        <p>Пользователь обязан предоставить актуальный email. Пароль хранится в хэшированном виде. Пользователь несёт ответственность за сохранность своих данных.</p>
-        <h4 className="text-emerald-400 font-medium mt-4 mb-2">3. Правила использования</h4>
-        <ul className="list-disc pl-5 space-y-1 marker:text-emerald-500">
-          <li>Запрещено использование для незаконных действий.</li>
-          <li>Запрещён скрейпинг и парсинг данных.</li>
-          <li>Запрещены DoS/DDoS-атаки.</li>
-          <li>Запрещена имитация личности (фишинг).</li>
-        </ul>
-      </div>
-    ),
-  },
-  {
-    id: 'privacy',
-    icon: <Shield className="w-4 h-4" />,
-    title: 'Политика конфиденциальности',
-    color: 'cyan',
-    content: (
-      <div className="space-y-3 text-sm text-zinc-300 leading-relaxed">
-        <p>Мы собираем минимально необходимые данные для работы сервиса.</p>
-        <h4 className="text-cyan-400 font-medium mt-4 mb-2">Собираемые данные</h4>
-        <ul className="list-disc pl-5 space-y-1 marker:text-cyan-500">
-          <li>Email адрес (для авторизации)</li>
-          <li>Username (публичный псевдоним)</li>
-          <li>Аватар (опционально)</li>
-        </ul>
-        <h4 className="text-cyan-400 font-medium mt-4 mb-2">Защита данных</h4>
-        <p>Все сообщения защищены E2EE. Мы не имеем доступа к содержимому чатов. Логи не сохраняются.</p>
-      </div>
-    ),
-  },
-  {
-    id: 'security',
-    icon: <Ban className="w-4 h-4" />,
-    title: 'Безопасность',
-    color: 'violet',
-    content: (
-      <div className="space-y-3 text-sm text-zinc-300 leading-relaxed">
-        <p>CipherTalk использует современные криптографические протоколы для защиты ваших данных.</p>
-        <h4 className="text-violet-400 font-medium mt-4 mb-2">Шифрование</h4>
-        <ul className="list-disc pl-5 space-y-1 marker:text-violet-500">
-          <li>AES-256 + XChaCha20-Poly1305</li>
-          <li>Сквозное шифрование (E2EE)</li>
-          <li>Zero-knowledge архитектура</li>
-        </ul>
-        <h4 className="text-violet-400 font-medium mt-4 mb-2">Сессии</h4>
-        <p>Вы можете просматривать активные сессии и завершать их удалённо.</p>
-      </div>
-    ),
-  },
-  {
-    id: 'rights',
-    icon: <Gavel className="w-4 h-4" />,
-    title: 'Права и обязанности',
-    color: 'emerald',
-    content: (
-      <div className="space-y-3 text-sm text-zinc-300 leading-relaxed">
-        <p>Администрация имеет право приостанавливать доступ при нарушении правил. Сервис предоставляется "как есть" (AS IS).</p>
-        <h4 className="text-emerald-400 font-medium mt-4 mb-2">Ваши права</h4>
-        <ul className="list-disc pl-5 space-y-1 marker:text-emerald-500">
-          <li>Запросить удаление аккаунта</li>
-          <li>Экспортировать свои данные</li>
-          <li>Отозвать согласие на обработку</li>
-        </ul>
-      </div>
-    ),
-  },
-];
+const sections = LEGAL_SECTIONS.map((section) => ({
+  ...section,
+  icon: section.icon === 'ScrollText' ? <ScrollText className="w-4 h-4" /> :
+        section.icon === 'Shield' ? <Shield className="w-4 h-4" /> :
+        section.icon === 'Ban' ? <Ban className="w-4 h-4" /> :
+        section.icon === 'Gavel' ? <Gavel className="w-4 h-4" /> : null,
+  content: (
+    <div className="space-y-3 text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
+      {section.content}
+    </div>
+  ),
+}));
 
 function AccordionItem({ section, isOpen, onClick }: { section: typeof sections[0]; isOpen: boolean; onClick: () => void }) {
   const colorClasses = {
