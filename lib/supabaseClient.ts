@@ -3,6 +3,10 @@ import { createBrowserClient } from '@supabase/ssr';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY');
+}
+
 // Клиент для браузера — корректно синхронизирует куки с SSR middleware
 export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
 
@@ -17,14 +21,16 @@ export interface DbMessage {
 }
 
 /** Role-Based Access Control roles */
-export type UserRole = 'owner' | 'admin' | 'moderator' | 'user';
+export type UserRole = 'owner' | 'super_admin' | 'admin' | 'moderator' | 'helper' | 'user';
 
 /** Role hierarchy weight (higher = more powerful) */
 export const ROLE_WEIGHT: Record<UserRole, number> = {
-  owner: 4,
+  owner: 5,
+  super_admin: 4,
   admin: 3,
   moderator: 2,
-  user: 1,
+  helper: 1,
+  user: 0,
 };
 
 /** Can `actor` perform action on `target`? */
@@ -35,7 +41,8 @@ export function canAct(actorRole: UserRole, targetRole: UserRole, action: 'chang
   if (action === 'change_tier') return aw > tw;
   if (action === 'change_role') {
     if (actorRole === 'owner') return true;
-    if (actorRole === 'admin') return targetRole === 'moderator' || targetRole === 'user';
+    if (actorRole === 'super_admin') return targetRole === 'admin' || targetRole === 'moderator' || targetRole === 'helper' || targetRole === 'user';
+    if (actorRole === 'admin') return targetRole === 'moderator' || targetRole === 'helper' || targetRole === 'user';
     return false;
   }
   return false;

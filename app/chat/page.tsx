@@ -384,12 +384,12 @@ export default function ChatPage() {
     async (text: string, cipher: CipherType) => {
       if (!activeRoomId || !currentUserId) return;
       const visibleCipherText = cipher !== 'none' ? encryptText(text, cipher) : text;
-      const e2eeCipherText = encryptMessage(visibleCipherText);
+      const e2eeCipherText = await encryptMessage(visibleCipherText);
       const tempId = (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function')
         ? globalThis.crypto.randomUUID()
         : `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-const optimisticMessage: Message = {
+      const optimisticMessage: Message = {
         id: tempId, text: visibleCipherText, senderId: currentUserId, senderName: currentProfile?.username || 'Я',
         sender: 'me', senderAvatar: (currentProfile as any)?.avatar_url || null, timestamp: new Date(),
         roomId: activeRoomId, cipher: cipher !== 'none' ? cipher : undefined, isEncrypted: cipher !== 'none',
