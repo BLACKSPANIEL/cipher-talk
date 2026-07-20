@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SettingsSidebar } from '@/components/settings/SettingsSidebar';
 import { Menu, X } from 'lucide-react';
 
-export type SettingsTab = 'profile' | 'account' | 'security' | 'notifications' | 'appearance' | 'language' | 'devices' | 'storage' | 'about';
+export type SettingsTab = 'profile' | 'account' | 'security' | 'notifications' | 'appearance' | 'language' | 'devices' | 'storage' | 'about' | 'admin';
 
 interface SettingsLayoutProps {
   children: React.ReactNode;

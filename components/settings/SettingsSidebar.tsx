@@ -1,11 +1,14 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Lock, Globe, LogOut, Crown, Bell, Palette, Monitor, Info, HardDrive, Shield } from 'lucide-react';
+import { User, Lock, Globe, LogOut, Crown, Bell, Palette, Monitor, Info, HardDrive, Shield, Gauge, Settings } from 'lucide-react';
 import { TierBadge } from '@/components/chat/TierBadge';
 import type { SettingsTab } from '@/components/settings/SettingsLayout';
 import { useLanguage } from '@/lib/i18n';
+import { supabase } from '@/lib/supabaseClient';
+import { ROLES, type UserRole } from '@/lib/roles';
+import { useRouter } from 'next/navigation';
 
 interface SettingsSidebarProps {
   activeTab: SettingsTab;
@@ -25,8 +28,26 @@ export function SettingsSidebar({
   onLogout,
 }: SettingsSidebarProps) {
   const { t } = useLanguage();
+  const router = useRouter();
+  const [userRole, setUserRole] = useState<UserRole>('user');
 
-  const tabs: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
+  useEffect(() => {
+    const fetchRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+        if (profile?.role) {
+          setUserRole(profile.role as UserRole);
+        }
+      }
+    };
+    fetchRole();
+  }, []);
+
+  const isAdmin = userRole === 'owner' || userRole === 'admin' || userRole === 'moderator';
+  const roleConfig = ROLES[userRole];
+
+  const tabs: { id: SettingsTab; label: string; icon: React.ReactNode; badge?: string }[] = [
     { id: 'profile', label: t('settings.tab.profile'), icon: <User className="w-5 h-5" /> },
     { id: 'account', label: t('settings.tab.account'), icon: <Shield className="w-5 h-5" /> },
     { id: 'security', label: t('settings.tab.security'), icon: <Lock className="w-5 h-5" /> },
@@ -37,6 +58,16 @@ export function SettingsSidebar({
     { id: 'storage', label: t('settings.tab.storage'), icon: <HardDrive className="w-5 h-5" /> },
     { id: 'about', label: t('settings.tab.about'), icon: <Info className="w-5 h-5" /> },
   ];
+
+  // Add admin panel tab for privileged roles
+  if (isAdmin) {
+    tabs.splice(1, 0, { 
+      id: 'admin', 
+      label: 'Админ-панель', 
+      icon: <Gauge className="w-5 h-5" />,
+      badge: roleConfig.label 
+    });
+  }
 
   return (
     <div className="w-full h-full bg-black/40 backdrop-blur-3xl flex flex-col relative overflow-hidden">
@@ -60,13 +91,14 @@ export function SettingsSidebar({
           <div className="flex items-center gap-4">
             {/* Avatar with premium glow */}
             <div className="relative">
-              <div className="w-16 h-16 rounded-2xl border-2 border-emerald-500/40 bg-black/60 flex items-center justify-center shadow-[0_0_40px_rgba(16,245,181,0.3)]"
+              <div className="w-16 h-16 rounded-2xl border-2 border-emerald-500/40 bg-black/60 flex items-center justify-center"
                 style={{ boxShadow: '0 0 40px rgba(16,245,181,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' }}
               >
                 <User className="w-8 h-8 text-emerald-400" />
               </div>
               {/* Online indicator */}
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-[#0a0f17] shadow-[0_0_20px_rgba(16,185,129,0.8)]" />
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-[#0a0f17]" 
+                style={{ boxShadow: '0 0 20px rgba(16,185,129,0.8)' }} />
             </div>
 
             <div className="flex-1 min-w-0">
@@ -76,14 +108,21 @@ export function SettingsSidebar({
                   <TierBadge tier={tier as any} size="sm" />
                 )}
               </div>
-              <p className="text-xs text-gray-400 capitalize font-medium">{status}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-gray-400 capitalize font-medium">{status}</p>
+                {isAdmin && (
+                  <span className={`text-[10px] font-bold uppercase tracking-wider ${roleConfig.color}`}>
+                    • {roleConfig.label}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </motion.div>
 
       {/* Navigation Tabs */}
-      <nav className="flex-1 space-y-1.5 relative px-3">
+      <nav className="flex-1 space-y-1.5 relative px-3 overflow-y-auto">
         {tabs.map((tab, index) => (
           <motion.button
             key={tab.id}
@@ -122,11 +161,18 @@ export function SettingsSidebar({
             </span>
 
             {/* Label */}
-            <span className={`text-sm font-semibold relative z-10 transition-all duration-200 ${
+            <span className={`text-sm font-semibold relative z-10 transition-all duration-200 flex-1 text-left ${
               activeTab === tab.id ? 'text-white' : 'text-neutral-400 group-hover:text-neutral-200'
             }`}>
               {tab.label}
             </span>
+
+            {/* Badge for admin */}
+            {tab.badge && (
+              <span className={`relative z-10 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 text-emerald-400`}>
+                {tab.badge}
+              </span>
+            )}
 
             {/* Active indicator — neon left border */}
             {activeTab === tab.id && (
